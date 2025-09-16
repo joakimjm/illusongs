@@ -13,9 +13,8 @@ type SongPageProps = {
   readonly params: Promise<SongPageParams>;
 };
 
-export const generateStaticParams = async (): Promise<
-  ReadonlyArray<SongPageParams>
-> => listSongs().map((song) => ({ songId: song.id }));
+export const generateStaticParams = async (): Promise<SongPageParams[]> =>
+  Array.from(listSongs(), (song) => ({ songId: song.id }));
 
 export const generateMetadata = async ({
   params,
