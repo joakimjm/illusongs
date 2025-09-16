@@ -1,0 +1,101 @@
+[
+  {
+    "id": "jeg-har-fanget-mig-en-myg",
+    "title": "Jeg har fanget mig en myg",
+    "verses": [
+      {
+        "id": 1,
+        "illustration": "/jeg-har-fanget-mig-en-myg-01.png",
+        "text": "Jeg har fanget mig en myg,\nsmeltet fedtet af den.\nTønden her er stor og tyk,\nfyldt med fedtet fra den.\nSy mig fluks et støvlepar,\ndu kan godt begynde.\nHvis jeg ingen penge har,\nfår du fedt i tønde."
+      },
+      {
+        "id": 2,
+        "illustration": "/jeg-har-fanget-mig-en-myg-02.png",
+        "text": "Dine støvler har jeg her,\nde er meget fine.\nDen, som disse støvler ser,\nkommer til at grine.\nDer er store huller i,\ntæerne bli’r kolde.\nSyn’s du, det er snyderi,\nmå du fedt beholde."
+      }
+    ]
+  },
+  {
+    "id": "en-elefant-kom-marcherende",
+    "title": "En elefant kom marcherende",
+    "verses": [
+      {
+        "id": 1,
+        "illustration": "/en-elefant-kom-marcherende-01.png",
+        "text": "En elefant kom marcherende,\nhen ad edderkoppens fine spind.\nFandt at vejen var så interessant,\nAt den byder op endnu en elefant."
+      },
+      {
+        "id": 2,
+        "illustration": "/en-elefant-kom-marcherende-02.png",
+        "text": "To elefanter kom marcherende,\nhen ad edderkoppens fine spind.\nFandt at vejen var så interessant,\nAt den byder op endnu en elefant."
+      },
+      {
+        "id": 3,
+        "illustration": "/en-elefant-kom-marcherende-03.png",
+        "text": "Tre elefanter kom marcherende,\nhen ad edderkoppens fine spind.\nFandt at vejen var så interessant,\nAt den byder op endnu en elefant."
+      },
+      {
+        "id": 4,
+        "illustration": "/en-elefant-kom-marcherende-04.png",
+        "text": "Fire elefanter kom marcherende,\nhen ad edderkoppens fine spind.\nFandt at vejen var så interessant,\nAt den byder op endnu en elefant."
+      },
+      {
+        "id": 5,
+        "illustration": "/en-elefant-kom-marcherende-05.png",
+        "text": "Fem elefanter kom marcherende,\nhen ad edderkoppens fine spind.\nFandt at vejen var så interessant,\nAt den byder op endnu en elefant."
+      }
+    ]
+  },
+  {
+    "id": "jeg-ved-en-laerkerede",
+    "title": "Jeg ved en lærkerede",
+    "verses": [
+      {
+        "id": 1,
+        "text": "Jeg ved en lærkerede,\njeg siger ikke mer;\nden findes på en hede,\net sted som ingen ser.",
+        "illustration": "/jeg-ved-en-laerkerede-01.png"
+      },
+      {
+        "id": 2,
+        "text": "I reden er der unger,\nog ungerne har dun.\nDe pipper de har tunger,\nog reden er så lun.",
+        "illustration": "/jeg-ved-en-laerkerede-02.png"
+      },
+      {
+        "id": 3,
+        "text": "Og de to gamle lærker,\nde flyver tæt omkring.\nJeg tænker nok de mærker,\njeg gør dem ingenting.",
+        "illustration": "/jeg-ved-en-laerkerede-03.png"
+      },
+      {
+        "id": 4,
+        "text": "Jeg lurer bag en slåen.\nDer står jeg ganske nær.\nJeg rækker mig på tåen\nog holder på mit vejr.",
+        "illustration": "/jeg-ved-en-laerkerede-04.png"
+      },
+      {
+        "id": 5,
+        "text": "For ræven han vil bide\nog drengen samle bær.\nmen ingen skal få vide,\nhvor lærkereden er.",
+        "illustration": "/jeg-ved-en-laerkerede-05.png"
+      }
+    ]
+  },
+  {
+    "id": "solen-er-saa-roed-mor",
+    "title": "Solen er så rød, mor",
+    "verses": [
+      {
+        "id": 1,
+        "text": "Solen er så rød, mor,\nog skoven blir så sort.\nNu er solen død, mor,\nog dagen gået bort.\nRæven går derude, mor.\nVi låser vores gang.\nKom, sæt dig ved min pude, mor,\nog syng en lille sang.",
+        "illustration": "/solen-er-saa-roed-mor-01.png"
+      },
+      {
+        "id": 2,
+        "text": "Himlen er så stor, mor,\nmed klare stjerner på.\nHvem monstro der bor, mor,\npå stjernen i det blå?\nTror du, der er drenge, mor,\nder kigger ned til mig? \nOg tror du, de har senge, mor,\nog sover li’som jeg?",
+        "illustration": "/solen-er-saa-roed-mor-02.png"
+      },
+      {
+        "id": 3,
+        "text": "Hvorfor blir det nat, mor,\nog kold og bitter vind?\nHør den lille kat,mor,\ndenmjaver og vil ind.\nMågerne og ternerne\nhar ingen sted at bo.\nÅ hør, nu synger stjernerne.\nDe synger mig til ro.",
+        "illustration": "/solen-er-saa-roed-mor-03.png"
+      }
+    ]
+  }
+]
