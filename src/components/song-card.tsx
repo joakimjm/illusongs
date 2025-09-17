@@ -17,13 +17,14 @@ const SongCard = ({ song }: SongCardProps) => {
   return (
     <article className="group flex flex-col overflow-hidden rounded-3xl bg-white/80 shadow-sm ring-1 ring-black/5 backdrop-blur transition hover:-translate-y-1 hover:shadow-lg">
       <Link href={`/songs/${song.id}`} className="flex flex-col">
-        <div className="relative overflow-hidden">
+        <div className="relative aspect-square overflow-hidden">
           <Image
             src={leadVerse.illustration.src}
             alt={leadVerse.illustration.alt}
-            width={640}
-            height={640}
-            className="h-auto w-full object-cover transition duration-700 group-hover:scale-105"
+            fill
+            className="object-cover transition duration-700 group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 400px"
+            priority={false}
           />
         </div>
         <div className="flex flex-col gap-3 p-6">
