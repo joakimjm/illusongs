@@ -11,9 +11,7 @@ type PolymorphicProps<C extends ElementType> = {
 type PillButtonProps<C extends ElementType> = PolymorphicProps<C> &
   Omit<ComponentPropsWithoutRef<C>, keyof PolymorphicProps<C>>;
 
-const mergeClassNames = (
-  className?: string,
-): string => {
+const mergeClassNames = (className?: string): string => {
   if (className === undefined || className.length === 0) {
     return BASE_CLASSES;
   }

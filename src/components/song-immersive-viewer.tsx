@@ -201,15 +201,17 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
                     : "transform 500ms ease, opacity 400ms ease",
               }}
             >
-              <div className="relative flex h-full w-full flex-col justify-end">
-                <Image
-                  src={verse.illustration.src}
-                  alt=""
-                  fill
-                  priority={index === 0}
-                  sizes="100vw"
-                  className="object-cover scale-200 blur-3xl"
-                />
+              <div className="relative flex h-full w-full flex-col justify-end overflow-hidden">
+                <div className="absolute inset-0 overflow-hidden">
+                  <Image
+                    src={verse.illustration.src}
+                    alt=""
+                    fill
+                    priority={index === 0}
+                    sizes="100vw"
+                    className="object-cover scale-200 blur-3xl"
+                  />
+                </div>
                 <div className="pointer-events-none absolute inset-0" />
                 <div className="relative flex h-full flex-col justify-center">
                   <figure className="flex flex-1 items-start justify-center">
@@ -226,11 +228,6 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
                   <div className="z-0 pt-6 pb-24 backdrop-blur absolute bottom-0 w-full">
                     <div className="flex">
                       <div className="w-full px-6 text-slate-100">
-                        {totalVerses > 1 && (
-                          <p className="text-[0.65rem] mb-5 font-semibold uppercase tracking-[0.45em] text-amber-300">
-                            Vers {index + 1} / {totalVerses}
-                          </p>
-                        )}
                         <p className="whitespace-pre-line text-lg leading-relaxed sm:text-2xl">
                           {verse.text}
                         </p>
@@ -242,7 +239,20 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
             </article>
           );
         })}
-        <div className="py-6 w-full absolute bottom-0 z-10 mt-6 flex flex-wrap items-center justify-between gap-4 px-2 text-white sm:px-0">
+        <div className="fixed top-8 right-6">
+          <div className="flex items-center gap-3" aria-hidden>
+            {verses.map((verse, index) => (
+              <span
+                key={verse.id}
+                className={`h-2.5 w-2.5 rounded-full border border-white/40 transition ${index === activeIndex
+                  ? "bg-amber-300 shadow-[0_0_0_8px_rgba(252,211,77,0.35)]"
+                  : "bg-transparent"
+                  }`}
+              />
+            ))}
+          </div>
+        </div>
+        <div className="py-6 w-full absolute bottom-0 z-10 mt-6 flex flex-wrap items-center justify-between gap-2 px-2 text-white sm:px-0">
           <PillButton
             type="button"
             onClick={goPrevious}
@@ -250,18 +260,7 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
           >
             ← Forrige
           </PillButton>
-          <div className="flex items-center gap-3" aria-hidden>
-            {verses.map((verse, index) => (
-              <span
-                key={verse.id}
-                className={`h-2.5 w-2.5 rounded-full border border-white/40 transition ${
-                  index === activeIndex
-                    ? "bg-amber-300 shadow-[0_0_0_8px_rgba(252,211,77,0.35)]"
-                    : "bg-transparent"
-                }`}
-              />
-            ))}
-          </div>
+
           <PillButton type="button" onClick={goNext} aria-label="Næste vers">
             Næste →
           </PillButton>
