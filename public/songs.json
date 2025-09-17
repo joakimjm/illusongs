@@ -97,5 +97,58 @@
         "illustration": "/solen-er-saa-roed-mor-03.png"
       }
     ]
+  },
+  {
+    "id": "lille-foel",
+    "title": "Lille føl",
+    "verses": [
+      {
+        "id": 1,
+        "illustration": "/lille-foel-01.png",
+        "text": "Lille føl, ved du hvad!\ndu kan sagtens være glad.\nDu kan få en lækker davre,\ndu kan gå og nippe havre,\ndu kan spise, hvad du vil,\nog så drikke mælk dertil."
+      },
+      {
+        "id": 2,
+        "illustration": "/lille-foel-02.png",
+        "text": "Lille føl, ved du hvad!\ndu kan sagtens være glad.\nDu kan lege hele dagen,\nspringe og slå op med bagen,\ndu kan drive frit dit spil,\ngøre, lige hvad du vil."
+      },
+      {
+        "id": 3,
+        "illustration": "/lille-foel-03.png",
+        "text": "Lille føl, ved du hvad!\ndu kan sagtens være glad.\nMens de andre trækker læsset,\nkan du hvile dig i græsset.\nDe får skænd og piskerap,\ndu får kælenavn og klap."
+      }
+    ]
+  },
+  {
+    "id": "du-er-min-oejesten",
+    "title": "Du er min øjesten",
+    "verses": [
+      {
+        "id": 1,
+        "illustration": "/du-er-min-oejesten-01.png",
+        "text": "Hør, hvor lærken slår sin trille for den gyldne sol.\nJeg for dig vil også spille lidt på min fiol:\nDu er min øjesten, en bette dejlig en er du.\nOg når vi to følges ad, så er jeg altid glad som nu.\nDu er et stykke af himlens blå.\nAlverdens lykke, den vil du få.\nHvem kommer så på den grønne gren?\nDet gør min øjesten og jeg."
+      },
+      {
+        "id": 2,
+        "illustration": "/du-er-min-oejesten-02.png",
+        "text": "Tusind klokkeblomster gynger blidt i solens skær.\nHør jeg syn's at lærken synger med på denne her:\nDu er min øjesten, en bette dejlig en er du.\nOg når vi to følges ad, så er jeg altid glad som nu.\nDu er et stykke af himlens blå.\nAlverdens lykke, den vil du få.\nHvem kommer så på den grønne gren?\nDet gør min øjesten og jeg."
+      },
+      {
+        "id": 3,
+        "illustration": "/du-er-min-oejesten-03.png",
+        "text": "Hver gang månens gule lygte lokked' med sit skær,\njeg min kære pige søgte her blandt skovens træer.\nDu er min øjesten, en bette dejlig en er du.\nOg når vi to følges ad, så er jeg altid glad som nu.\nDu er et stykke af himlens blå.\nAlverdens lykke, den vil du få.\nHvem kommer så på den grønne gren?\nDet gør min øjesten og jeg."
+      }
+    ]
+  },
+  {
+    "id": "bjoernen-sover",
+    "title": "Bjørnen sover",
+    "verses": [
+      {
+        "id": 1,
+        "illustration": "/bjoernen-sover-01.png",
+        "text": "Bjørnen sover,\nbjørnen sover,\ni sit lune bo.\nHan er ikke farlig,\nnår man blot er varlig.\nMen man kan dog,\nmen man kan dog,\naldrig på ham tro."
+      }
+    ]
   }
 ]
