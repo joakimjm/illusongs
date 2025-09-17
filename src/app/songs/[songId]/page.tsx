@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import PillButton from "@/components/pill-button";
 import SongImmersiveViewer from "@/components/song-immersive-viewer";
 import { getSongById, listSongs } from "@/data/songs";
 
@@ -45,18 +46,9 @@ const SongPage = async ({ params }: SongPageProps) => {
   return (
     <main className="relative flex min-h-screen flex-col text-white">
       <div className="fixed z-10 top-4 flex w-full max-w-6xl items-center justify-between px-4 sm:px-10">
-        <Link
-          href="/"
-          className="group inline-flex items-center gap-3 rounded-full border border-white/25 bg-yellow-900/20 px-5 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-amber-200 transition hover:bg-white/20 backdrop-blur-sm"
-        >
-          <span
-            aria-hidden
-            className="text-base transition-transform group-hover:-translate-x-1"
-          >
-            ←
-          </span>
-          Tilbage
-        </Link>
+        <PillButton as={Link} href="/">
+          ← Tilbage
+        </PillButton>
         <p className="hidden text-sm font-semibold uppercase tracking-[0.28em] text-amber-100 md:block">
           {song.title}
         </p>

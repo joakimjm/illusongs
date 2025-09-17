@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 
+import PillButton from "@/components/pill-button";
 import type { Song } from "@/data/songs";
 
 type SongImmersiveViewerProps = {
@@ -225,9 +226,11 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
                   <div className="z-0 pt-6 pb-24 backdrop-blur absolute bottom-0 w-full">
                     <div className="flex">
                       <div className="w-full px-6 text-slate-100">
-                        {totalVerses > 1 && <p className="text-[0.65rem] mb-5 font-semibold uppercase tracking-[0.45em] text-amber-300">
-                          Vers {index + 1} / {totalVerses}
-                        </p>}
+                        {totalVerses > 1 && (
+                          <p className="text-[0.65rem] mb-5 font-semibold uppercase tracking-[0.45em] text-amber-300">
+                            Vers {index + 1} / {totalVerses}
+                          </p>
+                        )}
                         <p className="whitespace-pre-line text-lg leading-relaxed sm:text-2xl">
                           {verse.text}
                         </p>
@@ -240,33 +243,28 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
           );
         })}
         <div className="py-6 w-full absolute bottom-0 z-10 mt-6 flex flex-wrap items-center justify-between gap-4 px-2 text-white sm:px-0">
-          <button
+          <PillButton
             type="button"
             onClick={goPrevious}
-            className="inline-flex items-center gap-3 rounded-full border border-white/20 bg-yellow-900/20 px-6 py-3 text-xs font-semibold uppercase tracking-[0.38em] transition hover:bg-white/20"
             aria-label="Forrige vers"
           >
             ← Forrige
-          </button>
+          </PillButton>
           <div className="flex items-center gap-3" aria-hidden>
             {verses.map((verse, index) => (
               <span
                 key={verse.id}
-                className={`h-2.5 w-2.5 rounded-full border border-white/40 transition ${index === activeIndex
-                  ? "bg-amber-300 shadow-[0_0_0_8px_rgba(252,211,77,0.35)]"
-                  : "bg-transparent"
-                  }`}
+                className={`h-2.5 w-2.5 rounded-full border border-white/40 transition ${
+                  index === activeIndex
+                    ? "bg-amber-300 shadow-[0_0_0_8px_rgba(252,211,77,0.35)]"
+                    : "bg-transparent"
+                }`}
               />
             ))}
           </div>
-          <button
-            type="button"
-            onClick={goNext}
-            className="inline-flex items-center gap-3 rounded-full border border-white/20 bg-yellow-900/20 px-6 py-3 text-xs font-semibold uppercase tracking-[0.38em] transition hover:bg-white/20"
-            aria-label="Næste vers"
-          >
+          <PillButton type="button" onClick={goNext} aria-label="Næste vers">
             Næste →
-          </button>
+          </PillButton>
         </div>
       </section>
     </div>
