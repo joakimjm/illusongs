@@ -209,7 +209,7 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
                     fill
                     priority={index === 0}
                     sizes="100vw"
-                    className="object-cover scale-200 blur-3xl"
+                    className="object-cover scale-200 blur-2xl"
                   />
                 </div>
                 <div className="pointer-events-none absolute inset-0" />
