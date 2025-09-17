@@ -14,9 +14,9 @@ const HomePage = () => {
           Syng, læs og se historien folde sig ud
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-700">
-          Illusongs samler danske børnesange og giver dem nyt liv med lysende
-          illustrationer. Del musikken med familiens yngste, og opdag nye vers
-          undervejs.
+          Illustrerede Børnesange samler danske børnesange og giver dem nyt liv
+          med lysende illustrationer. Del musikken med familiens yngste, og
+          opdag nye vers undervejs.
         </p>
       </section>
       <SongList songs={songs} />

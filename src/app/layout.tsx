@@ -14,10 +14,21 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Illusongs",
-    template: "%s · Illusongs",
+    default: "Illustrerede Børnesange",
+    template: "%s · Illustrerede Børnesange",
   },
   description: "Illustrerede danske børnesange til fællessang og hygge.",
+  manifest: "/manifest.json",
+  themeColor: "#050914",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    viewportFit: "cover",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+  },
 };
 
 type RootLayoutProps = {
