@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import SongDetail from "@/components/song-detail";
+import SongImmersiveViewer from "@/components/song-immersive-viewer";
 import { getSongById, listSongs } from "@/data/songs";
 
 type SongPageParams = {
@@ -43,20 +43,27 @@ const SongPage = async ({ params }: SongPageProps) => {
   }
 
   return (
-    <main className="mx-auto flex max-w-4xl flex-col gap-10 px-6 pb-24 pt-16 md:px-10 lg:pt-24">
-      <Link
-        href="/"
-        className="group inline-flex w-fit items-center gap-2 text-sm font-semibold uppercase tracking-[0.2em] text-amber-700"
-      >
-        <span
-          aria-hidden
-          className="transition-transform group-hover:-translate-x-1"
+    <main className="relative flex min-h-screen flex-col text-white">
+      <div className="fixed z-10 top-4 flex w-full max-w-6xl items-center justify-between px-4 sm:px-10">
+        <Link
+          href="/"
+          className="group inline-flex items-center gap-3 rounded-full border border-white/25 bg-yellow-900/20 px-5 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-amber-200 transition hover:bg-white/20 backdrop-blur-sm"
         >
-          ←
-        </span>
-        Tilbage til forsiden
-      </Link>
-      <SongDetail song={song} />
+          <span
+            aria-hidden
+            className="text-base transition-transform group-hover:-translate-x-1"
+          >
+            ←
+          </span>
+          Tilbage
+        </Link>
+        <p className="hidden text-sm font-semibold uppercase tracking-[0.28em] text-amber-100 md:block">
+          {song.title}
+        </p>
+      </div>
+      <div className="mx-auto flex w-full max-w-6xl flex-1 px-0 sm:px-10">
+        <SongImmersiveViewer song={song} />
+      </div>
     </main>
   );
 };
