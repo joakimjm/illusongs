@@ -150,5 +150,31 @@
         "text": "Bjørnen sover,\nbjørnen sover,\ni sit lune bo.\nHan er ikke farlig,\nnår man blot er varlig.\nMen man kan dog,\nmen man kan dog,\naldrig på ham tro."
       }
     ]
+  },
+  {
+    "id": "elefantens-vuggevise",
+    "title": "Elefantens Vuggevise",
+    "verses": [
+      {
+        "id": 1,
+        "illustration": "/elefantens-vuggevise-01.png",
+        "text": "Nu tændes der stjerner på himlens blå.\nHalvmånen løfter sin sabel.\nJeg våger at ikke de slemme mus\nSkal liste sig op i din snabel.\nSov sødt lille jumbo og visselul.\nNu bliver skoven så dunkel.\nNu sover tante den gamle struds,\nOg næsehornet din onkel."
+      },
+      {
+        "id": 2,
+        "illustration": "/elefantens-vuggevise-02.png",
+        "text": "Nu kalder i søvne den vilde gnu\nI krattet af store lianer.\nOg aber synger sig selv i søvn\nI vuggen af grønne bananer.\nSov sødt lille jumbo, dit lille pus!\nSlet intet, min ven skal du mangle.\nI morgen får du en kokosnød,\nOg den skal du bruge som rangle."
+      },
+      {
+        "id": 3,
+        "illustration": "/elefantens-vuggevise-03.png",
+        "text": "En zebra tager sin natdragt på,\nMed sorte og hvide striber,\nEt flyveegern med lådne ben,\nSidder i mørket og piber.\nSov sødt lille jumbo, nu er du vel mæt?\nDu kender ej husmodersorgen.\nEn lille plantage på tusinde rør,\nDem skal vi ha’ syltet i morgen!"
+      },
+      {
+        "id": 4,
+        "illustration": "/elefantens-vuggevise-04.png",
+        "text": "Hør tigeren brøler sin aftensang\nOg spejder mod alle kanter,\nVed vadestedet, med slebet klo,\nDer lister den sorte panter.\nSov tyst lille jumbo, dit lille myr.\nDin nuttede lille rødbede.\nDu bad mig fortælle et eventyr,\nNu sover du sødt allerede."
+      }
+    ]
   }
 ]
