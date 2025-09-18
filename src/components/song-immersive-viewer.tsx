@@ -227,7 +227,7 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
                       sizes="100vw"
                     />
                   </figure>
-                  <div className="z-0 pt-6 pb-24 backdrop-blur absolute bottom-0 w-full">
+                  <div className="z-0 pt-6 pb-24 backdrop-blur-fade-top-to-bottom absolute bottom-0 w-full">
                     <div className="flex">
                       <div className="w-full px-6 text-slate-100">
                         <p className="whitespace-pre-line text-lg leading-relaxed sm:text-2xl">
@@ -252,11 +252,10 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
           {verses.map((verse, index) => (
             <span
               key={verse.id}
-              className={`h-2.5 w-2.5 rounded-full border border-white/40 transition ${
-                index === activeIndex
+              className={`h-2.5 w-2.5 rounded-full border border-white/40 transition ${index === activeIndex
                   ? "bg-amber-300 shadow-[0_0_0_8px_rgba(252,211,77,0.35)]"
                   : "bg-transparent"
-              }`}
+                }`}
             />
           ))}
         </div>
