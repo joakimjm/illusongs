@@ -19,7 +19,6 @@ export const metadata: Metadata = {
   },
   description: "Illustrerede danske børnesange til fællessang og hygge.",
   manifest: "/manifest.json",
-  themeColor: "#050914",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -30,6 +29,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  themeColor: "#050914",
 };
 
 type RootLayoutProps = {
