@@ -176,5 +176,36 @@
         "text": "Hør tigeren brøler sin aftensang\nOg spejder mod alle kanter,\nVed vadestedet, med slebet klo,\nDer lister den sorte panter.\nSov tyst lille jumbo, dit lille myr.\nDin nuttede lille rødbede.\nDu bad mig fortælle et eventyr,\nNu sover du sødt allerede."
       }
     ]
+  },
+  {
+    "id": "se-den-lille-kattekilling",
+    "title": "Se den lille kattekilling",
+    "verses": [
+      {
+        "id": 1,
+        "illustration": "/se-den-lille-kattekilling-01.png",
+        "text": "Se den lille kattekilling\nnej hvor er den sød\nden har fine hvide poter\nog en pels så blød"
+      },
+      {
+        "id": 2,
+        "illustration": "/se-den-lille-kattekilling-02.png",
+        "text": "Den kan sige miav og spinde\nligesom sin mor\nden skal snart få lært at finde\nhen hvor musen bor"
+      },
+      {
+        "id": 3,
+        "illustration": "/se-den-lille-kattekilling-03.png",
+        "text": "Lille mus kom op af hullet\nkom og leg tagfat\nhar du ikke lyst at lege\nmed den lille kat"
+      },
+      {
+        "id": 4,
+        "illustration": "/se-den-lille-kattekilling-04.png",
+        "text": "Nej det må jeg ikke\nfor min far og min mor\nfor de siger at det var dig\nder åd min storebror"
+      },
+      {
+        "id": 5,
+        "illustration": "/se-den-lille-kattekilling-05.png",
+        "text": "Nej det var det ikke\ndet var smedens gamle kat\nham der bor i Århusgade\nnummer enogtres"
+      }
+    ]
   }
 ]
