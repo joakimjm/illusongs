@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import {
   type PointerEvent,
   useCallback,
@@ -9,6 +10,11 @@ import {
   useRef,
   useState,
 } from "react";
+import {
+  HiHome,
+  HiOutlineArrowLeft,
+  HiOutlineArrowRight,
+} from "react-icons/hi2";
 
 import PillButton from "@/components/pill-button";
 import type { Song } from "@/data/songs";
@@ -34,27 +40,25 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
 
   const goNext = useCallback(() => {
     setActiveIndex((previousIndex) => {
-      const total = verses.length;
+      const lastIndex = verses.length - 1;
 
-      if (total === 0) {
+      if (lastIndex <= 0 || previousIndex >= lastIndex) {
         return previousIndex;
       }
 
-      return (previousIndex + 1) % total;
+      return previousIndex + 1;
     });
   }, [verses.length]);
 
   const goPrevious = useCallback(() => {
     setActiveIndex((previousIndex) => {
-      const total = verses.length;
-
-      if (total === 0) {
+      if (previousIndex <= 0) {
         return previousIndex;
       }
 
-      return (previousIndex + total - 1) % total;
+      return previousIndex - 1;
     });
-  }, [verses.length]);
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -75,12 +79,6 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [goNext, goPrevious]);
-
-  useEffect(() => {
-    if (activeIndex >= verses.length) {
-      setActiveIndex(0);
-    }
-  }, [activeIndex, verses.length]);
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
     pointerSnapshot.current = {
@@ -128,9 +126,11 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
     const deltaX = event.clientX - snapshot.startX;
 
     if (Math.abs(deltaX) >= SWIPE_THRESHOLD_PX) {
-      if (deltaX < 0) {
+      if (deltaX < 0 && activeIndex < verses.length - 1) {
         goNext();
-      } else {
+      }
+
+      if (deltaX > 0 && activeIndex > 0) {
         goPrevious();
       }
     }
@@ -150,16 +150,18 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
     return null;
   }
 
-  const totalVerses = verses.length;
   const containerWidth = stageRef.current?.clientWidth ?? 0;
   const dragOffsetPercent =
     containerWidth === 0 ? 0 : (dragOffset / containerWidth) * 100;
+  const totalVerses = verses.length;
+  const hasPrevious = totalVerses > 0 && activeIndex > 0;
+  const hasNext = totalVerses > 0 && activeIndex < totalVerses - 1;
 
   return (
     <div className="relative flex w-full flex-1 flex-col">
       <section
         ref={stageRef}
-        className="relative flex min-h-screen flex-1 overflow-hidden touch-pan-y"
+        className="relative flex min-h-[100dvh] flex-1 overflow-hidden touch-pan-y"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerEnd}
@@ -239,31 +241,64 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
             </article>
           );
         })}
-        <div className="fixed top-8 right-6">
-          <div className="flex items-center gap-3" aria-hidden>
-            {verses.map((verse, index) => (
-              <span
-                key={verse.id}
-                className={`h-2.5 w-2.5 rounded-full border border-white/40 transition ${index === activeIndex
+        <div
+          aria-hidden
+          className="pointer-events-none absolute right-4 flex items-center gap-3 text-white"
+          style={{
+            top: "calc(env(safe-area-inset-top, 0px) + 1rem)",
+            right: "calc(env(safe-area-inset-right, 0px) + 1rem)",
+          }}
+        >
+          {verses.map((verse, index) => (
+            <span
+              key={verse.id}
+              className={`h-2.5 w-2.5 rounded-full border border-white/40 transition ${
+                index === activeIndex
                   ? "bg-amber-300 shadow-[0_0_0_8px_rgba(252,211,77,0.35)]"
                   : "bg-transparent"
-                  }`}
-              />
-            ))}
-          </div>
+              }`}
+            />
+          ))}
         </div>
-        <div className="py-6 w-full absolute bottom-0 z-10 mt-6 flex flex-wrap items-center justify-between gap-2 px-2 text-white sm:px-0">
+        <div
+          className="absolute bottom-0 z-10 mt-6 flex w-full items-center justify-between gap-3 px-3 text-white sm:px-6"
+          style={{
+            paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 1.5rem)",
+            paddingLeft: "calc(env(safe-area-inset-left, 0px) + 0.75rem)",
+            paddingRight: "calc(env(safe-area-inset-right, 0px) + 0.75rem)",
+          }}
+        >
           <PillButton
-            type="button"
-            onClick={goPrevious}
-            aria-label="Forrige vers"
+            as={Link}
+            href="/"
+            aria-label="Til forsiden"
+            className="px-4 text-xl"
           >
-            ← Forrige
+            <HiHome aria-hidden className="h-6 w-6" />
+            <span className="sr-only">Til forsiden</span>
           </PillButton>
-
-          <PillButton type="button" onClick={goNext} aria-label="Næste vers">
-            Næste →
-          </PillButton>
+          <div className="flex items-center gap-3">
+            <PillButton
+              type="button"
+              onClick={goPrevious}
+              aria-label="Forrige vers"
+              disabled={!hasPrevious}
+              className="px-4 text-xl disabled:opacity-40"
+            >
+              <HiOutlineArrowLeft aria-hidden className="h-6 w-6" />
+              <span className="sr-only">Forrige vers</span>
+            </PillButton>
+            <PillButton
+              type="button"
+              onClick={goNext}
+              aria-label="Næste vers"
+              disabled={!hasNext}
+              className="px-4 text-xl disabled:opacity-40"
+            >
+              <HiOutlineArrowRight aria-hidden className="h-6 w-6" />
+              <span className="sr-only">Næste vers</span>
+            </PillButton>
+          </div>
         </div>
       </section>
     </div>
