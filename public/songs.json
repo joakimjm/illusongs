@@ -207,5 +207,84 @@
         "text": "Nej det var det ikke\ndet var smedens gamle kat\nham der bor i Århusgade\nnummer enogtres"
       }
     ]
+  },
+  {
+    "id": "puff-den-magiske-drage",
+    "title": "Puff den magiske drage",
+    "verses": [
+      {
+        "id": 1,
+        "illustration": "/puff-den-magiske-drage-01.png",
+        "text": "Puff, hvor kan man finde drager som dig\nDu ligger på en klippeø\nog venter kun på mig\nDu kan li at lege, du var min ven\nmen kære Puff vi kommer aldrig til at leg igen"
+      },
+      {
+        "id": 2,
+        "illustration": "/puff-den-magiske-drage-02.png",
+        "text": "Puff da jeg var lille, red jeg på dig\njeg sad på halen, stor og bred\ndu svømmede med mig\nAlle sænker flaget hilser på dig\nvi fandt en skat med sølv og guld – og delte du og jeg"
+      },
+      {
+        "id": 3,
+        "illustration": "/puff-den-magiske-drage-03.png",
+        "text": "Puff vi sad på stranden, solen gik ned\nen havskildpadde gemmer sine\næg et hemmeligt sted\nTropevinden suser, natten bliver sort\nvi føler begge to vi sidder nær ved lykkens port"
+      },
+      {
+        "id": 4,
+        "illustration": "/puff-den-magiske-drage-04.png",
+        "text": "Puff på vores rejse så vi et slot\nhvor prinser og prinsesser boede\nNej hvor var det flot\nKongen og hans dronning gav mig en ring\nmen ringen var en tryllering – nu er den ingenting"
+      },
+      {
+        "id": 5,
+        "illustration": "/puff-den-magiske-drage-05.png",
+        "text": "Puff du er alene, alt er forbi\nfor drager lever tusind år\nhvor er min fantasi\nDu kan li´at lege du var min ven\nmen kære Puff jeg blir jo aldrig som et barn igen."
+      }
+    ]
+  },
+  {
+    "id": "mester-jakob",
+    "title": "Mester Jakob",
+    "verses": [
+      {
+        "id": 1,
+        "illustration": "/mester-jakob-01.png",
+        "text": "Mester Jakob, mester Jakob\nSover du? Sover du?\nHører du ej klokken?\nHører du ej klokken?\nBim bam bum!\nBim bam bum!"
+      }
+    ]
+  },
+  {
+    "id": "der-bor-en-bager",
+    "title": "Der bor en bager",
+    "verses": [
+      {
+        "id": 1,
+        "illustration": "/der-bor-en-bager-01.png",
+        "text": "Der bor en bager\npå Nørregade,\nhan bager kringler\nog julekage.\nHan bager store,\nhan bager små,\nhan bager nogle\nmed sukker på."
+      },
+      {
+        "id": 2,
+        "illustration": "/der-bor-en-bager-02.png",
+        "text": "Og i hans vindu'\ner sukkersager\nog heste, grise\nog peberkager,\nså har du penge,\nså kan du få,\nmen har du ingen,\nså må du gå."
+      }
+    ]
+  },
+  {
+    "id": "bro-bro-brille",
+    "title": "Bro bro brille",
+    "verses": [
+      {
+        "id": 1,
+        "illustration": "/bro-bro-brille-01.png",
+        "text": "Bro, bro, brille!\nKlokken ringer el’ve,\nkejseren står på sit høje hvide slot,\nså hvidt som et kridt,\nså sort som et kul."
+      },
+      {
+        "id": 2,
+        "illustration": "/bro-bro-brille-02.png",
+        "text": "Fare, fare, krigsmand,\ndøden skal du lide,\nden, som kommer allersidst,\nskal i den sorte gryde."
+      },
+      {
+        "id": 3,
+        "illustration": "/bro-bro-brille-03.png",
+        "text": "Første gang så la’r vi ham gå,\nanden gang så lige så,\ntredie gang så ta’r vi ham\nog putter ham i gryden!"
+      }
+    ]
   }
 ]
