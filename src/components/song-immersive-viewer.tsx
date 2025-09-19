@@ -158,7 +158,7 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
           aria-hidden
           className="pointer-events-none absolute right-4 flex items-center gap-3 text-white"
           style={{
-            top: "calc(env(safe-area-inset-top, 0px))",
+            top: "max(calc(env(safe-area-inset-top, 0px)), 1rem)",
             right: "calc(env(safe-area-inset-right, 0px) + 0.75rem)",
           }}
         >
