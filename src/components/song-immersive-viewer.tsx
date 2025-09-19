@@ -11,6 +11,7 @@ import {
 
 import PillButton from "@/components/pill-button";
 import type { Song } from "@/data/songs";
+import 'scrollyfills';
 
 type SongImmersiveViewerProps = {
   readonly song: Song;
@@ -20,7 +21,27 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
   const verses = useMemo(() => song.verses, [song.verses]);
   const [activeIndex, setActiveIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const activeIndexRef = useRef(0);
+
+  useEffect(() => {
+    if (containerRef.current === null) {
+      return;
+    }
+
+    const eventListener = () => {
+      if (containerRef.current === null) {
+        return;
+      }
+
+      const index = Math.round(
+        containerRef.current.scrollLeft / containerRef.current.clientWidth,
+      );
+      setActiveIndex(index);
+    };
+
+    containerRef.current.addEventListener("scrollend", eventListener);
+
+    return () => containerRef.current?.removeEventListener("scrollend", eventListener);
+  }, [containerRef.current]);
 
   const clampIndex = useCallback(
     (index: number) => {
@@ -47,17 +68,13 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
   );
 
   const scrollAndUpdate = useCallback(
-    (index: number, behavior: ScrollBehavior = "smooth") => {
+    (index: number) => {
       const target = clampIndex(index);
       setActiveIndex(target);
       scrollToIndex(target);
     },
     [clampIndex],
   );
-
-  useEffect(() => {
-    activeIndexRef.current = activeIndex;
-  }, [activeIndex]);
 
   useEffect(() => {
     if (activeIndex >= verses.length && verses.length > 0) {
@@ -119,6 +136,7 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
               <div className="relative flex h-full w-full flex-col justify-end overflow-hidden">
                 <div className="absolute h-full w-full border inset-0 overflow-hidden">
                   <Image
+                    priority
                     src={verse.illustration.src}
                     alt=""
                     fill
@@ -129,6 +147,7 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
                 <div className="relative flex h-full flex-col justify-center">
                   <figure className="flex flex-1 items-start justify-center">
                     <Image
+                      priority
                       src={verse.illustration.src}
                       alt={verse.illustration.alt}
                       width={1600}
