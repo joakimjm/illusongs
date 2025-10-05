@@ -392,5 +392,150 @@
         "text": "Bim bam busse, jeg er en haletudse,\njeg vælter mig i andemad,\nså jeg kan sagtens være glad,\nog selv om vandet det er vådt,\nså svømmer jeg nu ganske godt\nBim bam busse, jeg er en haletudse"
       }
     ]
+  },
+  {
+    "id": "bjerget-i-skoven",
+    "title": "Bjerget i skoven",
+    "verses": [
+      {
+        "id": 1,
+        "illustration": "/bjerget-i-skoven-01.png",
+        "text": "Langt ud’ i skoven lå et lille bjerg,\naldrig så jeg så dejligt et bjerg.\nBjerget ligger langt ud’ i skoven."
+      },
+      {
+        "id": 2,
+        "illustration": "/bjerget-i-skoven-02.png",
+        "text": "På det lille bjerg der stod et lille træ,\naldrig så jeg så dejligt et træ.\nTræet på bjerget,\nbjerget ligger langt ud’ i skoven."
+      },
+      {
+        "id": 3,
+        "illustration": "/bjerget-i-skoven-03.png",
+        "text": "På det lille træ der sad en lille gren,\naldrig så jeg så dejlig en gren.\nGrenen på træet,\ntræet på bjerget,\nbjerget ligger langt ud’ i skoven."
+      },
+      {
+        "id": 4,
+        "illustration": "/bjerget-i-skoven-04.png",
+        "text": "På den lille gren der sad en lille kvist,\naldrig så jeg så dejlig en kvist.\nKvisten på grenen,\ngrenen på træet,\ntræet på bjerget,\nbjerget ligger langt ud’ i skoven."
+      },
+      {
+        "id": 5,
+        "illustration": "/bjerget-i-skoven-05.png",
+        "text": "På den lille kvist der sad et lille blad,\naldrig så jeg så dejligt et blad.\nBladet på kvisten,\nkvisten på grenen,\ngrenen på træet,\ntræet på bjerget,\nbjerget ligger langt ud’ i skoven."
+      },
+      {
+        "id": 6,
+        "illustration": "/bjerget-i-skoven-06.png",
+        "text": "På det lille blad der var en lille rede,\naldrig så jeg så dejlig en rede.\nReden på bladet,\nbladet på kvisten,\nkvisten på grenen,\ngrenen på træet,\ntræet på bjerget,\nbjerget ligger langt ud’ i skoven."
+      },
+      {
+        "id": 7,
+        "illustration": "/bjerget-i-skoven-07.png",
+        "text": "I den lille rede var et lille æg,\naldrig så jeg så dejligt et æg.\nÆgget i reden,\nreden på bladet,\nbladet på kvisten,\nkvisten på grenen,\ngrenen på træet,\ntræet på bjerget,\nbjerget ligger langt ud’ i skoven."
+      },
+      {
+        "id": 8,
+        "illustration": "/bjerget-i-skoven-08.png",
+        "text": "Af det lille æg der kom en lille fugl,\naldrig så jeg så dejlig en fugl.\nFuglen af ægget,\nægget i reden,\nreden på bladet,\nbladet på kvisten,\nkvisten på grenen,\ngrenen på træet,\ntræet på bjerget,\nbjerget ligger langt ud’ i skoven."
+      },
+      {
+        "id": 9,
+        "illustration": "/bjerget-i-skoven-09.png",
+        "text": "På den lille fugl der sad en lille fjer,\naldrig så jeg så dejlig en fjer.\nFjeren på fuglen,\nfuglen af ægget,\nægget i reden,\nreden på bladet,\nbladet på kvisten,\nkvisten på grenen,\ngrenen på træet,\ntræet på bjerget,\nbjerget ligger langt ud’ i skoven."
+      },
+      {
+        "id": 10,
+        "illustration": "/bjerget-i-skoven-10.png",
+        "text": "Af den lille fjer der blev en lille pude,\naldrig så jeg så dejlig en pude.\nPuden af fjeren,\nfjeren på fuglen,\nfuglen af ægget,\nægget i reden,\nreden på bladet,\nbladet på kvisten,\nkvisten på grenen,\ngrenen på træet,\ntræet på bjerget,\nbjerget ligger langt ud’ i skoven."
+      },
+      {
+        "id": 11,
+        "illustration": "/bjerget-i-skoven-11.png",
+        "text": "På den lille pude lå en lille dreng,\naldrig så jeg så dejlig en dreng.\nDrengen på puden,\npuden af fjeren,\nfjeren på fuglen,\nfuglen af ægget,\nægget i reden,\nreden på bladet,\nbladet på kvisten,\nkvisten på grenen,\ngrenen på træet,\ntræet på bjerget,\nbjerget ligger langt ud’ i skoven."
+      }
+    ]
+  },
+  {
+    "id": "blaesten-kan-man-ikke-faa-at-se",
+    "title": "Blæsten kan man ikke få at se",
+    "verses": [
+      {
+        "id": 1,
+        "illustration": "/blaesten-kan-man-ikke-faa-at-se-01.png",
+        "text": "Blæsten kan man ikke få at se.\nDet’ der ikke no’et at gøre ve’.\nMen når møllen rigtig svinger\nrundt med sine store vinger,\nså’ det let at gætte at det blæser."
+      },
+      {
+        "id": 2,
+        "illustration": "/blaesten-kan-man-ikke-faa-at-se-02.png",
+        "text": "Blæsten kan man ikke få at se.\nDet’ der ikke no’et at gøre ve’.\nMen når støv og visne blade\nflyver rundt på vej og gade,\nså’ det let at gætte at det blæser."
+      },
+      {
+        "id": 3,
+        "illustration": "/blaesten-kan-man-ikke-faa-at-se-03.png",
+        "text": "Blæsten kan man ikke få at se.\nDet’ der ikke noget at gøre ve’.\nMen når luften rigtig suser,\nog når alle træer bruser,\nså det let at gætte at det blæser."
+      }
+    ]
+  },
+  {
+    "id": "den-lille-fraekke-frederik",
+    "title": "Den lille frække Frederik",
+    "verses": [
+      {
+        "id": 1,
+        "illustration": "/den-lille-fraekke-frederik-01.png",
+        "text": "Den lille frække Frederik,\nsom elsker sjov og mekanik,\nhar købt en bil og kører nu\nog si’r babu, babu, babu."
+      },
+      {
+        "id": 2,
+        "illustration": "/den-lille-fraekke-frederik-02.png",
+        "text": "Han gi’r den rigeligt med gas\nog kører hen til Højbro Plads,\nhvor Absalon ta’r hjelmen af\nog si’r goddag, goddag, goddag."
+      },
+      {
+        "id": 3,
+        "illustration": "/den-lille-fraekke-frederik-03.png",
+        "text": "Så kører han til Jægerspris\nog bytter bilen for en gris,\nog bytter grisen for en bog\nmed billed’ af et lille tog."
+      },
+      {
+        "id": 4,
+        "illustration": "/den-lille-fraekke-frederik-04.png",
+        "text": "Så kører han med toget hjem\nog spiser middag klokken fem;\nog så er den fortælling slut,\nog toget siger futtefut."
+      }
+    ]
+  },
+  {
+    "id": "der-sad-to-katte-paa-et-bord",
+    "title": "Der sad to katte på et bord",
+    "verses": [
+      {
+        "id": 1,
+        "illustration": "/der-sad-to-katte-paa-et-bord-01.png",
+        "text": "Der sad to katte på et bord,\nkritte-vitte-vit bom bom.\nDen ene på den anden glor,\nkritte-vitte-vit bom bom.\nSå sa’ den ene: “Hør, min ven,\nkritte-vitte-vitte-vitte-vit bom bom,\nsku’ vi ikke kravle ned igen?”\nKritte-vitte-vit bom bom."
+      },
+      {
+        "id": 2,
+        "illustration": "/der-sad-to-katte-paa-et-bord-02.png",
+        "text": "Og da de så var kravlet ned,\nkritte-vitte-vit bom bom.\nSå sa’ den anden: “Hør, min ven,\nkritte-vitte-vit bom bom,\nsku’ vi ikke kravle op igen?”\nkritte-vitte-vitte-vitte-vit bom bom.\nSå kravlede de begge op.\nKritte-vitte-vit bom bom."
+      }
+    ]
+  },
+  {
+    "id": "aah-abe",
+    "title": "Åh Abe",
+    "verses": [
+      {
+        "id": 1,
+        "illustration": "/aah-abe-01.png",
+        "text": "Der var engang en abe,\nden bo’de i en skov,\nog den ku’ svinge sig fra gren til gren\nog ta’ bananer\nsåd’n når den – bum –\nrendte rundt og laved’ sjov.\nÅh abe, åh abe, gid jeg var li’som dig.\nSnoabe, snoabe, du har altid sjov til leg."
+      },
+      {
+        "id": 2,
+        "illustration": "/aah-abe-02.png",
+        "text": "Og abens lange hale,\nden ku’ den altså sno,\nså den ku’ svinge sig fra gren til gren\nog uden at holde\nsåd’n får den – bum –\nfir’ bananer, to og to.\nÅh abe, åh abe, gid jeg var li’som dig.\nSnoabe, snoabe, du har altid sjov til leg."
+      },
+      {
+        "id": 3,
+        "illustration": "/aah-abe-03.png",
+        "text": "Der var engang en abe,\nog den var rød og blå,\nnår den sku’ svinge sig fra gren til gren,\nvar bagpartiet\nsåd’n på den – bum –\nåh så sjovt at kigge på.\nÅh abe, åh abe, gid jeg var li’som dig.\nSnoabe, snoabe, du har altid sjov til leg."
+      }
+    ]
   }
 ]
