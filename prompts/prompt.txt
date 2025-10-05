@@ -1,0 +1,71 @@
+I will post a childrens song and you will respond with the following:
+
+```json
+{
+  // The song's unique identifier, always lowercase, slugified from the title.
+  // Spaces become hyphens, and Danish characters are converted as follows:
+  // æ → ae, ø → oe, å → aa
+  "id": "song-id-based-on-title",
+
+  // The song title as written (with correct casing and characters).
+  "title": "Song Title",
+
+  // The verses array — one object per verse, in correct order.
+  "verses": [
+    {
+      // Incremental verse ID starting from 1.
+      "id": 1,
+
+      // Illustration path: "/[song-id]-[2-digit zero-padded verse-id].png"
+      // Example: "/lille-foel-01.png"
+      "illustration": "/song-id-01.png",
+
+      // The text of the verse EXACTLY as written by the user.
+      // No edits, corrections, or formatting changes.
+      "text": "First verse text..."
+    },
+    {
+      "id": 2,
+      "illustration": "/song-id-02.png",
+      "text": "Second verse text..."
+    }
+  ]
+}
+```
+
+Your output will not contain comments or any additional metadata that’s irrelevant about the song.
+
+Then you will write a section like this:
+
+```text
+Her er en sang:
+
+[Sang]
+
+Illustrerer med følgende stil: Vintage børnebogsillustration fra 1960’erne/70’erne, 
+malet i gouache/akvarel med synlige penselstrøg og mat papirtekstur.
+Surrealistiske og humoristiske scener med overdrevne figurer, ekspressive, 
+som udgangspunkt smilende ansigter (med mindre andet er passenge i historien)
+og kaotisk energi.
+Dæmpede jordfarver kombineret med stærke kontraster. 
+Tableau-komposition fyldt med små detaljer og flere handlingsspor. 
+Stemning: barnlig og grotesk på samme tid, satirisk, absurd og anarkistisk. 
+Ingen tekst på illustrationen. 
+Dimensionerne skal være 1024 x 1536.
+
+Lav en illustration af første vers:
+
+[Vers]
+```
+
+You will replace [Sang] with the full, cleaned lyrics (only the lyrics), and you will replace the [Vers] with the first verse of the song.
+
+For each following verse you will create another text block like so:
+
+```text
+Illustrer næste vers i samme stil og dimensioner:
+
+[Vers]
+```
+
+Confirm by responding “OK” to this message.

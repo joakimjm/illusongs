@@ -286,5 +286,111 @@
         "text": "Første gang så la’r vi ham gå,\nanden gang så lige så,\ntredie gang så ta’r vi ham\nog putter ham i gryden!"
       }
     ]
+  },
+  {
+    "id": "lille-peter-edderkop",
+    "title": "Lille Peter Edderkop",
+    "verses": [
+      {
+        "id": 1,
+        "illustration": "/lille-peter-edderkop-01.png",
+        "text": "Lille Peter Edderkop kravled op ad muren.\nSå kom regnen og skylled Peter væk.\nSå kom solen og tørred Peters krop.\nLille Peter Edderkop kravled atter op."
+      },
+      {
+        "id": 2,
+        "illustration": "/lille-peter-edderkop-02.png",
+        "text": "I sin moders spindelvæv kravled’ han omkring,\nmen han bestilte ingen verdens ting.\nSå sagde hans moder: Du skal fange fluer,\nmen Lille Peter Edderkop tog en gyngetur."
+      }
+    ]
+  },
+  {
+    "id": "en-lille-nisse-rejste",
+    "title": "En lille nisse rejste",
+    "verses": [
+      {
+        "id": 1,
+        "illustration": "/en-lille-nisse-rejste-01.png",
+        "text": "En lille nisse rejste\nmed ekstrapost fra land til land,\nhans agt det var at hilse\npå verdens største mand."
+      },
+      {
+        "id": 2,
+        "illustration": "/en-lille-nisse-rejste-02.png",
+        "text": "Han kom til stormogulen\nog der, hvor kæmpekålen gror,\nmen mellem alle kæmper\nham tyktes ingen stor."
+      },
+      {
+        "id": 3,
+        "illustration": "/en-lille-nisse-rejste-03.png",
+        "text": "Da gik han ned til havet\nog stirred i det klare vand,\nhan smilte, thi nu havde\nhan set den største mand."
+      }
+    ]
+  },
+  {
+    "id": "jeg-en-gaard-mig-bygge-vil",
+    "title": "Jeg en gård mig bygge vil",
+    "verses": [
+      {
+        "id": 1,
+        "illustration": "/jeg-en-gaard-mig-bygge-vil-01.png",
+        "text": "Jeg en gård mig bygge vil,\nder skal være have til.\nStore marker, grønne enge,\nog med lam i lille vænge,\nheste, grise, køer og får,\nhører til min bondegård."
+      },
+      {
+        "id": 2,
+        "illustration": "/jeg-en-gaard-mig-bygge-vil-02.png",
+        "text": "Der er hestestald og lo,\npå mit tag skal storken bo.\nGæs og ænder, høns og duer\nvil jeg ha' og mange stuer,\nhuset hvidt og tæk't med strå,\ndør og vindu'r malet blå."
+      },
+      {
+        "id": 3,
+        "illustration": "/jeg-en-gaard-mig-bygge-vil-03.png",
+        "text": "Op af brøndens klare vand\ntrækker jeg min lille spand,\nvander koen, vander hesten,\nmedens sol går ned i vesten,\nfølger koen i sin bås,\nlukker port og dør i lås."
+      }
+    ]
+  },
+  {
+    "id": "save-save-braende",
+    "title": "Save, save brænde",
+    "verses": [
+      {
+        "id": 1,
+        "illustration": "/save-save-braende-01.png",
+        "text": "Save, save brænde,\nvi er raske svende;\ndu til dig og jeg til mig\nhver må trække rask til sig,\n– sådan skal det være,\nsådan skal det være –"
+      },
+      {
+        "id": 2,
+        "illustration": "/save-save-braende-02.png",
+        "text": "Save, save brænde,\ni aften får det ende,\ni morgen er det helligdag,\nså hænger saven på sin knag,\n– så går vi til kirke,\nså går vi til kirke –"
+      }
+    ]
+  },
+  {
+    "id": "stille-nu",
+    "title": "Stille nu",
+    "verses": [
+      {
+        "id": 1,
+        "illustration": "/stille-nu-01.png",
+        "text": "Stille nu! Hører du,\naftenklokken ringer!\nSolen sank, stor og blank,\nnatten stilhed bringer."
+      },
+      {
+        "id": 2,
+        "illustration": "/stille-nu-02.png",
+        "text": "Mand bag plov, fugl i skov\nsøger hjem til senge.\nnu god nat! Sov, min skat,\nSov nu sødt og længe."
+      }
+    ]
+  },
+  {
+    "id": "bim-bam-busse",
+    "title": "Bim bam busse",
+    "verses": [
+      {
+        "id": 1,
+        "illustration": "/bim-bam-busse-01.png",
+        "text": "Bim bam busse, jeg er en haletudse,\ndet eneste jeg drømmer om\ndet er at blive smuk og skøn,\nog undgå storkens spidse næb\nog også undgå slid og slæb,\nBim bam busse, jeg er en haletudse"
+      },
+      {
+        "id": 2,
+        "illustration": "/bim-bam-busse-02.png",
+        "text": "Bim bam busse, jeg er en haletudse,\njeg vælter mig i andemad,\nså jeg kan sagtens være glad,\nog selv om vandet det er vådt,\nså svømmer jeg nu ganske godt\nBim bam busse, jeg er en haletudse"
+      }
+    ]
   }
 ]
