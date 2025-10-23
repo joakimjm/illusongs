@@ -537,5 +537,68 @@
         "text": "Der var engang en abe,\nog den var rød og blå,\nnår den sku’ svinge sig fra gren til gren,\nvar bagpartiet\nsåd’n på den – bum –\nåh så sjovt at kigge på.\nÅh abe, åh abe, gid jeg var li’som dig.\nSnoabe, snoabe, du har altid sjov til leg."
       }
     ]
+  },
+  {
+    "id": "spoerge-joergen",
+    "title": "Spørge Jørgen",
+    "verses": [
+      {
+        "id": 1,
+        "illustration": "/spoerge-joergen-01.png",
+        "text": "Nu skal jeg fortæller jer om Jørgen;\nJørgen var en temlig’ artig dreng!\nMen han plagede alle med sin spørgen!\nFra han vågnede til han gik i seng!\nFar og mor, de blev så trætte af det,\ndet – han spurgte om var noget pjat!\nTit han spurgte bare for at drille;\nHvorfor, hvoffer dit og hvoffer dat?"
+      },
+      {
+        "id": 2,
+        "illustration": "/spoerge-joergen-02.png",
+        "text": "Hvorfor har en buko ingen vinger?\nHvorfor siger den buh og ikke vov?\nHvorfor sidder neglen på min finger?\nHvis den sad på næsen, var det sjov!\nHvorfor sidder øjet ik’ i nakken?\nHvorfor er jeg ikke ble’t en kat?\nHvorfor kan min støvle ikke tale?\nHvorfor, hvoffer dit og hvoffer dat?"
+      },
+      {
+        "id": 3,
+        "illustration": "/spoerge-joergen-03.png",
+        "text": "Hvor har en loppe ingen bukser?\nHvorfor er den lille fisk så våd?\nHvorfor bliver en kylling ikke malket?\nHvorfor siger kommoden ikke no’et?\nHvorfor er der mænd på mine seler?\nHvorfor skal vi altid gå med hat?\nHvorfor spiser løven ikke jordbær?\nHvoffer, hvoffer dit og hvoffer dat?"
+      },
+      {
+        "id": 4,
+        "illustration": "/spoerge-joergen-04.png",
+        "text": "Men en dag blev det hans far for meget!\nJørgen fik smæk og Jørgen blev lagt i seng!\nMen nu lå han der igen og spurgte –\nnæsten som en helt fornuftig dreng;\nHvorfor fik jeg ingen pandekager?\nHvorfor må jeg ikke lege mer’?\nHvorfor har jeg dog så ondt i numsen?\nJeg skal aldrig spørge fjollet mer’."
+      }
+    ]
+  },
+  {
+    "id": "godmorgen-sol",
+    "title": "Godmorgen sol",
+    "verses": [
+      {
+        "id": 1,
+        "illustration": "/godmorgen-sol-01.png",
+        "text": "God morgen sol, god morgen, morgensol\nsom skinner ned på bellis og viol,\nog ned på Jens og Kay de frække fyre,\nsom står og tisser på en tissemyre."
+      },
+      {
+        "id": 2,
+        "illustration": "/godmorgen-sol-02.png",
+        "text": "Men myren må man ikke tisse på,\nOg derfor råber jeg: la’ vær’ og stå,\nOg tis på myren men gå hjem igen,\nmed jeres tissemyretissemænd!"
+      }
+    ]
+  },
+  {
+    "id": "jeg-er-en-papegoeje-fra-amerika",
+    "title": "Jeg er en papegøje fra Amerika",
+    "verses": [
+      {
+        "id": 1,
+        "illustration": "/jeg-er-en-papegoeje-fra-amerika-01.png",
+        "text": "Jeg er en papegøje fra Amerika.\nMin far var papegøjefiskepakker.\nJeg sagde ingenting, men mor hun sagde nu og da:\nHan lærer nok at tale, når han snakker.\nNu synger jeg: Åh falleri og fallera!\nHvis nogen spør’ mig, hvor jeg kommer fra,\nså svarer jeg: Åh falleri-ha-ha-ha-ha!\nJeg er en papegøje fra Amerika."
+      },
+      {
+        "id": 2,
+        "illustration": "/jeg-er-en-papegoeje-fra-amerika-02.png",
+        "text": "Jeg bo’de i en skov til jeg blev konfirmer’t.\nSå blev jeg fanget af en fuglefanger.\nHan lærte mig at synge, da han selv var for genert,\nog siden blev jeg operettesanger.\nNu synger jeg: Ah falleri og fallera!\nHvis nogen spør’ mig, hvor jeg kommer fra,\nså svarer jeg: Ah falleri-ha-ha-ha-ha!\nJeg er en papegøje fra Amerika."
+      },
+      {
+        "id": 3,
+        "illustration": "/jeg-er-en-papegoeje-fra-amerika-03.png",
+        "text": "En dag kom der en skipper ind og købte mig\nfor femogfyrre kroner og en blomme.\nJeg spiste blommen selv og skreg hurra og fløj min vej,\nog siden kom jeg her til Kardemomme.\nHer synger jeg: Ah falleri og fallera!\nOg byder man mig sukker, si’r jeg ja,\nfor alle ved: Ah falleri-ha-ha-ha-ha!\nJeg er papegøjen fra Amerika."
+      }
+    ]
   }
 ]

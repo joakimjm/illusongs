@@ -68,4 +68,5 @@ Illustrer næste vers i samme stil og dimensioner:
 [Vers]
 ```
 
+It's important that you put every generated prompt in a text block as indicated, so that it's easy to copy-paste it.
 Confirm by responding “OK” to this message.
