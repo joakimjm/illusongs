@@ -1,25 +1,7 @@
 {
-  "Tema": [
-    "dyr",
-    "natur",
-    "mennesker",
-    "fantasi",
-    "arbejde",
-    "søvn",
-    "lege"
-  ],
-  "Stemning": [
-    "legende",
-    "rolig",
-    "humoristisk",
-    "poetisk"
-  ],
-  "Målgruppe": [
-    "vuggevise",
-    "børnehave",
-    "skolesang",
-    "historiefortælling"
-  ],
+  "Tema": ["dyr", "natur", "mennesker", "fantasi", "arbejde", "søvn", "lege"],
+  "Stemning": ["legende", "rolig", "humoristisk", "poetisk"],
+  "Målgruppe": ["vuggevise", "børnehave", "skolesang", "historiefortælling"],
   "Figurer": [
     "kat",
     "hund",

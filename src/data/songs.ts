@@ -19,6 +19,7 @@ export type Song = {
   readonly id: string;
   readonly title: string;
   readonly verses: ReadonlyArray<SongVerse>;
+  readonly tags: ReadonlyArray<string>;
 };
 
 type SongVerseDocument = {
@@ -31,7 +32,8 @@ type SongDocument = {
   readonly id: string;
   readonly title: string;
   readonly verses: ReadonlyArray<SongVerseDocument>;
-  readonly illustration?: string;
+  readonly tags: ReadonlyArray<string>;
+  readonly illustration?: string; // future top-level illustration support
 };
 
 const isJsonObject = (value: JsonValue | undefined): value is JsonObject =>
@@ -91,17 +93,29 @@ const parseSongDocument = (value: JsonValue): SongDocument => {
   const id = ensureString(value.id, "Song id must be a string");
   const title = ensureString(value.title, "Song title must be a string");
   const versesValue = value.verses;
+  const tagsValue = value.tags;
 
   if (!isJsonArray(versesValue)) {
     throw new Error("Song verses must be an array");
   }
 
+  if (!isJsonArray(tagsValue)) {
+    throw new Error("Song tags must be an array");
+  }
+
   const verses = versesValue.map((verse) => parseSongVerseDocument(verse));
+  const tags = tagsValue.map((tagValue, index) => {
+    if (!isJsonString(tagValue)) {
+      throw new Error(`Song tag at index ${index} must be a string`);
+    }
+    return tagValue.toLowerCase();
+  });
 
   return {
     id,
     title,
     verses,
+    tags,
   };
 };
 
@@ -122,6 +136,7 @@ const toSong = (songDocument: SongDocument): Song => ({
   verses: songDocument.verses.map((verse) =>
     toSongVerse(songDocument.title)(verse),
   ),
+  tags: songDocument.tags,
 });
 
 const parseSongCollection = (

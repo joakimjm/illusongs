@@ -11,7 +11,7 @@ import {
 
 import PillButton from "@/components/pill-button";
 import type { Song } from "@/data/songs";
-import 'scrollyfills';
+import "scrollyfills";
 
 type SongImmersiveViewerProps = {
   readonly song: Song;
@@ -23,25 +23,23 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (containerRef.current === null) {
+    const container = containerRef.current;
+    if (container === null) {
       return;
     }
 
     const eventListener = () => {
-      if (containerRef.current === null) {
+      const current = containerRef.current;
+      if (current === null) {
         return;
       }
-
-      const index = Math.round(
-        containerRef.current.scrollLeft / containerRef.current.clientWidth,
-      );
+      const index = Math.round(current.scrollLeft / current.clientWidth);
       setActiveIndex(index);
     };
 
-    containerRef.current.addEventListener("scrollend", eventListener);
-
-    return () => containerRef.current?.removeEventListener("scrollend", eventListener);
-  }, [containerRef.current]);
+    container.addEventListener("scrollend", eventListener);
+    return () => container.removeEventListener("scrollend", eventListener);
+  }, []);
 
   const clampIndex = useCallback(
     (index: number) => {
@@ -62,7 +60,9 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
       }
 
       const target = clampIndex(index);
-      container.getElementsByTagName("article")[target]?.scrollIntoView({ behavior: "smooth" });
+      container
+        .getElementsByTagName("article")
+        [target]?.scrollIntoView({ behavior: "smooth" });
     },
     [clampIndex],
   );
@@ -73,7 +73,7 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
       setActiveIndex(target);
       scrollToIndex(target);
     },
-    [clampIndex],
+    [clampIndex, scrollToIndex],
   );
 
   useEffect(() => {
@@ -159,9 +159,7 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
                   <div className="z-0 pt-20 pb-24 backdrop-blur-fade-top-to-bottom absolute bottom-0 w-full">
                     <div className="flex">
                       <div className="w-full px-6 text-amber-100">
-                        <p
-                          className={`whitespace-pre-line sm:text-2xl`}
-                        >
+                        <p className={`whitespace-pre-line sm:text-2xl`}>
                           {verse.text}
                         </p>
                       </div>
@@ -184,10 +182,11 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
           {verses.map((verse, index) => (
             <span
               key={verse.id}
-              className={`h-2.5 w-2.5 rounded-full border border-white/40 transition ${index === activeIndex
-                ? "bg-amber-300 shadow-[0_0_0_8px_rgba(252,211,77,0.35)]"
-                : "bg-transparent"
-                }`}
+              className={`h-2.5 w-2.5 rounded-full border border-white/40 transition ${
+                index === activeIndex
+                  ? "bg-amber-300 shadow-[0_0_0_8px_rgba(252,211,77,0.35)]"
+                  : "bg-transparent"
+              }`}
             />
           ))}
         </div>
