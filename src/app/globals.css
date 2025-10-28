@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "react-inner-image-zoom/lib/styles.min.css";
 
 :root {
   color-scheme: light;

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import InnerImageZoom from 'react-inner-image-zoom';
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { HiOutlineArrowLeft, HiOutlineArrowRight } from "react-icons/hi2";
 import BackHomeButton from "@/components/back-home-button";
@@ -15,6 +16,7 @@ type SongImmersiveViewerProps = {
 const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
   const verses = useMemo(() => song.verses, [song.verses]);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isSpotlightEnabled, setIsSpotlightEnabled] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -140,16 +142,17 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
                   />
                 </div>
                 <div className="relative flex h-full flex-col justify-center">
+
                   <figure className="flex flex-1 items-start justify-center">
-                    <Image
-                      priority
-                      src={verse.illustration.src}
-                      alt={verse.illustration.alt}
+                    <InnerImageZoom
                       width={1600}
                       height={1200}
+                      afterZoomOut={() => setIsSpotlightEnabled(false)}
+                      afterZoomIn={() => setIsSpotlightEnabled(true)}
                       className="w-full object-contain"
-                      sizes="100vw"
-                    />
+                      src={verse.illustration.src}
+                      zoomSrc={verse.illustration.src} />
+
                   </figure>
                   <div className="z-0 pt-20 pb-24 backdrop-blur-fade-top-to-bottom absolute bottom-0 w-full">
                     <div className="flex">
@@ -178,8 +181,8 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
             <span
               key={verse.id}
               className={`h-2.5 w-2.5 rounded-full border border-white/40 transition ${index === activeIndex
-                  ? "bg-amber-300 shadow-[0_0_0_8px_rgba(252,211,77,0.35)]"
-                  : "bg-transparent"
+                ? "bg-amber-300 shadow-[0_0_0_8px_rgba(252,211,77,0.35)]"
+                : "bg-transparent"
                 }`}
             />
           ))}
