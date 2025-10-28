@@ -1,14 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  HiHome,
-  HiOutlineArrowLeft,
-  HiOutlineArrowRight,
-} from "react-icons/hi2";
-
+import { HiOutlineArrowLeft, HiOutlineArrowRight } from "react-icons/hi2";
+import BackHomeButton from "@/components/back-home-button";
 import PillButton from "@/components/pill-button";
 import type { Song } from "@/data/songs";
 import "scrollyfills";
@@ -62,7 +57,7 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
       const target = clampIndex(index);
       container
         .getElementsByTagName("article")
-        [target]?.scrollIntoView({ behavior: "smooth" });
+      [target]?.scrollIntoView({ behavior: "smooth" });
     },
     [clampIndex],
   );
@@ -182,11 +177,10 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
           {verses.map((verse, index) => (
             <span
               key={verse.id}
-              className={`h-2.5 w-2.5 rounded-full border border-white/40 transition ${
-                index === activeIndex
+              className={`h-2.5 w-2.5 rounded-full border border-white/40 transition ${index === activeIndex
                   ? "bg-amber-300 shadow-[0_0_0_8px_rgba(252,211,77,0.35)]"
                   : "bg-transparent"
-              }`}
+                }`}
             />
           ))}
         </div>
@@ -199,15 +193,7 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
             paddingRight: "calc(env(safe-area-inset-right, 0px) + 0.75rem)",
           }}
         >
-          <PillButton
-            as={Link}
-            href="/"
-            aria-label="Til forsiden"
-            className="flex items-center justify-center gap-3 px-4 text-xl"
-          >
-            <HiHome aria-hidden className="h-6 w-6" />
-            <span className="sr-only">Til forsiden</span>
-          </PillButton>
+          <BackHomeButton />
           <div className="flex items-center gap-3">
             <PillButton
               type="button"
