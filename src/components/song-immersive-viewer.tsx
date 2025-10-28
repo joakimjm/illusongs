@@ -178,7 +178,7 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
               key={verse.id}
               className="flex h-full w-full flex-shrink-0 snap-start"
             >
-              <div className="relative flex h-full w-full flex-col justify-end overflow-hidden">
+              <div className="select-none relative flex h-full w-full flex-col justify-end overflow-hidden">
                 <div className="absolute h-full w-full border inset-0 overflow-hidden">
                   <Image
                     priority
