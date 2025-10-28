@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-
+import { Suspense } from "react";
 import SongImmersiveViewer from "@/components/song-immersive-viewer";
 import { getSongById, listSongs } from "@/data/songs";
 
@@ -43,7 +43,9 @@ const SongPage = async ({ params }: SongPageProps) => {
 
   return (
     <main className="relative flex min-h-[100dvh] flex-col bg-black text-white">
-      <SongImmersiveViewer song={song} />
+      <Suspense fallback={null}>
+        <SongImmersiveViewer song={song} />
+      </Suspense>
     </main>
   );
 };

@@ -1,5 +1,6 @@
 import SongBrowser from "@/components/song-browser";
 import { listSongs } from "@/data/songs";
+import { Suspense } from "react";
 
 const HomePage = () => {
   const songs = listSongs();
@@ -19,7 +20,9 @@ const HomePage = () => {
           opdag nye vers undervejs.
         </p>
       </section>
-      <SongBrowser songs={songs} />
+      <Suspense fallback={null}>
+        <SongBrowser songs={songs} />
+      </Suspense>
     </main>
   );
 };
