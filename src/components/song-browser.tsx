@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import SongFilters, { type SongFiltersValue } from "@/components/song-filters";
 import SongList from "@/components/song-list";
 import type { Song } from "@/data/songs";
@@ -43,13 +44,37 @@ const filterSongs = (
 };
 
 const SongBrowser = ({ songs }: SongBrowserProps) => {
-  const [filters, setFilters] = useState<SongFiltersValue>({
-    text: "",
-    tags: [],
-  });
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Initial state hydrated from URL
+  const initialText = searchParams.get("q") ?? "";
+  const initialTagsParam = searchParams.get("tags") ?? "";
+  const initialTags = initialTagsParam
+    .split(",")
+    .map((t) => t.trim().toLowerCase())
+    .filter((t) => t.length > 0);
+
+  const [filters, setFilters] = useState<SongFiltersValue>(() => ({
+    text: initialText,
+    tags: initialTags,
+  }));
   const [open, setOpen] = useState(false);
 
   const filtered = useMemo(() => filterSongs(songs, filters), [songs, filters]);
+
+  // Persist filters to URL (replace to avoid history spam)
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (filters.text.length > 0) {
+      params.set("q", filters.text);
+    }
+    if (filters.tags.length > 0) {
+      params.set("tags", filters.tags.join(","));
+    }
+    const qs = params.toString();
+    router.replace(qs.length === 0 ? "?" : `?${qs}`);
+  }, [filters.text, filters.tags, router]);
 
   return (
     <div className="flex flex-col gap-6">
