@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import InnerImageZoom from 'react-inner-image-zoom';
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { HiOutlineArrowLeft, HiOutlineArrowRight } from "react-icons/hi2";
+import InnerImageZoom from "react-inner-image-zoom";
 import BackHomeButton from "@/components/back-home-button";
 import PillButton from "@/components/pill-button";
 import type { Song } from "@/data/songs";
@@ -17,26 +17,74 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
   const verses = useMemo(() => song.verses, [song.verses]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isSpotlightEnabled, setIsSpotlightEnabled] = useState(false);
+  const [spotPos, setSpotPos] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  });
+  const requestRef = useRef<number | null>(null);
+  const pendingPos = useRef<{ x: number; y: number } | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
+  // Track pointer / touch position for spotlight while enabled.
+  useEffect(() => {
+    if (!isSpotlightEnabled) {
+      return;
+    }
+    const handleMove = (e: PointerEvent | TouchEvent | MouseEvent) => {
+      let clientX: number | null = null;
+      let clientY: number | null = null;
+      if (e instanceof TouchEvent) {
+        const t = e.touches[0];
+        if (t) {
+          clientX = t.clientX;
+          clientY = t.clientY;
+        }
+      } else if (e instanceof PointerEvent || e instanceof MouseEvent) {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+      if (clientX === null || clientY === null) return;
+      pendingPos.current = { x: clientX, y: clientY };
+      if (requestRef.current === null) {
+        requestRef.current = window.requestAnimationFrame(() => {
+          if (pendingPos.current) {
+            setSpotPos(pendingPos.current);
+          }
+          requestRef.current = null;
+        });
+      }
+    };
+    window.addEventListener("pointermove", handleMove, { passive: true });
+    window.addEventListener("touchmove", handleMove, { passive: true });
+    window.addEventListener("mousemove", handleMove, { passive: true });
+    return () => {
+      window.removeEventListener("pointermove", handleMove);
+      window.removeEventListener("touchmove", handleMove);
+      window.removeEventListener("mousemove", handleMove);
+      if (requestRef.current !== null) {
+        cancelAnimationFrame(requestRef.current);
+        requestRef.current = null;
+      }
+    };
+  }, [isSpotlightEnabled]);
+
+  // Scroll snap index tracking (restored original effect)
   useEffect(() => {
     const container = containerRef.current;
     if (container === null) {
       return;
     }
-
     const eventListener = () => {
       const current = containerRef.current;
-      if (current === null) {
-        return;
-      }
+      if (current === null) return;
       const index = Math.round(current.scrollLeft / current.clientWidth);
       setActiveIndex(index);
     };
-
     container.addEventListener("scrollend", eventListener);
     return () => container.removeEventListener("scrollend", eventListener);
   }, []);
+
+  const SPOT_RADIUS = 140; // px
 
   const clampIndex = useCallback(
     (index: number) => {
@@ -59,7 +107,7 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
       const target = clampIndex(index);
       container
         .getElementsByTagName("article")
-      [target]?.scrollIntoView({ behavior: "smooth" });
+        [target]?.scrollIntoView({ behavior: "smooth" });
     },
     [clampIndex],
   );
@@ -142,7 +190,6 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
                   />
                 </div>
                 <div className="relative flex h-full flex-col justify-center">
-
                   <figure className="flex flex-1 items-start justify-center">
                     <InnerImageZoom
                       width={1600}
@@ -151,8 +198,8 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
                       afterZoomIn={() => setIsSpotlightEnabled(true)}
                       className="w-full object-contain"
                       src={verse.illustration.src}
-                      zoomSrc={verse.illustration.src} />
-
+                      zoomSrc={verse.illustration.src}
+                    />
                   </figure>
                   <div className="z-0 pt-20 pb-24 backdrop-blur-fade-top-to-bottom absolute bottom-0 w-full">
                     <div className="flex">
@@ -169,6 +216,16 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
           ))}
         </div>
 
+        {isSpotlightEnabled && (
+          <div
+            aria-hidden
+            className="pointer-events-none fixed inset-0 z-40 transition-opacity"
+            style={{
+              background: `radial-gradient(circle ${SPOT_RADIUS}px at ${spotPos.x}px ${spotPos.y}px, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.45) 65%, rgba(0,0,0,0.65) 100%)`,
+            }}
+          />
+        )}
+
         <div
           aria-hidden
           className="pointer-events-none absolute right-4 flex items-center gap-3 text-white"
@@ -180,10 +237,11 @@ const SongImmersiveViewer = ({ song }: SongImmersiveViewerProps) => {
           {verses.map((verse, index) => (
             <span
               key={verse.id}
-              className={`h-2.5 w-2.5 rounded-full border border-white/40 transition ${index === activeIndex
-                ? "bg-amber-300 shadow-[0_0_0_8px_rgba(252,211,77,0.35)]"
-                : "bg-transparent"
-                }`}
+              className={`h-2.5 w-2.5 rounded-full border border-white/40 transition ${
+                index === activeIndex
+                  ? "bg-amber-300 shadow-[0_0_0_8px_rgba(252,211,77,0.35)]"
+                  : "bg-transparent"
+              }`}
             />
           ))}
         </div>
