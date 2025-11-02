@@ -1,0 +1,23 @@
+{
+  "typescript.tsserver.experimental.enableProjectDiagnostics": true,
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.biome": "explicit",
+    "source.organizeImports.biome": "explicit"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  }
+}

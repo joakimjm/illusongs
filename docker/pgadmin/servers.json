@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Illusongs",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "illusongs",
+      "Username": "illusongs",
+      "SSLMode": "prefer",
+      "ConnectNow": true
+    }
+  }
+}
