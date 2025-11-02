@@ -22,9 +22,7 @@ export const normalizeSongSlugParam = (slug: string | undefined): string => {
 };
 
 type SongRouteContext = {
-  params: {
-    slug: string;
-  };
+  params: Promise<{ slug: string }>;
 };
 
 export const GET = async (
@@ -32,7 +30,8 @@ export const GET = async (
   context: SongRouteContext,
 ): Promise<Response> => {
   try {
-    const normalizedSlug = normalizeSongSlugParam(context.params.slug);
+    const params = await Promise.resolve(context.params);
+    const normalizedSlug = normalizeSongSlugParam(params.slug);
     const song = await findSongBySlug(normalizedSlug);
 
     if (!song || !song.isPublished) {

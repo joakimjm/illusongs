@@ -21,3 +21,18 @@ export type SongDetailDto = SongSummaryDto & {
   isPublished: boolean;
   verses: SongVerseDto[];
 };
+
+export type CreateSongVerseInput = {
+  sequenceNumber: number;
+  lyricText: string;
+  illustrationUrl: string | null;
+};
+
+export type CreateSongInput = {
+  slug: string;
+  title: string;
+  languageCode: string;
+  isPublished: boolean;
+  tags: string[];
+  verses: CreateSongVerseInput[];
+};
