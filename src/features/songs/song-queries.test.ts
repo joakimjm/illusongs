@@ -1,10 +1,10 @@
 import { expect, test } from "vitest";
-import { registerDatabaseTestSuite } from "@/features/testing/database-test-harness";
-import { withTestPool } from "@/features/testing/postgres-test-utils";
 import {
   fetchPublishedSongs,
   findSongBySlug,
 } from "@/features/songs/song-queries";
+import { registerDatabaseTestSuite } from "@/features/testing/database-test-harness";
+import { withTestPool } from "@/features/testing/postgres-test-utils";
 
 const SONG_TABLES: readonly string[] = [
   "song_tags",

@@ -1,8 +1,5 @@
 import { expect, test } from "vitest";
-import {
-  InvalidSongSlugError,
-  normalizeSongSlugParam,
-} from "./route";
+import { InvalidSongSlugError, normalizeSongSlugParam } from "./route";
 
 test("normalizeSongSlugParam lowercases and trims slug", () => {
   const slug = normalizeSongSlugParam("  Jeg-Har-Fanget  ");

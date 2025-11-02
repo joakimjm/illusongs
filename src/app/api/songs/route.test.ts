@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  InvalidSongRequestError,
-  parseCreateSongPayload,
-} from "./route";
+import { InvalidSongRequestError, parseCreateSongPayload } from "./route";
 
 const createPayload = () => ({
   id: "jeg-har-fanget-mig-en-myg",

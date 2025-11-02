@@ -11,10 +11,10 @@ type LogLevel = "info" | "warn" | "error";
 
 type LogPayload = {
   action:
-  | "attempt"
-  | "validation_failed"
-  | "sign_in_failed"
-  | "sign_in_succeeded";
+    | "attempt"
+    | "validation_failed"
+    | "sign_in_failed"
+    | "sign_in_succeeded";
   detail?: string;
   supabaseStatus?: number | null;
   supabaseErrorName?: string | null;

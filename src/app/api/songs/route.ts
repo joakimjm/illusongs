@@ -92,9 +92,7 @@ const mapVersePayload = (
   };
 };
 
-export const parseCreateSongPayload = (
-  payload: unknown,
-): CreateSongInput => {
+export const parseCreateSongPayload = (payload: unknown): CreateSongInput => {
   if (!isRecord(payload)) {
     throw new InvalidSongRequestError("Payload must be a JSON object.");
   }

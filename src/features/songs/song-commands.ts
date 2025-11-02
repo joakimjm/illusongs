@@ -2,13 +2,20 @@ import type { PoolClient } from "pg";
 import { getPostgresConnection } from "@/features/postgres/postgres-connection-pool";
 import { mapSongStoToDetailDto } from "@/features/songs/song-mapping";
 import type {
+  SongSto,
+  SongTagSto,
+  SongVerseSto,
+} from "@/features/songs/song-stos";
+import type {
   CreateSongInput,
   CreateSongVerseInput,
   SongDetailDto,
 } from "@/features/songs/song-types";
-import type { SongSto, SongTagSto, SongVerseSto } from "@/features/songs/song-stos";
 
-const insertTag = async (client: PoolClient, tagName: string): Promise<void> => {
+const insertTag = async (
+  client: PoolClient,
+  tagName: string,
+): Promise<void> => {
   await client.query(
     `
       INSERT INTO tags (name, display_name)
@@ -34,8 +41,9 @@ const insertSongTag = async (
     [songId, tagName],
   );
 
-  if (result.rowCount > 0) {
-    return result.rows[0];
+  const inserted = result.rows[0];
+  if (inserted) {
+    return inserted;
   }
 
   const fallback = await client.query<SongTagSto>(
@@ -80,12 +88,7 @@ const insertSongVerse = async (
         created_at,
         updated_at
     `,
-    [
-      songId,
-      verse.sequenceNumber,
-      verse.lyricText,
-      verse.illustrationUrl,
-    ],
+    [songId, verse.sequenceNumber, verse.lyricText, verse.illustrationUrl],
   );
 
   const row = result.rows[0];

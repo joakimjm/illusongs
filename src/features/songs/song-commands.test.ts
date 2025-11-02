@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
+import { createSong } from "@/features/songs/song-commands";
 import { registerDatabaseTestSuite } from "@/features/testing/database-test-harness";
 import { withTestPool } from "@/features/testing/postgres-test-utils";
-import { createSong } from "@/features/songs/song-commands";
 
 const SONG_TABLES: readonly string[] = [
   "song_tags",
