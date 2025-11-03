@@ -8,9 +8,9 @@ type BodyProps = {
 };
 
 const VARIANT_CLASSES = {
-  default: "text-[color:var(--text-secondary)]",
-  muted: "text-[color:var(--text-muted)]",
-  highlight: "text-[color:var(--accent-text)]",
+  default: "text-stone-700 dark:text-stone-300",
+  muted: "text-stone-500 dark:text-stone-400",
+  highlight: "text-amber-600 dark:text-amber-300",
 } as const;
 
 type BodyVariant = keyof typeof VARIANT_CLASSES;

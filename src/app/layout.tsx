@@ -40,7 +40,7 @@ const RootLayout = ({ children }: RootLayoutProps) => (
     className={`${bodyFont.variable} ${headingFont.variable}`}
     suppressHydrationWarning
   >
-    <body className="font-body text-stone-900 antialiased selection:bg-amber-200 selection:text-amber-900">
+    <body className="min-h-screen bg-amber-50 font-body text-stone-900 antialiased selection:bg-amber-200 selection:text-amber-900 dark:bg-slate-950 dark:text-stone-100">
       <AppProviders>{children}</AppProviders>
     </body>
   </html>

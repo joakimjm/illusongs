@@ -120,7 +120,7 @@ const SongCard = ({ song }: { readonly song: SongSummaryDto }) => {
       <Link
         href={`/songs/${song.slug}`}
         ref={cardRef}
-        className="group relative block overflow-hidden rounded-[1.75rem] border border-[rgba(195,170,130,0.38)] bg-[rgba(255,248,238,0.85)] shadow-[0_20px_50px_-32px_rgba(110,80,40,0.45)] transition hover:-translate-y-[6px] hover:shadow-[0_28px_60px_-28px_rgba(110,80,40,0.55)] focus:outline-none focus-visible:ring focus-visible:ring-amber-400 dark:border-[color:var(--surface-border)] dark:bg-[color:var(--surface-card)] dark:shadow-[0_18px_44px_-30px_rgba(40,28,14,0.45)] dark:hover:shadow-[0_28px_60px_-28px_rgba(40,28,14,0.55)]"
+        className="group relative block overflow-hidden rounded-[1.75rem] border border-amber-200/60 bg-amber-50/90 shadow-[0_20px_50px_-32px_rgba(110,80,40,0.45)] transition hover:-translate-y-[6px] hover:shadow-[0_28px_60px_-28px_rgba(110,80,40,0.55)] focus:outline-none focus-visible:ring focus-visible:ring-amber-400 dark:border-slate-600/50 dark:bg-slate-900/90 dark:shadow-[0_18px_44px_-30px_rgba(40,28,14,0.45)] dark:hover:shadow-[0_28px_60px_-28px_rgba(40,28,14,0.55)]"
         aria-label={`${song.title} – åbner sangen`}
       >
         <div
@@ -136,15 +136,15 @@ const SongCard = ({ song }: { readonly song: SongSummaryDto }) => {
           }}
         >
           {song.coverImageUrl ? null : (
-            <div className="absolute inset-0 bg-gradient-to-br from-[rgba(231,201,160,0.6)] via-[rgba(245,224,193,0.8)] to-[rgba(255,243,225,0.85)]" />
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-200/60 via-amber-100/80 to-amber-50/90" />
           )}
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(15,12,18,0.78)] via-[rgba(21,18,24,0.45)] to-[rgba(21,18,28,0.25)]" />
-        <div className="relative flex flex-col gap-4 p-6 text-[rgba(255,248,240,0.95)] drop-shadow-[0_10px_24px_rgba(0,0,0,0.45)]">
+        <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-stone-900/45 to-stone-900/25" />
+        <div className="relative flex flex-col gap-4 p-6 text-amber-50 drop-shadow-[0_10px_24px_rgba(0,0,0,0.45)]">
           <h3 className="font-heading text-2xl font-semibold leading-snug text-white drop-shadow-[0_8px_24px_rgba(0,0,0,0.5)]">
             {song.title}
           </h3>
-          <span className="inline-flex items-center gap-2 self-start rounded-full bg-[rgba(20,18,28,0.6)] px-3 py-1.5 text-sm font-semibold tracking-[0.25em] text-[rgba(255,245,230,0.9)] transition group-hover:bg-[rgba(15,12,20,0.75)]">
+          <span className="inline-flex items-center gap-2 self-start rounded-full bg-stone-900/70 px-3 py-1.5 text-sm font-semibold tracking-[0.25em] text-amber-100 transition group-hover:bg-stone-900/80">
             Åbn sangen
             <HiChevronRight className="h-3 w-3" />
           </span>
@@ -168,8 +168,8 @@ const TagBadge = ({
     onClick={() => onToggle(tag.id)}
     className={`rounded-full border px-4 py-2 text-sm transition ${
       active
-        ? "border-amber-500 bg-amber-100/90 text-amber-800"
-        : "border-[color:var(--surface-border)] bg-[color:var(--surface-card)] text-[color:var(--text-secondary)] hover:border-amber-300 hover:text-amber-700"
+        ? "border-amber-500 bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-100"
+        : "border-amber-200/60 bg-amber-50 text-stone-600 hover:border-amber-300 hover:text-amber-700 dark:border-slate-600/60 dark:bg-slate-900/60 dark:text-stone-300 dark:hover:text-amber-200"
     }`}
     aria-pressed={active}
   >
@@ -187,7 +187,7 @@ const ActiveFilterBadge = ({
   <button
     type="button"
     onClick={() => onRemove(tag.id)}
-    className="inline-flex items-center gap-2 rounded-full bg-[color:var(--surface-panel)] px-4 py-2 text-sm text-[color:var(--text-secondary)] shadow-sm transition hover:bg-amber-100/70 hover:text-amber-800"
+    className="inline-flex items-center gap-2 rounded-full bg-amber-50 px-4 py-2 text-sm text-stone-600 shadow-sm transition hover:bg-amber-100 hover:text-amber-800 dark:bg-slate-900/70 dark:text-stone-300 dark:hover:text-amber-100"
   >
     {tag.label}
     <span aria-hidden className="text-base leading-none">
@@ -229,10 +229,10 @@ const FilterPanel = ({
   }, [categories, expandedCategory]);
 
   return (
-    <div className="fixed inset-0 z-40 flex flex-col bg-[rgba(22,16,10,0.6)] backdrop-blur-md">
-      <div className="mx-auto mt-auto w-full max-w-[720px] rounded-t-[1.75rem] bg-[color:var(--surface-panel)] px-5 pb-8 pt-6 shadow-[0_-28px_60px_-32px_rgba(30,20,10,0.45)]">
+    <div className="fixed inset-0 z-40 flex flex-col bg-stone-950/60 backdrop-blur-md">
+      <div className="mx-auto mt-auto w-full max-w-[720px] rounded-t-[1.75rem] bg-amber-50 px-5 pb-8 pt-6 shadow-[0_-28px_60px_-32px_rgba(30,20,10,0.45)] dark:bg-slate-900/80">
         <div className="mb-4 flex items-center justify-between">
-          <span className="font-heading text-sm uppercase tracking-[0.35em] text-[color:var(--text-muted)]">
+          <span className="font-heading text-sm uppercase tracking-[0.35em] text-stone-500 dark:text-stone-300">
             Søg & filtrér
           </span>
           <button
@@ -250,7 +250,7 @@ const FilterPanel = ({
             return (
               <div
                 key={category.id}
-                className="rounded-[1.5rem] border border-[color:var(--surface-border)] bg-[color:var(--surface-card)]"
+                className="rounded-[1.5rem] border border-amber-200/60 bg-amber-50 dark:border-slate-600/60 dark:bg-slate-900/80"
               >
                 <button
                   type="button"
@@ -261,7 +261,7 @@ const FilterPanel = ({
                   }
                   className="flex w-full items-center justify-between px-5 py-4 text-left"
                 >
-                  <span className="font-heading text-lg text-[color:var(--text-primary)]">
+                  <span className="font-heading text-lg text-stone-700 dark:text-stone-100">
                     {category.label}
                   </span>
                   <span className="text-amber-700">
@@ -441,7 +441,7 @@ export const SongbookClient = ({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Søg efter titel, stemning eller figur"
-            className="rounded-3xl border border-[rgba(180,150,110,0.25)] bg-[rgba(255,255,255,0.92)] px-4 py-3 text-base text-[rgba(50,38,26,0.88)] placeholder:text-[rgba(150,120,90,0.55)] shadow-[inset_0_2px_6px_rgba(210,180,150,0.25)] focus:border-amber-400 focus:outline-none focus-visible:ring focus-visible:ring-amber-300/40 dark:border-transparent dark:bg-[rgba(34,40,55,0.9)] dark:text-white dark:placeholder:text-[rgba(200,205,215,0.6)] dark:shadow-none"
+            className="rounded-3xl border border-amber-200/50 bg-white/90 px-4 py-3 text-base text-stone-700 placeholder:text-amber-300 focus:border-amber-400 focus:outline-none focus-visible:ring focus-visible:ring-amber-300/40 dark:border-slate-700/40 dark:bg-slate-900/80 dark:text-stone-100 dark:placeholder:text-slate-400"
           />
         </label>
 
@@ -449,7 +449,7 @@ export const SongbookClient = ({
           <button
             type="button"
             onClick={() => setIsFilterOpen(true)}
-            className="inline-flex items-center gap-2 rounded-full border border-[rgba(180,120,60,0.25)] bg-[rgba(248,214,164,0.37)] px-4 py-2 text-sm font-semibold text-[rgba(110,60,20,0.9)] transition hover:bg-[rgba(248,214,164,0.5)] dark:border-transparent dark:bg-[rgba(255,205,120,0.18)] dark:text-amber-100 dark:hover:bg-[rgba(255,205,120,0.28)]"
+            className="inline-flex items-center gap-2 rounded-full border border-amber-200/60 bg-amber-100/40 px-4 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-100/60 dark:border-amber-200/30 dark:bg-amber-200/10 dark:text-amber-100 dark:hover:bg-amber-200/20"
           >
             Søg & filtrér
             {selectedTags.length > 0 ? (
@@ -458,14 +458,14 @@ export const SongbookClient = ({
               </span>
             ) : null}
           </button>
-          <p className="flex flex-auto justify-end text-sm text-(--text-muted)">
+          <p className="flex flex-auto justify-end text-sm text-stone-500 dark:text-stone-300">
             {resultsLabel}
           </p>
         </div>
 
         {selectedTags.length > 0 ? (
           <div className="mt-4 flex flex-col gap-3">
-            <p className="text-xs uppercase tracking-[0.35em] text-[rgba(110,80,54,0.65)] dark:text-[rgba(240,235,230,0.7)]">
+            <p className="text-xs uppercase tracking-[0.35em] text-stone-500 dark:text-stone-300">
               Aktive filtre
             </p>
             <div className="flex flex-wrap gap-2">
@@ -482,7 +482,7 @@ export const SongbookClient = ({
               <button
                 type="button"
                 onClick={clearFilters}
-                className="rounded-full border border-transparent px-4 py-2 text-sm font-semibold text-[rgba(120,60,20,0.9)] hover:text-[rgba(90,45,15,1)] dark:text-amber-100 dark:hover:text-white"
+                className="rounded-full border border-transparent px-4 py-2 text-sm font-semibold text-amber-700 hover:text-amber-800 dark:text-amber-100 dark:hover:text-white"
               >
                 Ryd alle
               </button>
@@ -492,7 +492,7 @@ export const SongbookClient = ({
       </section>
 
       {filteredSongs.length === 0 ? (
-        <div className="rounded-[2.5rem] border border-dashed border-[color:var(--surface-border)] bg-[color:var(--surface-card)] p-6 text-center text-[color:var(--text-muted)]">
+        <div className="rounded-[2.5rem] border border-dashed border-amber-200/60 bg-amber-50 p-6 text-center text-stone-500 dark:border-slate-600/60 dark:bg-slate-900/80 dark:text-stone-300">
           Ingen sange passer til filtrene endnu. Vælg en anden stemning eller
           ryd søgningen for at udforske hele sangbogen.
         </div>

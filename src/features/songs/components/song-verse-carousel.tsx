@@ -168,7 +168,7 @@ export const SongVerseCarousel = ({
                   />
                 </>
               ) : (
-                <div className="absolute inset-0 bg-gradient-to-br from-[#2f1e16] via-[#3b2921] to-[#1f130c]" />
+                <div className="absolute inset-0 bg-gradient-to-br from-stone-900/80 via-stone-800/80 to-stone-900/90" />
               )}
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[rgba(15,10,5,0.2)] to-[rgba(10,6,3,0.75)]" />
               <div className="relative z-10 flex w-full flex-col gap-6 px-6 pb-28 pt-24 sm:px-12">

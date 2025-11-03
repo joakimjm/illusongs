@@ -10,12 +10,12 @@ type HeadingProps = {
 };
 
 const headingStyles: Record<HeadingLevel, string> = {
-  1: "font-heading text-4xl font-semibold text-[color:var(--text-primary)]",
-  2: "font-heading text-3xl font-semibold text-[color:var(--text-primary)]",
-  3: "font-heading text-2xl font-semibold text-[color:var(--text-primary)]",
-  4: "font-heading text-xl font-semibold text-[color:var(--text-primary)]",
-  5: "font-heading text-lg font-semibold text-[color:var(--text-primary)]",
-  6: "font-heading text-base font-semibold text-[color:var(--text-primary)]",
+  1: "font-heading text-4xl font-semibold text-stone-800 dark:text-stone-100",
+  2: "font-heading text-3xl font-semibold text-stone-800 dark:text-stone-100",
+  3: "font-heading text-2xl font-semibold text-stone-800 dark:text-stone-100",
+  4: "font-heading text-xl font-semibold text-stone-800 dark:text-stone-100",
+  5: "font-heading text-lg font-semibold text-stone-800 dark:text-stone-100",
+  6: "font-heading text-base font-semibold text-stone-800 dark:text-stone-100",
 };
 
 export const Heading = ({
