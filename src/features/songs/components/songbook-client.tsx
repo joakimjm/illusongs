@@ -121,12 +121,12 @@ const SongCard = ({ song }: { readonly song: SongSummaryDto }) => {
       <Link
         href={`/songs/${song.slug}`}
         ref={cardRef}
-        className="group relative block overflow-hidden rounded-[1.75rem] border border-amber-200/60 bg-amber-50/90 shadow-[0_20px_50px_-32px_rgba(110,80,40,0.45)] transition hover:-translate-y-[6px] hover:shadow-[0_28px_60px_-28px_rgba(110,80,40,0.55)] focus:outline-none focus-visible:ring focus-visible:ring-amber-400 dark:border-slate-600/50 dark:bg-slate-900/90 dark:shadow-[0_18px_44px_-30px_rgba(40,28,14,0.45)] dark:hover:shadow-[0_28px_60px_-28px_rgba(40,28,14,0.55)]"
+        className="group relative block overflow-hidden rounded-[1.75rem] border border-amber-200/50 shadow-[0_20px_50px_-32px_rgba(110,80,40,0.45)] transition hover:-translate-y-1.5 hover:shadow-[0_28px_60px_-28px_rgba(110,80,40,0.55)] focus:outline-none focus-visible:ring focus-visible:ring-amber-400 dark:border-slate-600/50 dark:bg-slate-900/90 dark:shadow-[0_18px_44px_-30px_rgba(40,28,14,0.45)] dark:hover:shadow-[0_28px_60px_-28px_rgba(40,28,14,0.55)]"
         aria-label={`${song.title} – åbner sangen`}
       >
         <div
           aria-hidden
-          className="absolute inset-0 opacity-95 transition will-change-transform [transform:scale(1.02)] group-hover:[transform:scale(1.05)]"
+          className="absolute inset-0 opacity-95 transition will-change-transform transform-[scale(1.02)] group-hover:transform-[scale(1.05)]"
           style={{
             backgroundImage: song.coverImageUrl
               ? `url('${song.coverImageUrl}')`
@@ -137,10 +137,10 @@ const SongCard = ({ song }: { readonly song: SongSummaryDto }) => {
           }}
         >
           {song.coverImageUrl ? null : (
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-200/60 via-amber-100/80 to-amber-50/90" />
+            <div className="absolute inset-0 bg-linear-to-br from-amber-200/60 via-amber-100/80 to-amber-50/90" />
           )}
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-stone-900/45 to-stone-900/25" />
+        <div className="absolute inset-0 bg-linear-to-t from-stone-950/80 via-stone-900/45 to-stone-900/25" />
         <div className="relative flex flex-col gap-4 p-6 text-amber-50 drop-shadow-[0_10px_24px_rgba(0,0,0,0.45)]">
           <Heading
             level={3}
@@ -254,7 +254,7 @@ const FilterPanel = ({
             return (
               <div
                 key={category.id}
-                className="rounded-[1.5rem] border border-amber-200/60 bg-amber-50 dark:border-slate-600/60 dark:bg-slate-900/80"
+                className="rounded-3xl border border-amber-200/60 bg-amber-50 dark:border-slate-600/60 dark:bg-slate-900/80"
               >
                 <button
                   type="button"
@@ -448,7 +448,7 @@ export const SongbookClient = ({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Søg efter titel, stemning eller figur"
-            className="rounded-3xl border border-amber-200/50 bg-white/90 px-4 py-3 text-base text-stone-700 placeholder:text-amber-300 focus:border-amber-400 focus:outline-none focus-visible:ring focus-visible:ring-amber-300/40 dark:border-slate-700/40 dark:bg-slate-900/80 dark:text-stone-100 dark:placeholder:text-slate-400"
+            className="rounded-3xl border border-amber-200/50 bg-white/5 px-4 py-3 text-base text-stone-100 placeholder:text-amber-300 focus:border-amber-400 focus:outline-none focus-visible:ring focus-visible:ring-amber-300/40 dark:border-slate-700/40 dark:bg-slate-900/80 dark:text-stone-100 dark:placeholder:text-slate-400"
           />
         </label>
 
@@ -456,16 +456,16 @@ export const SongbookClient = ({
           <button
             type="button"
             onClick={() => setIsFilterOpen(true)}
-            className="inline-flex items-center gap-2 rounded-full border border-amber-200/60 bg-amber-100/40 px-4 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-100/60 dark:border-amber-200/30 dark:bg-amber-200/10 dark:text-amber-100 dark:hover:bg-amber-200/20"
+            className="inline-flex items-center gap-2 rounded-full border border-amber-200/60 bg-stone-800/30 px-4 py-2 text-sm font-semibold text-amber-200 transition hover:bg-amber-100/60 dark:border-amber-200/30 dark:bg-amber-200/10 dark:text-amber-100 dark:hover:bg-amber-200/20"
           >
             Søg & filtrér
             {selectedTags.length > 0 ? (
-              <span className="flex h-5 min-w-[1.5rem] items-center justify-center rounded-full bg-amber-500 px-1 text-xs font-semibold text-white dark:bg-amber-600">
+              <span className="flex h-5 min-w-6 items-center justify-center rounded-full bg-amber-500 px-1 text-xs font-semibold text-white dark:bg-amber-600">
                 {selectedTags.length}
               </span>
             ) : null}
           </button>
-          <p className="flex flex-auto justify-end text-sm text-stone-500 dark:text-stone-300">
+          <p className="flex flex-auto justify-end text-sm text-stone-100 dark:text-stone-300">
             {resultsLabel}
           </p>
         </div>

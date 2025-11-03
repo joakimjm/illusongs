@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { JSX } from "react";
-import { Body, Heading, HeadingText } from "@/components/typography";
+import { Body, HeadingText } from "@/components/typography";
 import { APP_NAME } from "@/config/app";
 import { HomeScrollBackground } from "@/features/home/components/home-scroll-background";
 import { SongbookClient } from "@/features/songs/components/songbook-client";
@@ -76,12 +76,12 @@ const HomePage = async ({
           <HeadingText className="text-xs uppercase tracking-[0.45em] text-amber-200 dark:text-amber-200/70">
             {APP_NAME}
           </HeadingText>
-          <Heading
-            level={1}
-            className="text-4xl text-amber-300/70 mix-blend-multiply dark:text-white sm:text-5xl"
+          <HeadingText
+            as="h1"
+            className="text-4xl font-medium text-amber-100/70 mix-blend-multiply dark:text-white sm:text-5xl"
           >
             Saml jer, syng og drøm videre.
-          </Heading>
+          </HeadingText>
           <Body className="text-amber-100">
             Vælg sang efter stemning, figurer eller fritekst – hver side åbner
             en illustreret verden, du kan synge dig ind i med dem, du holder af.
