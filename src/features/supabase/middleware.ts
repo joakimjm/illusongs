@@ -36,28 +36,7 @@ export const updateSession = async (request: NextRequest) => {
 
   // IMPORTANT: DO NOT REMOVE auth.getUser()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const pathname = request.nextUrl.pathname;
-  if (!user) {
-    // This exists to allow access token-based requests to apis only
-    if (pathname.startsWith("/api")) {
-      return supabaseResponse;
-    }
-
-    if (
-      pathname !== "/" &&
-      !pathname.startsWith("/login") &&
-      !pathname.startsWith("/auth")
-    ) {
-      // no user, potentially respond by redirecting the user to the login page
-      const url = request.nextUrl.clone();
-      url.pathname = "/login";
-      return NextResponse.redirect(url);
-    }
-  }
+  await supabase.auth.getUser();
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
   // If you're creating a new response object with NextResponse.next() make sure to:
