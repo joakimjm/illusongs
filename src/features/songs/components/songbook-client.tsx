@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { HiChevronRight } from "react-icons/hi";
+import { Heading, HeadingText } from "@/components/typography";
 import type { TagCategoryDto } from "@/features/songs/song-tag-categories";
 import type { SongSummaryDto } from "@/features/songs/song-types";
 import { useScrollFollow } from "@/utils/use-scroll-follow";
@@ -141,9 +142,12 @@ const SongCard = ({ song }: { readonly song: SongSummaryDto }) => {
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-stone-900/45 to-stone-900/25" />
         <div className="relative flex flex-col gap-4 p-6 text-amber-50 drop-shadow-[0_10px_24px_rgba(0,0,0,0.45)]">
-          <h3 className="font-heading text-2xl font-semibold leading-snug text-white drop-shadow-[0_8px_24px_rgba(0,0,0,0.5)]">
+          <Heading
+            level={3}
+            className="text-2xl font-semibold leading-snug text-white drop-shadow-[0_8px_24px_rgba(0,0,0,0.5)]"
+          >
             {song.title}
-          </h3>
+          </Heading>
           <span className="inline-flex items-center gap-2 self-start rounded-full bg-stone-900/70 px-3 py-1.5 text-sm font-semibold tracking-[0.25em] text-amber-100 transition group-hover:bg-stone-900/80">
             Åbn sangen
             <HiChevronRight className="h-3 w-3" />
@@ -232,9 +236,9 @@ const FilterPanel = ({
     <div className="fixed inset-0 z-40 flex flex-col bg-stone-950/60 backdrop-blur-md">
       <div className="mx-auto mt-auto w-full max-w-[720px] rounded-t-[1.75rem] bg-amber-50 px-5 pb-8 pt-6 shadow-[0_-28px_60px_-32px_rgba(30,20,10,0.45)] dark:bg-slate-900/80">
         <div className="mb-4 flex items-center justify-between">
-          <span className="font-heading text-sm uppercase tracking-[0.35em] text-stone-500 dark:text-stone-300">
+          <HeadingText className="text-sm uppercase tracking-[0.35em] text-stone-500 dark:text-stone-300">
             Søg & filtrér
-          </span>
+          </HeadingText>
           <button
             type="button"
             onClick={onClose}
@@ -261,9 +265,12 @@ const FilterPanel = ({
                   }
                   className="flex w-full items-center justify-between px-5 py-4 text-left"
                 >
-                  <span className="font-heading text-lg text-stone-700 dark:text-stone-100">
+                  <HeadingText
+                    as="span"
+                    className="text-lg text-stone-700 dark:text-stone-100"
+                  >
                     {category.label}
-                  </span>
+                  </HeadingText>
                   <span className="text-amber-700">
                     {isExpanded ? "−" : "+"}
                   </span>

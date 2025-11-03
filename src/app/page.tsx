@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { JSX } from "react";
-import { Body, Heading } from "@/components/typography";
+import { Body, Heading, HeadingText } from "@/components/typography";
 import { APP_NAME } from "@/config/app";
 import { HomeScrollBackground } from "@/features/home/components/home-scroll-background";
 import { SongbookClient } from "@/features/songs/components/songbook-client";
@@ -73,9 +73,9 @@ const HomePage = async ({
       <HomeScrollBackground />
       <div className="relative mx-auto flex min-h-screen w-full max-w-[720px] flex-col gap-4 px-4 pb-28 pt-16 sm:px-6">
         <header className="rounded-3xl p-4 border border-white/15 backdrop-blur-xl">
-          <span className="font-heading text-xs uppercase tracking-[0.45em] text-amber-200 dark:text-amber-200/70">
+          <HeadingText className="text-xs uppercase tracking-[0.45em] text-amber-200 dark:text-amber-200/70">
             {APP_NAME}
-          </span>
+          </HeadingText>
           <Heading
             level={1}
             className="text-4xl text-amber-300/70 mix-blend-multiply dark:text-white sm:text-5xl"
