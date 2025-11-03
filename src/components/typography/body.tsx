@@ -8,10 +8,10 @@ type BodyProps = {
 };
 
 const VARIANT_CLASSES = {
-  default: "text-slate-600 dark:text-slate-300",
-  muted: "text-slate-500 dark:text-slate-400",
-  highlight: "text-blue-600/80 dark:text-blue-200",
-};
+  default: "text-[color:var(--text-secondary)]",
+  muted: "text-[color:var(--text-muted)]",
+  highlight: "text-[color:var(--accent-text)]",
+} as const;
 
 type BodyVariant = keyof typeof VARIANT_CLASSES;
 
@@ -19,7 +19,7 @@ const SIZE_CLASSES = {
   xs: "text-xs",
   sm: "text-sm",
   base: "text-base leading-6",
-};
+} as const;
 
 type BodySize = keyof typeof SIZE_CLASSES;
 

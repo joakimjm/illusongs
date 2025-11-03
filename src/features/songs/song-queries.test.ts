@@ -19,11 +19,23 @@ const seedSongData = async () => {
   await withTestPool(async (pool) => {
     await pool.query(
       `
-        INSERT INTO tags (name, display_name)
+        INSERT INTO tag_categories (slug, label)
         VALUES
-          ('humoristisk', 'Humoristisk'),
-          ('dyr', 'Dyr'),
-          ('rim', 'Rim');
+          ('stemninger', 'Stemninger'),
+          ('figurer', 'Figurer'),
+          ('temaer', 'Temaer')
+        ON CONFLICT (slug) DO NOTHING;
+      `,
+    );
+
+    await pool.query(
+      `
+        INSERT INTO tags (name, display_name, category_slug)
+        VALUES
+          ('humoristisk', 'Humoristisk', 'stemninger'),
+          ('dyr', 'Dyr', 'figurer'),
+          ('rim', 'Rim', 'temaer')
+        ON CONFLICT (name) DO NOTHING;
       `,
     );
 
@@ -68,6 +80,7 @@ test("fetchPublishedSongs returns only published songs with sorted tags", async 
   expect(song?.slug).toBe("jeg-har-fanget-mig-en-myg");
   expect(song?.title).toBe("Jeg har fanget mig en myg");
   expect(song?.tags).toEqual(["dyr", "humoristisk"]);
+  expect(song?.coverImageUrl).toBe("/jeg-har-fanget-mig-en-myg-01.png");
 });
 
 test("findSongBySlug returns full song with verses ordered by sequence", async () => {
@@ -82,6 +95,7 @@ test("findSongBySlug returns full song with verses ordered by sequence", async (
 
   expect(song.slug).toBe("jeg-har-fanget-mig-en-myg");
   expect(song.isPublished).toBe(true);
+  expect(song.coverImageUrl).toBe("/jeg-har-fanget-mig-en-myg-01.png");
   expect(song.tags).toEqual(["dyr", "humoristisk"]);
   expect(song.verses).toHaveLength(2);
   expect(song.verses[0]?.sequenceNumber).toBe(1);

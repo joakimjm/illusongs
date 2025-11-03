@@ -1,67 +1,106 @@
-import Link from "next/link";
-import { HeroHeader } from "@/components/hero-header";
-import { PageShell } from "@/components/page-shell";
-import { Panel } from "@/components/panel";
-import { Body, Strong } from "@/components/typography";
-import { Anchor } from "@/components/typography/anchor";
-import { APP_DESCRIPTION, APP_NAME } from "@/config/app";
-import { isAdminUser } from "@/features/auth/policies";
-import { getUser } from "@/features/supabase/server";
+import type { Metadata } from "next";
+import type { JSX } from "react";
+import { Body, Heading } from "@/components/typography";
+import { APP_NAME } from "@/config/app";
+import { HomeScrollBackground } from "@/features/home/components/home-scroll-background";
+import { SongbookClient } from "@/features/songs/components/songbook-client";
+import {
+  fetchPublishedSongs,
+  fetchTagMetadata,
+} from "@/features/songs/song-queries";
+import { groupTagsIntoCategories } from "@/features/songs/song-tag-categories";
 
-const HomePage = async () => {
-  const user = await getUser();
-  const isAdmin = user ? isAdminUser(user) : false;
+type HomePageProps = {
+  readonly searchParams?: Record<string, string | string[] | undefined>;
+};
+
+export const metadata: Metadata = {
+  title: `${APP_NAME} | Illustreret sangbog`,
+};
+
+const parseTagsParam = (value: string | string[] | undefined): string[] => {
+  if (!value) {
+    return [];
+  }
+
+  const rawValue = Array.isArray(value) ? value.join(",") : value;
+  return rawValue
+    .split(",")
+    .map((tag) => tag.trim().toLowerCase())
+    .filter((tag) => tag.length > 0);
+};
+
+const HomePage = async ({
+  searchParams,
+}: HomePageProps): Promise<JSX.Element> => {
+  const resolvedParams = await Promise.resolve(searchParams ?? {});
+
+  const songs = await fetchPublishedSongs();
+
+  const tagNames = Array.from(
+    new Set(songs.flatMap((song) => song.tags.map((tag) => tag))),
+  );
+  const tagMetadata = await fetchTagMetadata(tagNames);
+  const categories = groupTagsIntoCategories(tagMetadata);
+  const filterCategories =
+    categories.length > 0
+      ? categories
+      : [
+          {
+            id: "alle",
+            label: "Alle tags",
+            tags: tagNames
+              .sort((a, b) => a.localeCompare(b, "da"))
+              .map((tag) => ({
+                id: tag,
+                label: tag
+                  .split("-")
+                  .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+                  .join(" "),
+              })),
+          },
+        ];
+
+  const queryParam =
+    typeof resolvedParams.q === "string"
+      ? decodeURIComponent(resolvedParams.q)
+      : "";
+
+  const tagParam = parseTagsParam(resolvedParams.tags);
 
   return (
-    <PageShell>
-      <HeroHeader
-        eyebrow={APP_NAME}
-        title="Kickstart your secure internal tools."
-        description={APP_DESCRIPTION}
-      />
+    <main className="relative min-h-screen overflow-x-hidden">
+      <HomeScrollBackground />
+      <div className="relative mx-auto flex min-h-screen w-full max-w-[720px] flex-col gap-4 px-4 pb-28 pt-16 sm:px-6">
+        <header className="rounded-3xl p-4 border border-white/15 backdrop-blur-xl">
+          <span className="font-heading text-xs uppercase tracking-[0.45em] text-amber-200 dark:text-amber-200/70">
+            {APP_NAME}
+          </span>
+          <Heading
+            level={1}
+            className="text-4xl text-amber-300/70 mix-blend-multiply dark:text-white sm:text-5xl"
+          >
+            Saml jer, syng og drøm videre.
+          </Heading>
+          <Body className="text-amber-100">
+            Vælg sang efter stemning, figurer eller fritekst – hver side åbner
+            en illustreret verden, du kan synge dig ind i med dem, du holder af.
+          </Body>
+        </header>
 
-      <Panel as="ul" className="grid gap-3 list-disc pl-10">
-        <li>
-          <Body>
-            Supabase Auth (Azure) session handling already wired into Next.js
-            Server Components.
-          </Body>
-        </li>
-        <li>
-          <Body>
-            PostgreSQL migrations, Docker Compose, and a Vitest-powered database
-            harness for confident iteration.
-          </Body>
-        </li>
-        <li>
-          <Body>
-            Access token issuance with API routes, UI, and role-aware
-            authorization policies.
-          </Body>
-        </li>
-      </Panel>
+        <SongbookClient
+          songs={songs}
+          categories={filterCategories}
+          initialQuery={queryParam}
+          initialTags={tagParam}
+        />
 
-      {user ? (
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-6">
-          <Strong>You are signed in.</Strong>
-          <Anchor as={Link} href="/dashboard">
-            Open workspace
-            <span aria-hidden>→</span>
-          </Anchor>
-          {isAdmin ? (
-            <Anchor as={Link} href="/admin/tokens">
-              Manage access tokens
-              <span aria-hidden>→</span>
-            </Anchor>
-          ) : null}
+        <div className="pointer-events-none mx-auto flex flex-col items-center gap-2 text-sm text-[rgba(240,235,230,0.7)]">
+          <span className="uppercase tracking-[0.4em]">Scroll</span>
+          <span className="inline-block h-7 w-px bg-[rgba(240,235,230,0.4)]" />
         </div>
-      ) : (
-        <Anchor as={Link} href="/login">
-          Sign in to get started
-          <span aria-hidden>→</span>
-        </Anchor>
-      )}
-    </PageShell>
+      </div>
+    </main>
   );
 };
 

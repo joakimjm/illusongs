@@ -1,1 +1,56 @@
 @import "tailwindcss";
+
+@layer base {
+  :root {
+    color-scheme: light;
+    --songbook-background: radial-gradient(
+      circle at 15% 20%,
+      #faf1e7 0%,
+      #f5e7d8 45%,
+      #f2d8c1 100%
+    );
+    --text-primary: #2f2215;
+    --text-secondary: #4a3a2b;
+    --text-muted: #7c6753;
+    --accent-text: #b0702c;
+    --surface-card: rgba(255, 250, 244, 0.92);
+    --surface-panel: rgba(253, 243, 231, 0.92);
+    --surface-border: rgba(143, 110, 71, 0.24);
+    --scroll-follow-offset: 0px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --songbook-background: radial-gradient(
+        circle at 18% 18%,
+        #1e2331 0%,
+        #141a27 55%,
+        #0e141f 100%
+      );
+      --text-primary: #f4ede3;
+      --text-secondary: #dcd0c3;
+      --text-muted: #b4a59a;
+      --accent-text: #f1bf74;
+      --surface-card: rgba(25, 30, 44, 0.9);
+      --surface-panel: rgba(20, 24, 35, 0.92);
+      --surface-border: rgba(107, 133, 171, 0.25);
+    }
+  }
+
+  body {
+    background: var(--songbook-background);
+    color: var(--text-primary);
+    min-height: 100vh;
+  }
+
+  .font-body {
+    font-family:
+      var(--font-body), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+      sans-serif;
+  }
+
+  .font-heading {
+    font-family: var(--font-heading), "Times New Roman", serif;
+  }
+}

@@ -10,9 +10,11 @@ import type {
 import type {
   SongSto,
   SongSummarySto,
+  SongTagMetadataSto,
   SongTagSto,
   SongVerseSto,
 } from "./song-stos";
+import type { TagMetadata } from "./song-tag-categories";
 
 export const fetchPublishedSongs = async (): Promise<SongSummaryDto[]> => {
   const connection = getPostgresConnection();
@@ -28,6 +30,7 @@ export const fetchPublishedSongs = async (): Promise<SongSummaryDto[]> => {
           s.is_published,
           s.created_at,
           s.updated_at,
+          preview.illustration_url AS cover_image_url,
           COALESCE(
             ARRAY_AGG(st.tag_name::text ORDER BY st.tag_name::text)
               FILTER (WHERE st.tag_name IS NOT NULL),
@@ -36,6 +39,14 @@ export const fetchPublishedSongs = async (): Promise<SongSummaryDto[]> => {
         FROM songs s
         LEFT JOIN song_tags st
           ON st.song_id = s.id
+        LEFT JOIN LATERAL (
+          SELECT
+            illustration_url
+          FROM song_verses sv
+          WHERE sv.song_id = s.id AND sv.illustration_url IS NOT NULL
+          ORDER BY sv.sequence_number ASC
+          LIMIT 1
+        ) AS preview ON true
         WHERE s.is_published = true
         GROUP BY
           s.id,
@@ -44,7 +55,8 @@ export const fetchPublishedSongs = async (): Promise<SongSummaryDto[]> => {
           s.language_code,
           s.is_published,
           s.created_at,
-          s.updated_at
+          s.updated_at,
+          preview.illustration_url
         ORDER BY s.created_at DESC, s.id DESC
       `,
     );
@@ -110,5 +122,39 @@ export const findSongBySlug = async (
     );
 
     return mapSongStoToDetailDto(song, tagResult.rows, verseResult.rows);
+  });
+};
+
+export const fetchTagMetadata = async (
+  tagNames: readonly string[],
+): Promise<TagMetadata[]> => {
+  if (tagNames.length === 0) {
+    return [];
+  }
+
+  const connection = getPostgresConnection();
+
+  return await connection.clientUsing(async (client) => {
+    const result = await client.query<SongTagMetadataSto>(
+      `
+        SELECT
+          t.name,
+          t.display_name,
+          t.category_slug,
+          c.label AS category_label
+        FROM tags t
+        LEFT JOIN tag_categories c
+          ON c.slug = t.category_slug
+        WHERE t.name = ANY($1)
+      `,
+      [tagNames],
+    );
+
+    return result.rows.map((row) => ({
+      name: row.name,
+      displayName: row.display_name,
+      categorySlug: row.category_slug,
+      categoryLabel: row.category_label,
+    }));
   });
 };

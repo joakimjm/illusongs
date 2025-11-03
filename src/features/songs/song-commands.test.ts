@@ -43,6 +43,7 @@ test("createSong inserts song, verses, and tags", async () => {
 
   expect(song.slug).toBe("jeg-har-fanget-mig-en-myg");
   expect(song.tags).toEqual(["dyr", "humoristisk"]);
+  expect(song.coverImageUrl).toBe("/song-01.png");
   expect(song.verses).toHaveLength(2);
   expect(song.verses[0]?.sequenceNumber).toBe(1);
   expect(song.verses[1]?.sequenceNumber).toBe(2);
@@ -66,6 +67,23 @@ test("createSong is idempotent on tags table", async () => {
       },
     ],
   });
+
+  const song = await createSong({
+    slug: "gentagelse-2",
+    title: "Gentagelse 2",
+    languageCode: "da",
+    isPublished: false,
+    tags: ["gentagelse", "Gentagelse"],
+    verses: [
+      {
+        sequenceNumber: 1,
+        lyricText: "Tekst",
+        illustrationUrl: null,
+      },
+    ],
+  });
+
+  expect(song.coverImageUrl).toBeNull();
 
   const tags = await withTestPool(async (pool) => {
     const result = await pool.query<{ name: string }>(

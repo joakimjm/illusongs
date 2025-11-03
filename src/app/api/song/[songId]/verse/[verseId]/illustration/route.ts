@@ -18,14 +18,6 @@ import {
 import { isValidUuid } from "@/utils";
 
 export const runtime = "nodejs";
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: "10mb",
-    },
-  },
-} as const;
-
 export class InvalidVerseIllustrationRequestError extends Error {}
 
 const FILE_FIELD_NAME = "file";

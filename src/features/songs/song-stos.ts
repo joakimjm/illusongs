@@ -9,6 +9,7 @@ export type SongSto = {
 };
 
 export type SongSummarySto = SongSto & {
+  cover_image_url: string | null;
   tag_names: readonly string[];
 };
 
@@ -24,4 +25,11 @@ export type SongVerseSto = {
 
 export type SongTagSto = {
   tag_name: string;
+};
+
+export type SongTagMetadataSto = {
+  name: string;
+  display_name: string | null;
+  category_slug: string | null;
+  category_label: string | null;
 };

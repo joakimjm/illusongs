@@ -3,6 +3,7 @@ export type SongSummaryDto = {
   slug: string;
   title: string;
   languageCode: string;
+  coverImageUrl: string | null;
   createdAt: string;
   updatedAt: string;
   tags: string[];

@@ -6,7 +6,7 @@ type StrongProps = {
 };
 
 export const Strong = ({ children, className = "" }: StrongProps) => {
-  const baseStyles = "font-medium text-slate-900 dark:text-white";
+  const baseStyles = "font-semibold text-[color:var(--text-primary)]";
   const combinedClassName = className
     ? `${baseStyles} ${className}`
     : baseStyles;
