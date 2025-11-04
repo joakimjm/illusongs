@@ -1,4 +1,4 @@
-export type TagOption = {
+type TagOption = {
   id: string;
   label: string;
 };

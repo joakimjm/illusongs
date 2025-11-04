@@ -29,7 +29,7 @@ type SaveVerseIllustrationInput = {
   imageData: ArrayBuffer;
 };
 
-export type SaveVerseIllustrationResult = {
+type SaveVerseIllustrationResult = {
   verse: SongVerseDto;
   storagePath: string;
   thumbnailPath: string | null;

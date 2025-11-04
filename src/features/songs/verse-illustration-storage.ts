@@ -18,7 +18,7 @@ const createIllustrationObjectName = (variant: IllustrationVariant): string => {
   return `${prefix}-${timestamp}-${suffix}.webp`;
 };
 
-export const getVerseIllustrationsBucketName = (): string =>
+const getVerseIllustrationsBucketName = (): string =>
   getRequiredConfigValue(
     VERSE_ILLUSTRATION_BUCKET_KEY,
     DEFAULT_VERSE_ILLUSTRATION_BUCKET,
@@ -38,7 +38,7 @@ export const buildVerseIllustrationObjectPath = (
 };
 
 export class VerseIllustrationUploadError extends Error {}
-export class VerseIllustrationDeletionError extends Error {}
+class VerseIllustrationDeletionError extends Error {}
 
 type UploadVerseIllustrationImageInput = {
   songId: string;

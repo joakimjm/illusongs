@@ -49,7 +49,7 @@ type ToastViewportProps = {
 };
 
 const ToastViewport = ({ toasts, onDismiss }: ToastViewportProps) => (
-  <div className="pointer-events-none fixed top-4 right-4 z-[999] flex max-w-sm flex-col gap-3 sm:right-6">
+  <div className="pointer-events-none fixed top-4 right-4 z-999 flex max-w-sm flex-col gap-3 sm:right-6">
     {toasts.map((toast) => {
       const toastClasses = [
         "pointer-events-auto flex flex-col gap-2 rounded-xl border px-4 py-3 shadow-lg shadow-slate-950/10 transition focus-within:ring-2 focus-within:ring-blue-500 dark:shadow-black/40",
@@ -169,5 +169,3 @@ export const useToast = () => {
   }
   return context;
 };
-
-export type { ToastVariant, ToastInput };

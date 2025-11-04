@@ -4,7 +4,7 @@ import type { SongVerseSto } from "@/features/songs/song-stos";
 
 export class SongVerseNotFoundError extends Error {}
 
-export type UpdateVerseIllustrationInput = {
+type UpdateVerseIllustrationInput = {
   songId: string;
   verseId: string;
   illustrationUrl: string | null;

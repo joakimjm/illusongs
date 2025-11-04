@@ -1,4 +1,4 @@
-export type AccessTokenSto = {
+type AccessTokenSto = {
   id: string;
   label: string;
   token_last_four: string;
@@ -11,7 +11,7 @@ export type AccessTokenWithPermissionsSto = AccessTokenSto & {
   permissions: readonly string[];
 };
 
-export type AccessTokenWithHashSto = AccessTokenSto & {
+type AccessTokenWithHashSto = AccessTokenSto & {
   token_hash: Buffer;
 };
 

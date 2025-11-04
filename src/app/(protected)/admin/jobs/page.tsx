@@ -1,6 +1,7 @@
 import type { Route } from "next";
 import { revalidatePath } from "next/cache";
 import { HiArrowTopRightOnSquare } from "react-icons/hi2";
+import { Badge, type BadgeVariant } from "@/components/badge";
 import { Button } from "@/components/button";
 import { HeroHeader } from "@/components/hero-header";
 import { PageShell } from "@/components/page-shell";
@@ -137,13 +138,11 @@ const formatTimestamp = (iso: string): string =>
 const truncate = (value: string, length: number = 100): string =>
   value.length <= length ? value : `${value.slice(0, length)}…`;
 
-const STATUS_STYLES: Record<string, string> = {
-  pending:
-    "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-100",
-  in_progress: "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-100",
-  failed: "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-100",
-  completed:
-    "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-100",
+const STATUS_BADGE_VARIANTS: Record<string, BadgeVariant> = {
+  pending: "warning",
+  in_progress: "info",
+  failed: "error",
+  completed: "success",
 };
 
 const buildConversationUrl = (conversationId: string): string =>
@@ -189,9 +188,8 @@ const AdminJobsPage = async () => {
                 </thead>
                 <tbody className="divide-y divide-slate-200/70 dark:divide-slate-800/60">
                   {jobs.map((job) => {
-                    const badge =
-                      STATUS_STYLES[job.status] ??
-                      "bg-slate-200 text-slate-700 dark:bg-slate-800/60 dark:text-slate-200";
+                    const badgeVariant =
+                      STATUS_BADGE_VARIANTS[job.status] ?? "neutral";
                     const canReset = job.status !== "pending";
                     const conversationId = job.conversationId?.trim() ?? null;
                     const conversationUrl = conversationId
@@ -232,11 +230,12 @@ const AdminJobsPage = async () => {
                           ) : null}
                         </td>
                         <td className="px-4 py-3">
-                          <span
-                            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${badge}`}
+                          <Badge
+                            variant={badgeVariant}
+                            className="px-2.5 py-0.5"
                           >
                             {job.status.replace("_", " ")}
-                          </span>
+                          </Badge>
                         </td>
                         <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
                           {job.attempts}

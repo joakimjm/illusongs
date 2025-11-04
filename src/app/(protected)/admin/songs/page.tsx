@@ -1,6 +1,7 @@
 import type { Route } from "next";
 import { revalidatePath } from "next/cache";
 import Link from "next/link";
+import { Badge } from "@/components/badge";
 import { HeroHeader } from "@/components/hero-header";
 import { PageShell } from "@/components/page-shell";
 import { Panel } from "@/components/panel";
@@ -140,9 +141,7 @@ const SongsAdminPage = async () => {
             </thead>
             <tbody className="divide-y divide-slate-200/70 dark:divide-slate-800/60">
               {songs.map((song) => {
-                const badgeClasses = song.isPublished
-                  ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-100"
-                  : "bg-slate-200 text-slate-700 dark:bg-slate-800/60 dark:text-slate-200";
+                const badgeVariant = song.isPublished ? "success" : "neutral";
 
                 return (
                   <tr
@@ -162,11 +161,9 @@ const SongsAdminPage = async () => {
                       {song.pendingJobs}
                     </td>
                     <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${badgeClasses}`}
-                      >
+                      <Badge variant={badgeVariant} className="px-2.5 py-0.5">
                         {song.isPublished ? "Published" : "Draft"}
-                      </span>
+                      </Badge>
                     </td>
                     <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
                       {formatDate(song.createdAt)}

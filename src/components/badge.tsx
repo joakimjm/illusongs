@@ -2,7 +2,7 @@ import type { ComponentPropsWithoutRef } from "react";
 
 type BadgeVariant = "neutral" | "success" | "warning" | "info" | "error";
 
-export type BadgeProps = {
+type BadgeProps = {
   variant?: BadgeVariant;
   className?: string;
 } & ComponentPropsWithoutRef<"span">;

@@ -1,6 +1,6 @@
 import { getPostgresConnection } from "@/features/postgres/postgres-connection-pool";
 
-export type SongGenerationConversation = {
+type SongGenerationConversation = {
   songId: string;
   provider: string;
   model: string;

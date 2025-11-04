@@ -13,7 +13,7 @@ import type {
 } from "@/features/songs/song-stos";
 import type { SongDetailDto, SongVerseDto } from "@/features/songs/song-types";
 
-export type SongGenerationJobDto = {
+type SongGenerationJobDto = {
   id: string;
   songId: string;
   verseId: string;
@@ -26,13 +26,13 @@ export type SongGenerationJobDto = {
   updatedAt: string;
 };
 
-export type SongGenerationJobClaim = {
+type SongGenerationJobClaim = {
   job: SongGenerationJobDto;
   song: SongDetailDto;
   verse: SongVerseDto;
 };
 
-export type SongGenerationJobListItem = SongGenerationJobDto & {
+type SongGenerationJobListItem = SongGenerationJobDto & {
   verseSequence: number;
   verseLyric: string;
   songTitle: string;
@@ -41,7 +41,7 @@ export type SongGenerationJobListItem = SongGenerationJobDto & {
   conversationId: string | null;
 };
 
-export type ResetSongGenerationJobResult = {
+type ResetSongGenerationJobResult = {
   jobId: string;
   songId: string;
   verseId: string;
