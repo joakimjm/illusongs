@@ -37,6 +37,7 @@ export type SongGenerationJobListItem = SongGenerationJobDto & {
   verseLyric: string;
   songTitle: string;
   songSlug: string;
+  verseIllustrationUrl: string | null;
 };
 
 const JOB_COLUMNS = `
@@ -238,6 +239,7 @@ type SongGenerationJobListRow = {
   song_slug: string;
   verse_sequence_number: number;
   verse_lyric_text: string;
+  verse_illustration_url: string | null;
 };
 
 const mapJobListRow = (
@@ -257,6 +259,7 @@ const mapJobListRow = (
   songSlug: row.song_slug,
   verseSequence: row.verse_sequence_number,
   verseLyric: row.verse_lyric_text,
+  verseIllustrationUrl: row.verse_illustration_url,
 });
 
 export const fetchSongGenerationJobList = async (
@@ -281,7 +284,8 @@ export const fetchSongGenerationJobList = async (
           s.title AS song_title,
           s.slug AS song_slug,
           v.sequence_number AS verse_sequence_number,
-          v.lyric_text AS verse_lyric_text
+          v.lyric_text AS verse_lyric_text,
+          v.illustration_url AS verse_illustration_url
         FROM song_generation_jobs j
         JOIN songs s ON s.id = j.song_id
         JOIN song_verses v ON v.id = j.verse_id

@@ -1,4 +1,6 @@
+import type { Route } from "next";
 import { revalidatePath } from "next/cache";
+import { HiArrowTopRightOnSquare } from "react-icons/hi2";
 import { HeroHeader } from "@/components/hero-header";
 import { PageShell } from "@/components/page-shell";
 import { Panel } from "@/components/panel";
@@ -11,7 +13,7 @@ import {
 import { processNextSongGenerationJob } from "@/features/songs/song-generation-runner";
 import { type DispatchState, ProcessJobForm } from "./process-job-form";
 
-const JOBS_PATH = "/admin/jobs";
+const JOBS_PATH: Route = "/admin/jobs";
 
 const processNextJobAction = async (
   _prevState: {
@@ -99,90 +101,108 @@ const AdminJobsPage = async () => {
           <ProcessJobForm action={processNextJobAction} />
         </div>
 
-        <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200/80 bg-white/80 shadow-sm dark:border-slate-700/60 dark:bg-slate-900/40">
-          <table className="min-w-full divide-y divide-slate-200/70 text-sm dark:divide-slate-800/60">
-            <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-900 dark:text-slate-300">
-              <tr>
-                <th className="px-4 py-3">Song</th>
-                <th className="px-4 py-3">Verse</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Attempts</th>
-                <th className="px-4 py-3">Updated</th>
-                <th className="px-4 py-3">Last error</th>
-                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200/70 dark:divide-slate-800/60">
-              {jobs.map((job) => {
-                const badge =
-                  STATUS_STYLES[job.status] ??
-                  "bg-slate-200 text-slate-700 dark:bg-slate-800/60 dark:text-slate-200";
-                const canReset = job.status !== "pending";
-
-                return (
-                  <tr
-                    key={job.id}
-                    className="transition hover:bg-slate-50 dark:hover:bg-slate-900/40"
-                  >
-                    <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">
-                      <div>{job.songTitle}</div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400">
-                        /{job.songSlug}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-slate-700 dark:text-slate-300">
-                      <div className="font-medium">
-                        Verse {job.verseSequence}
-                      </div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400">
-                        {truncate(job.verseLyric, 120)}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${badge}`}
-                      >
-                        {job.status.replace("_", " ")}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
-                      {job.attempts}
-                    </td>
-                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
-                      {formatTimestamp(job.updatedAt ?? job.createdAt)}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-rose-600 dark:text-rose-300">
-                      {job.lastError ? truncate(job.lastError, 90) : ""}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <form action={resetJobAction} className="inline-flex">
-                        <input type="hidden" name="jobId" value={job.id} />
-                        <button
-                          type="submit"
-                          disabled={!canReset}
-                          className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400 dark:border-slate-700 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800/60 dark:disabled:border-slate-700/60 dark:disabled:text-slate-500"
-                        >
-                          Requeue
-                        </button>
-                      </form>
-                    </td>
+        <div className="mt-6 -mx-4 overflow-x-auto sm:mx-0">
+          <div className="inline-block align-middle">
+            <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white/80 shadow-sm dark:border-slate-700/60 dark:bg-slate-900/40">
+              <table className="divide-y divide-slate-200/70 text-sm dark:divide-slate-800/60">
+                <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-900 dark:text-slate-300">
+                  <tr>
+                    <th className="px-4 py-3 whitespace-nowrap">Song</th>
+                    <th className="px-4 py-3 whitespace-nowrap">Verse</th>
+                    <th className="px-4 py-3 whitespace-nowrap">Status</th>
+                    <th className="px-4 py-3 whitespace-nowrap">Attempts</th>
+                    <th className="px-4 py-3 whitespace-nowrap">Updated</th>
+                    <th className="px-4 py-3 whitespace-nowrap">Last error</th>
+                    <th className="px-4 py-3 whitespace-nowrap" />
                   </tr>
-                );
-              })}
-              {jobs.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center">
-                    <Body
-                      size="sm"
-                      className="text-slate-500 dark:text-slate-400"
-                    >
-                      The queue is empty. Draft a song to enqueue new jobs.
-                    </Body>
-                  </td>
-                </tr>
-              ) : null}
-            </tbody>
-          </table>
+                </thead>
+                <tbody className="divide-y divide-slate-200/70 dark:divide-slate-800/60">
+                  {jobs.map((job) => {
+                    const badge =
+                      STATUS_STYLES[job.status] ??
+                      "bg-slate-200 text-slate-700 dark:bg-slate-800/60 dark:text-slate-200";
+                    const canReset = job.status !== "pending";
+
+                    return (
+                      <tr
+                        key={job.id}
+                        className="transition hover:bg-slate-50 dark:hover:bg-slate-900/40"
+                      >
+                        <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">
+                          <div className="whitespace-nowrap">
+                            {job.songTitle}
+                          </div>
+                          <div className="text-xs text-slate-500 dark:text-slate-400">
+                            /{job.songSlug}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-slate-700 dark:text-slate-300">
+                          <div className="font-medium">
+                            Verse {job.verseSequence}
+                          </div>
+                          <div className="whitespace-pre text-xs text-slate-500 dark:text-slate-400">
+                            {truncate(job.verseLyric, 120)}
+                          </div>
+                          {job.status === "completed" &&
+                          job.verseIllustrationUrl ? (
+                            <a
+                              href={job.verseIllustrationUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="mt-1 inline-flex text-xs font-medium text-sky-600 underline decoration-sky-400 underline-offset-2 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-300"
+                            >
+                              View illustration
+                              <HiArrowTopRightOnSquare className="ml-1 mt-0.5" />
+                            </a>
+                          ) : null}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${badge}`}
+                          >
+                            {job.status.replace("_", " ")}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
+                          {job.attempts}
+                        </td>
+                        <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                          {formatTimestamp(job.updatedAt ?? job.createdAt)}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-rose-600 dark:text-rose-300">
+                          {job.lastError ? truncate(job.lastError, 90) : ""}
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <form action={resetJobAction} className="inline-flex">
+                            <input type="hidden" name="jobId" value={job.id} />
+                            <button
+                              type="submit"
+                              disabled={!canReset}
+                              className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400 dark:border-slate-700 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800/60 dark:disabled:border-slate-700/60 dark:disabled:text-slate-500"
+                            >
+                              Requeue
+                            </button>
+                          </form>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {jobs.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-4 py-12 text-center">
+                        <Body
+                          size="sm"
+                          className="text-slate-500 dark:text-slate-400"
+                        >
+                          The queue is empty. Draft a song to enqueue new jobs.
+                        </Body>
+                      </td>
+                    </tr>
+                  ) : null}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </Panel>
     </PageShell>
