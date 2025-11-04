@@ -26,6 +26,8 @@ export type SongGenerationVerseArtifactSto = {
   model: string;
   image_url: string | null;
   image_path: string | null;
+  thumbnail_path: string | null;
+  image_summary: string | null;
   created_at: Date;
   updated_at: Date;
 };

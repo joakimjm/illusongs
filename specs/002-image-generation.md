@@ -25,10 +25,11 @@ This document describes how Illusongs ingests song drafts, generates verse-level
    - Subsequent verses reuse the same id, keeping prompts in one conversation.
 3. **Prompt & OpenRouter Call**
    - Verse 1 uses `createInitialSongIllustrationPrompt`; others use `createNextVerseIllustrationPrompt`.
+   - Previous verse artifacts are replayed as assistant turns (summary text + thumbnail image) so the model keeps palette and characters consistent.
    - Images are generated via OpenRouter (using the official OpenAI SDK with `X-Conversation-ID`).
 4. **Supabase Storage & Records**
-   - `saveVerseIllustration` transcodes the image to WebP, uploads to `SUPABASE_VERSE_ILLUSTRATIONS_BUCKET`, and updates `song_verses.illustration_url`.
-   - `recordSongGenerationVerseArtifact` stores prompt, provider, model, and resulting URL for audit.
+   - `saveVerseIllustration` transcodes the full image, generates a low-res thumbnail, uploads both to `SUPABASE_VERSE_ILLUSTRATIONS_BUCKET`, and updates `song_verses.illustration_url`.
+   - `recordSongGenerationVerseArtifact` stores prompt, provider, model, main image path, thumbnail path, and the model’s textual summary for audit and future prompts.
 5. **Job Completion**
    - On success: job → `completed`. The dispatcher returns `204` when no work remains.
    - On failure: job → `failed` with `last_error`; editors can requeue.
@@ -55,7 +56,7 @@ song_generation_conversations
   song_id (PK), provider, model, conversation_id, timestamps
 
 song_generation_verse_artifacts
-  job_id, verse_id, prompt, provider, model, image_url, image_path, timestamps
+  job_id, verse_id, prompt, provider, model, image_url, image_path, thumbnail_path, image_summary, timestamps
 ```
 
 ## Configuration

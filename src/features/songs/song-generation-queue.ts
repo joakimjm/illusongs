@@ -46,6 +46,7 @@ export type ResetSongGenerationJobResult = {
   songId: string;
   verseId: string;
   imagePath: string | null;
+  thumbnailPath: string | null;
 };
 
 const JOB_COLUMNS = `
@@ -387,9 +388,10 @@ export const resetSongGenerationJob = async (
 
     const artifactResult = await client.query<{
       image_path: string | null;
+      thumbnail_path: string | null;
     }>(
       `
-        SELECT image_path
+        SELECT image_path, thumbnail_path
         FROM song_generation_verse_artifacts
         WHERE verse_id = $1
         LIMIT 1
@@ -436,6 +438,7 @@ export const resetSongGenerationJob = async (
       songId: job.song_id,
       verseId: job.verse_id,
       imagePath: artifactResult.rows[0]?.image_path ?? null,
+      thumbnailPath: artifactResult.rows[0]?.thumbnail_path ?? null,
     } as ResetSongGenerationJobResult;
   });
 };
@@ -448,6 +451,8 @@ type RecordArtifactInput = {
   model: string;
   imageUrl: string | null;
   imagePath: string | null;
+  thumbnailPath: string | null;
+  imageSummary: string | null;
 };
 
 export const recordSongGenerationVerseArtifact = async (
@@ -465,9 +470,11 @@ export const recordSongGenerationVerseArtifact = async (
           provider,
           model,
           image_url,
-          image_path
+          image_path,
+          thumbnail_path,
+          image_summary
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         ON CONFLICT (verse_id)
         DO UPDATE SET
           prompt = EXCLUDED.prompt,
@@ -475,6 +482,8 @@ export const recordSongGenerationVerseArtifact = async (
           model = EXCLUDED.model,
           image_url = EXCLUDED.image_url,
           image_path = EXCLUDED.image_path,
+          thumbnail_path = EXCLUDED.thumbnail_path,
+          image_summary = EXCLUDED.image_summary,
           updated_at = NOW()
         RETURNING
           id,
@@ -485,6 +494,8 @@ export const recordSongGenerationVerseArtifact = async (
           model,
           image_url,
           image_path,
+          thumbnail_path,
+          image_summary,
           created_at,
           updated_at
       `,
@@ -496,6 +507,8 @@ export const recordSongGenerationVerseArtifact = async (
         input.model,
         input.imageUrl,
         input.imagePath,
+        input.thumbnailPath,
+        input.imageSummary,
       ],
     );
 

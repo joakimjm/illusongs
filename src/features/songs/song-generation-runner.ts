@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import OpenAI from "openai";
 import type {
   Response,
+  ResponseInputItem,
   ResponseOutputItem,
 } from "openai/resources/responses/responses";
 import { getRequiredConfigValue } from "@/config";
@@ -11,6 +12,7 @@ import {
   upsertConversationForSong,
 } from "@/features/songs/song-generation-conversations";
 import {
+  ART_STYLE_BLOCK,
   createInitialSongIllustrationPrompt,
   createNextVerseIllustrationPrompt,
 } from "@/features/songs/song-generation-prompts";
@@ -20,7 +22,13 @@ import {
   markSongGenerationJobFailed,
   recordSongGenerationVerseArtifact,
 } from "@/features/songs/song-generation-queue";
+import {
+  fetchSongGenerationVerseArtifactsBySong,
+  type SongGenerationVerseArtifactDto,
+} from "@/features/songs/song-generation-verse-artifacts";
+import type { SongDetailDto, SongVerseDto } from "@/features/songs/song-types";
 import { saveVerseIllustration } from "@/features/songs/verse-illustration-service";
+import { getVerseIllustrationPublicUrl } from "@/features/songs/verse-illustration-storage";
 
 const OPENROUTER_DEFAULT_BASE_URL = "https://openrouter.ai/api/v1";
 const OPENROUTER_DEFAULT_MODEL = "openai/gpt-5-image-mini";
@@ -75,7 +83,7 @@ const wait = (ms: number): Promise<void> =>
 const resolveImageFromResponse = async (
   client: OpenAI,
   response: Response,
-): Promise<Buffer> => {
+): Promise<{ buffer: Buffer; response: Response }> => {
   let attempt = 0;
   let current = response;
 
@@ -89,7 +97,7 @@ const resolveImageFromResponse = async (
     }
 
     if (imageCall.status === "completed" && imageCall.result) {
-      return decodeBase64Image(imageCall.result);
+      return { buffer: decodeBase64Image(imageCall.result), response: current };
     }
 
     if (imageCall.status === "failed") {
@@ -110,29 +118,99 @@ const resolveImageFromResponse = async (
   );
 };
 
+const createTextContent = (text: string) => ({
+  type: "input_text" as const,
+  text,
+});
+
+const createImageContent = (imageUrl: string) => ({
+  type: "input_image" as const,
+  image_url: imageUrl,
+  detail: "low" as const,
+});
+
+const createMessage = (
+  role: "system" | "user" | "assistant",
+  content: Array<
+    ReturnType<typeof createTextContent> | ReturnType<typeof createImageContent>
+  >,
+): ResponseInputItem => ({
+  type: "message",
+  role,
+  content,
+});
+
+const buildImageGenerationMessages = (
+  song: SongDetailDto,
+  currentVerse: SongVerseDto,
+  artifactsByVerseId: Map<string, SongGenerationVerseArtifactDto>,
+  finalPromptText: string,
+): ResponseInputItem[] => {
+  const styleMessage = createTextContent(
+    [
+      "Maintain the following illustration style consistently across all verses:",
+      "",
+      ART_STYLE_BLOCK,
+      "",
+      "Preserve character continuity, mood, and palette across every verse.",
+    ].join("\n"),
+  );
+
+  const messages: ResponseInputItem[] = [
+    createMessage("system", [styleMessage]),
+  ];
+
+  const previousVerses = song.verses
+    .filter((entry) => entry.sequenceNumber < currentVerse.sequenceNumber)
+    .sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+
+  for (const verse of previousVerses) {
+    messages.push(
+      createMessage("user", [
+        createTextContent(
+          `Verse ${verse.sequenceNumber}:\n${verse.lyricText.trim()}`,
+        ),
+      ]),
+    );
+
+    const artifact = artifactsByVerseId.get(verse.id);
+    if (!artifact) {
+      continue;
+    }
+
+    const summaryText = artifact.imageSummary?.trim().length
+      ? artifact.imageSummary.trim()
+      : `Illustration generated for verse ${verse.sequenceNumber}. Maintain visual continuity with this scene.`;
+
+    const assistantContent: Array<
+      | ReturnType<typeof createTextContent>
+      | ReturnType<typeof createImageContent>
+    > = [createTextContent(summaryText)];
+
+    const thumbnailUrl = getVerseIllustrationPublicUrl(artifact.thumbnailPath);
+    if (thumbnailUrl) {
+      assistantContent.push(createImageContent(thumbnailUrl));
+    }
+
+    messages.push(createMessage("assistant", assistantContent));
+  }
+
+  messages.push(createMessage("user", [createTextContent(finalPromptText)]));
+
+  return messages;
+};
+
 const generateIllustrationBuffer = async (
   client: OpenAI,
   model: string,
-  prompt: string,
-): Promise<{ buffer: Buffer; responseId: string }> => {
+  input: ResponseInputItem[],
+): Promise<{ buffer: Buffer; response: Response }> => {
   const response = await client.responses.create({
     model,
-    input: [
-      {
-        role: "user",
-        type: "message",
-        content: [
-          {
-            type: "input_text",
-            text: prompt,
-          },
-        ],
-      },
-    ],
+    input,
   });
 
-  const buffer = await resolveImageFromResponse(client, response);
-  return { buffer, responseId: response.id };
+  return await resolveImageFromResponse(client, response);
 };
 
 export type SongGenerationRunResult = {
@@ -205,10 +283,30 @@ export const processNextSongGenerationJob =
         }),
       );
 
+      const artifacts = await fetchSongGenerationVerseArtifactsBySong(song.id);
+      const artifactsByVerseId = new Map(
+        artifacts.map((artifact) => [artifact.verseId, artifact]),
+      );
+
       const prompt =
         verse.sequenceNumber === 1
           ? createInitialSongIllustrationPrompt(song)
           : createNextVerseIllustrationPrompt(verse);
+
+      const previousVerses = song.verses
+        .filter((entry) => entry.sequenceNumber < verse.sequenceNumber)
+        .sort((a, b) => a.sequenceNumber - b.sequenceNumber);
+
+      const referencedArtifacts = previousVerses.filter((entry) =>
+        artifactsByVerseId.has(entry.id),
+      ).length;
+
+      const messages = buildImageGenerationMessages(
+        song,
+        verse,
+        artifactsByVerseId,
+        prompt,
+      );
 
       console.info(
         JSON.stringify({
@@ -217,6 +315,8 @@ export const processNextSongGenerationJob =
           verseId: verse.id,
           verseSequence: verse.sequenceNumber,
           promptLength: prompt.length,
+          priorVerses: previousVerses.length,
+          referencedArtifacts,
         }),
       );
 
@@ -224,10 +324,16 @@ export const processNextSongGenerationJob =
       const generationResult = await generateIllustrationBuffer(
         client,
         model,
-        prompt,
+        messages,
       );
-      responseId = generationResult.responseId;
+      responseId = generationResult.response.id;
       generationDurationMs = Date.now() - generationStartedAt;
+
+      const outputText = generationResult.response.output_text;
+      const responseSummary =
+        typeof outputText === "string" && outputText.trim().length > 0
+          ? outputText.trim()
+          : null;
 
       console.info(
         JSON.stringify({
@@ -237,10 +343,15 @@ export const processNextSongGenerationJob =
           verseSequence: verse.sequenceNumber,
           responseId,
           generationDurationMs,
+          conversationDepth: messages.length,
         }),
       );
 
-      const { verse: updatedVerse, storagePath } = await saveVerseIllustration({
+      const {
+        verse: updatedVerse,
+        storagePath,
+        thumbnailPath,
+      } = await saveVerseIllustration({
         songId: song.id,
         verseId: verse.id,
         imageData: bufferToArrayBuffer(generationResult.buffer),
@@ -254,6 +365,7 @@ export const processNextSongGenerationJob =
           verseSequence: verse.sequenceNumber,
           illustrationUrl: updatedVerse.illustrationUrl,
           responseId,
+          thumbnailPath,
         }),
       );
 
@@ -265,6 +377,8 @@ export const processNextSongGenerationJob =
         model,
         imageUrl: updatedVerse.illustrationUrl,
         imagePath: storagePath,
+        thumbnailPath,
+        imageSummary: responseSummary,
       });
 
       await markSongGenerationJobCompleted(job.id);
@@ -280,6 +394,7 @@ export const processNextSongGenerationJob =
           responseId,
           totalDurationMs: Date.now() - jobStartedAt,
           generationDurationMs,
+          responseSummaryLength: responseSummary?.length ?? 0,
         }),
       );
 

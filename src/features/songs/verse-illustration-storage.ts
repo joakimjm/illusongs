@@ -6,13 +6,16 @@ const VERSE_ILLUSTRATION_BUCKET_KEY = "SUPABASE_VERSE_ILLUSTRATIONS_BUCKET";
 const DEFAULT_VERSE_ILLUSTRATION_BUCKET = "verse-illustrations";
 const CACHE_CONTROL_SECONDS = "31536000";
 
+type IllustrationVariant = "main" | "thumbnail";
+
 const sanitizeStorageSegment = (value: string): string =>
   value.replaceAll(/[^a-zA-Z0-9-]/g, "-").toLowerCase();
 
-const createIllustrationObjectName = (): string => {
+const createIllustrationObjectName = (variant: IllustrationVariant): string => {
   const timestamp = new Date().toISOString().replaceAll(/[:.]/g, "-");
   const suffix = randomUUID().slice(0, 8);
-  return `main-${timestamp}-${suffix}.webp`;
+  const prefix = variant === "thumbnail" ? "thumb" : "main";
+  return `${prefix}-${timestamp}-${suffix}.webp`;
 };
 
 export const getVerseIllustrationsBucketName = (): string =>
@@ -24,11 +27,14 @@ export const getVerseIllustrationsBucketName = (): string =>
 export const buildVerseIllustrationObjectPath = (
   songId: string,
   verseId: string,
+  variant: IllustrationVariant = "main",
 ): string => {
   const normalizedSongId = sanitizeStorageSegment(songId);
   const normalizedVerseId = sanitizeStorageSegment(verseId);
 
-  return `${normalizedSongId}/${normalizedVerseId}/${createIllustrationObjectName()}`;
+  return `${normalizedSongId}/${normalizedVerseId}/${createIllustrationObjectName(
+    variant,
+  )}`;
 };
 
 export class VerseIllustrationUploadError extends Error {}
@@ -38,6 +44,7 @@ type UploadVerseIllustrationImageInput = {
   songId: string;
   verseId: string;
   image: Uint8Array;
+  variant?: IllustrationVariant;
 };
 
 export const uploadVerseIllustrationImage = async (
@@ -48,6 +55,7 @@ export const uploadVerseIllustrationImage = async (
   const objectPath = buildVerseIllustrationObjectPath(
     input.songId,
     input.verseId,
+    input.variant ?? "main",
   );
 
   const { error: uploadError } = await client.storage
@@ -81,8 +89,21 @@ export const uploadVerseIllustrationImage = async (
   };
 };
 
+export const getVerseIllustrationPublicUrl = (
+  path: string | null,
+): string | null => {
+  if (!path || path.trim().length === 0) {
+    return null;
+  }
+
+  const client = getSupabaseStorageClient();
+  const bucket = getVerseIllustrationsBucketName();
+  const { data } = client.storage.from(bucket).getPublicUrl(path);
+  return data?.publicUrl ?? null;
+};
+
 export const deleteVerseIllustrationImage = async (
-  path: string,
+  path: string | null,
 ): Promise<void> => {
   const client = getSupabaseStorageClient();
   const bucket = getVerseIllustrationsBucketName();

@@ -6,10 +6,12 @@ import {
 } from "@/features/songs/verse-illustration-commands";
 import {
   convertIllustrationToWebp,
+  createIllustrationThumbnail,
   InvalidVerseIllustrationError,
   VerseIllustrationProcessingError,
 } from "@/features/songs/verse-illustration-processor";
 import {
+  deleteVerseIllustrationImage,
   uploadVerseIllustrationImage,
   VerseIllustrationUploadError,
 } from "@/features/songs/verse-illustration-storage";
@@ -30,6 +32,7 @@ type SaveVerseIllustrationInput = {
 export type SaveVerseIllustrationResult = {
   verse: SongVerseDto;
   storagePath: string;
+  thumbnailPath: string | null;
 };
 
 export const saveVerseIllustration = async (
@@ -39,20 +42,42 @@ export const saveVerseIllustration = async (
     imageData: input.imageData,
   });
 
-  const { publicUrl, path } = await uploadVerseIllustrationImage({
+  const thumbnailImage = await createIllustrationThumbnail({
+    imageData: input.imageData,
+  });
+
+  const mainUpload = await uploadVerseIllustrationImage({
     songId: input.songId,
     verseId: input.verseId,
     image: webpImage,
+    variant: "main",
   });
+
+  let thumbnailUpload: { publicUrl: string; path: string } | null = null;
+
+  try {
+    thumbnailUpload = await uploadVerseIllustrationImage({
+      songId: input.songId,
+      verseId: input.verseId,
+      image: thumbnailImage,
+      variant: "thumbnail",
+    });
+  } catch (error) {
+    await deleteVerseIllustrationImage(mainUpload.path).catch(() => {
+      // best-effort cleanup; original error is thrown below
+    });
+    throw error;
+  }
 
   const verse = await updateVerseIllustrationUrl({
     songId: input.songId,
     verseId: input.verseId,
-    illustrationUrl: publicUrl,
+    illustrationUrl: mainUpload.publicUrl,
   });
 
   return {
     verse: mapSongVerseStoToDto(verse),
-    storagePath: path,
+    storagePath: mainUpload.path,
+    thumbnailPath: thumbnailUpload?.path ?? null,
   };
 };

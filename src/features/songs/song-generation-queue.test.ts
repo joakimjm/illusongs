@@ -142,9 +142,13 @@ test("recordSongGenerationVerseArtifact upserts metadata", async () => {
     model: "model-1",
     imageUrl: "https://example.com/image1.webp",
     imagePath: "path-1",
+    thumbnailPath: "thumb-1",
+    imageSummary: "Summary 1",
   });
 
   expect(firstRecord.prompt).toBe("Prompt 1");
+  expect(firstRecord.thumbnail_path).toBe("thumb-1");
+  expect(firstRecord.image_summary).toBe("Summary 1");
 
   const secondRecord = await recordSongGenerationVerseArtifact({
     jobId,
@@ -154,10 +158,14 @@ test("recordSongGenerationVerseArtifact upserts metadata", async () => {
     model: "model-2",
     imageUrl: "https://example.com/image2.webp",
     imagePath: "path-2",
+    thumbnailPath: "thumb-2",
+    imageSummary: "Summary 2",
   });
 
   expect(secondRecord.prompt).toBe("Prompt 2");
   expect(secondRecord.model).toBe("model-2");
+  expect(secondRecord.thumbnail_path).toBe("thumb-2");
+  expect(secondRecord.image_summary).toBe("Summary 2");
 });
 
 test("enqueueSongGenerationJobs creates one job per verse", async () => {
@@ -215,15 +223,19 @@ test("resetSongGenerationJob clears illustration and requeues job", async () => 
           provider,
           model,
           image_url,
-          image_path
+          image_path,
+          thumbnail_path,
+          image_summary
         )
-        VALUES ($1, $2, 'Prompt', 'openrouter', 'model', $3, $4)
+        VALUES ($1, $2, 'Prompt', 'openrouter', 'model', $3, $4, $5, $6)
       `,
       [
         job?.id ?? "",
         verse?.id ?? "",
         "https://example.com/previous.webp",
         "old-path",
+        "old-thumb",
+        "Previous summary",
       ],
     );
   });
@@ -234,6 +246,7 @@ test("resetSongGenerationJob clears illustration and requeues job", async () => 
   expect(reset?.songId).toBe(song.id);
   expect(reset?.verseId).toBe(verse?.id);
   expect(reset?.imagePath).toBe("old-path");
+  expect(reset?.thumbnailPath).toBe("old-thumb");
 
   const status = await withTestPool(async (pool) => {
     const result = await pool.query<{ status: string }>(

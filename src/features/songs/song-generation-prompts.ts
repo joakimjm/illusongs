@@ -1,6 +1,6 @@
 import type { SongDetailDto, SongVerseDto } from "@/features/songs/song-types";
 
-const ART_STYLE_BLOCK = [
+export const ART_STYLE_BLOCK = [
   "Illustrerer med følgende stil: Vintage børnebogsillustration fra 1960’erne/70’erne,",
   "malet i gouache/akvarel med synlige penselstrøg og mat papirtekstur.",
   "Surrealistiske og humoristiske scener med overdrevne figurer, ekspressive,",

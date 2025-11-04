@@ -95,20 +95,33 @@ const resetJobAction = async (formData: FormData) => {
     return;
   }
 
+  const deletePromises: Array<Promise<void>> = [];
   if (result.imagePath) {
-    try {
-      await deleteVerseIllustrationImage(result.imagePath);
-    } catch (error) {
-      console.error(
-        JSON.stringify({
-          event: "song_generation_image_delete_failed",
-          jobId,
-          imagePath: result.imagePath,
-          error: error instanceof Error ? error.message : String(error),
-        }),
-      );
-    }
+    deletePromises.push(deleteVerseIllustrationImage(result.imagePath));
   }
+  if (result.thumbnailPath) {
+    deletePromises.push(deleteVerseIllustrationImage(result.thumbnailPath));
+  }
+
+  await Promise.allSettled(deletePromises).then((settled) => {
+    settled.forEach((outcome) => {
+      if (outcome.status === "rejected") {
+        const error = outcome.reason;
+        console.error(
+          JSON.stringify({
+            event: "song_generation_image_delete_failed",
+            jobId,
+            imagePath: result.imagePath,
+            thumbnailPath: result.thumbnailPath,
+            error:
+              error instanceof Error
+                ? error.message
+                : String(error ?? "unknown"),
+          }),
+        );
+      }
+    });
+  });
   revalidatePath(JOBS_PATH);
 };
 
@@ -162,7 +175,7 @@ const AdminJobsPage = async () => {
         <div className="mt-6 -mx-4 overflow-x-auto sm:mx-0">
           <div className="inline-block min-w-full align-middle">
             <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white/80 shadow-sm dark:border-slate-700/60 dark:bg-slate-900/40">
-              <table className="min-w-[64rem] table-fixed divide-y divide-slate-200/70 text-sm dark:divide-slate-800/60">
+              <table className="min-w-5xl table-fixed divide-y divide-slate-200/70 text-sm dark:divide-slate-800/60">
                 <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-900 dark:text-slate-300">
                   <tr>
                     <th className="px-4 py-3">Song</th>
