@@ -137,32 +137,63 @@ export const createSong = async (
 ): Promise<SongDetailDto> => {
   const connection = getPostgresConnection();
 
+  return await connection.clientUsing(
+    async (client) => await createSongWithClient(client, input),
+  );
+};
+
+export const createSongWithClient = async (
+  client: PoolClient,
+  input: CreateSongInput,
+): Promise<SongDetailDto> => {
+  const song = await insertSong(client, input);
+
+  const sortedTags = [...input.tags]
+    .map((tag) => tag.toLowerCase())
+    .filter((tag, index, arr) => arr.indexOf(tag) === index)
+    .sort((a, b) => a.localeCompare(b, "en"));
+
+  const tagRecords: SongTagSto[] = [];
+
+  for (const tag of sortedTags) {
+    await insertTag(client, tag);
+    const record = await insertSongTag(client, song.id, tag);
+    tagRecords.push(record);
+  }
+
+  const verseInputs = [...input.verses].sort(
+    (a, b) => a.sequenceNumber - b.sequenceNumber,
+  );
+
+  const verseRecords: SongVerseSto[] = [];
+  for (const verse of verseInputs) {
+    const record = await insertSongVerse(client, song.id, verse);
+    verseRecords.push(record);
+  }
+
+  return mapSongStoToDetailDto(song, tagRecords, verseRecords);
+};
+
+export const updateSongPublishStatus = async (
+  songId: string,
+  isPublished: boolean,
+): Promise<boolean> => {
+  const connection = getPostgresConnection();
+
   return await connection.clientUsing(async (client) => {
-    const song = await insertSong(client, input);
-
-    const sortedTags = [...input.tags]
-      .map((tag) => tag.toLowerCase())
-      .filter((tag, index, arr) => arr.indexOf(tag) === index)
-      .sort((a, b) => a.localeCompare(b, "en"));
-
-    const tagRecords: SongTagSto[] = [];
-
-    for (const tag of sortedTags) {
-      await insertTag(client, tag);
-      const record = await insertSongTag(client, song.id, tag);
-      tagRecords.push(record);
-    }
-
-    const verseInputs = [...input.verses].sort(
-      (a, b) => a.sequenceNumber - b.sequenceNumber,
+    const result = await client.query<{ id: string }>(
+      `
+        UPDATE songs
+        SET
+          is_published = $2,
+          updated_at = NOW()
+        WHERE id = $1
+        RETURNING id
+      `,
+      [songId, isPublished],
     );
 
-    const verseRecords: SongVerseSto[] = [];
-    for (const verse of verseInputs) {
-      const record = await insertSongVerse(client, song.id, verse);
-      verseRecords.push(record);
-    }
-
-    return mapSongStoToDetailDto(song, tagRecords, verseRecords);
+    const rowCount = result.rowCount ?? 0;
+    return rowCount > 0;
   });
 };

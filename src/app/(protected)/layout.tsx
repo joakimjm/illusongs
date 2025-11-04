@@ -39,6 +39,18 @@ const ProtectedLayout = async ({ children }: ProtectedLayoutProps) => {
       title: "Administration",
       items: [
         {
+          href: "/admin/songs",
+          label: "Songs",
+          description:
+            "Draft songs, queue illustrations, and publish when ready.",
+        },
+        {
+          href: "/admin/jobs",
+          label: "Illustration queue",
+          description:
+            "Monitor per-verse illustration jobs and retry failures.",
+        },
+        {
           href: "/admin/tokens",
           label: "Access tokens",
           description: "Issue and revoke API credentials.",

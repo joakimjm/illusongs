@@ -26,6 +26,11 @@ The project aims to bring song culture back into everyday family life through ar
 
 ## Uploading verse illustrations
 
-- Place PNG files in the `data/` directory using the pattern `<song-slug>-<zero-padded-sequence>.png` (e.g. `aah-abe-01.png`).
-- Run `ACCESS_TOKEN=<admin-token> npm run upload:illustrations`; optionally set `API_BASE_URL` and `POSTGRES_CONNECTION_STRING` if they differ from defaults.
-- The script resolves verse IDs from the database, uploads via the illustration API, and reports skipped or failed files.
+- Upload via `POST /api/song/{songId}/verse/{verseId}/illustration` with an administrator token; the endpoint converts to WebP, stores in Supabase, and updates the verse record.
+- For bulk migration, iterate over local assets with your own tooling (see `curl` example in the docs) and call the endpoint per verse to keep the database and storage in sync.
+
+## Song generation workflow
+
+- Create unpublished drafts through `POST /api/admin/songs` with `title` and a multiline `verses` payload. The server splits verses, stores them in order, and enqueues a `song_generation_jobs` row.
+- Trigger `POST /api/song-generation/dispatch` (e.g. via CRON) to process the next pending verse. Each call generates one illustration through OpenRouter, uploads it to Supabase Storage, records artifacts, and returns `204` when no work remains.
+- Configure `OPENROUTER_API_KEY` (and optional `OPENROUTER_BASE_URL`, `OPENROUTER_MODEL`, `OPENROUTER_HTTP_REFERER`, `OPENROUTER_APP_TITLE`) so the dispatcher can reach your chosen provider.

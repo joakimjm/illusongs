@@ -1,5 +1,8 @@
 import { expect, test } from "vitest";
-import { createSong } from "@/features/songs/song-commands";
+import {
+  createSong,
+  updateSongPublishStatus,
+} from "@/features/songs/song-commands";
 import { registerDatabaseTestSuite } from "@/features/testing/database-test-harness";
 import { withTestPool } from "@/features/testing/postgres-test-utils";
 
@@ -93,4 +96,47 @@ test("createSong is idempotent on tags table", async () => {
   });
 
   expect(tags).toEqual(["gentagelse"]);
+});
+
+test("updateSongPublishStatus toggles publish state", async () => {
+  const song = await createSong({
+    slug: "updater",
+    title: "Updater",
+    languageCode: "da",
+    isPublished: false,
+    tags: [],
+    verses: [
+      {
+        sequenceNumber: 1,
+        lyricText: "Vers",
+        illustrationUrl: null,
+      },
+    ],
+  });
+
+  const published = await updateSongPublishStatus(song.id, true);
+  expect(published).toBe(true);
+
+  const row = await withTestPool(async (pool) => {
+    const result = await pool.query<{ is_published: boolean }>(
+      `SELECT is_published FROM songs WHERE id = $1`,
+      [song.id],
+    );
+    return result.rows[0] ?? null;
+  });
+
+  expect(row?.is_published).toBe(true);
+
+  const unpublished = await updateSongPublishStatus(song.id, false);
+  expect(unpublished).toBe(true);
+
+  const row2 = await withTestPool(async (pool) => {
+    const result = await pool.query<{ is_published: boolean }>(
+      `SELECT is_published FROM songs WHERE id = $1`,
+      [song.id],
+    );
+    return result.rows[0] ?? null;
+  });
+
+  expect(row2?.is_published).toBe(false);
 });
