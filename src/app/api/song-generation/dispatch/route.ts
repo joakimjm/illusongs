@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { SONGS_MANAGED_BY_ADMINS_DETAIL } from "@/app/api/songs/songs.constants";
 import { createApiRoute } from "@/features/auth/api-handler";
-import { isAdmin } from "@/features/auth/policies";
+import { isAdmin, isTokenIdentity } from "@/features/auth/policies";
 import {
   createForbiddenResponse,
   logAndRespondWithError,
@@ -12,7 +12,7 @@ export const runtime = "nodejs";
 
 const handlers = createApiRoute({
   POST: async ({ identity }) => {
-    if (!isAdmin(identity)) {
+    if (!isAdmin(identity) && !isTokenIdentity(identity)) {
       return createForbiddenResponse(SONGS_MANAGED_BY_ADMINS_DETAIL);
     }
 

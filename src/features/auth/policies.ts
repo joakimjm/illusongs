@@ -12,8 +12,9 @@ const isSupabaseIdentity = (
   identity: ServerIdentity,
 ): identity is SupabaseIdentity => identity.type === "supabase";
 
-const isTokenIdentity = (identity: ServerIdentity): identity is TokenIdentity =>
-  identity.type === "access-token";
+export const isTokenIdentity = (
+  identity: ServerIdentity,
+): identity is TokenIdentity => identity.type === "access-token";
 
 export const isAdminUser = (user: SupabaseUser): boolean =>
   user.email === getRequiredConfigValue("ADMIN_EMAIL");
