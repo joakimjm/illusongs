@@ -7,7 +7,7 @@ export class SongVerseNotFoundError extends Error {}
 export type UpdateVerseIllustrationInput = {
   songId: string;
   verseId: string;
-  illustrationUrl: string;
+  illustrationUrl: string | null;
 };
 
 const updateIllustrationInternal = async (

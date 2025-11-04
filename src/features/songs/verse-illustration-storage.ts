@@ -32,6 +32,7 @@ export const buildVerseIllustrationObjectPath = (
 };
 
 export class VerseIllustrationUploadError extends Error {}
+export class VerseIllustrationDeletionError extends Error {}
 
 type UploadVerseIllustrationImageInput = {
   songId: string;
@@ -78,4 +79,23 @@ export const uploadVerseIllustrationImage = async (
     publicUrl,
     path: objectPath,
   };
+};
+
+export const deleteVerseIllustrationImage = async (
+  path: string,
+): Promise<void> => {
+  const client = getSupabaseStorageClient();
+  const bucket = getVerseIllustrationsBucketName();
+
+  if (!path || path.trim().length === 0) {
+    return;
+  }
+
+  const { error } = await client.storage.from(bucket).remove([path]);
+
+  if (error) {
+    throw new VerseIllustrationDeletionError(
+      `Failed to delete verse illustration: ${error.message}`,
+    );
+  }
 };

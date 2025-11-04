@@ -29,6 +29,21 @@ const SubmitButton = () => {
   );
 };
 
+const RepeatToggle = () => {
+  const { pending } = useFormStatus();
+  return (
+    <label className="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-300">
+      <input
+        type="checkbox"
+        name="repeat"
+        disabled={pending}
+        className="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500 dark:border-slate-600 dark:bg-slate-800"
+      />
+      <span>Process remaining jobs automatically</span>
+    </label>
+  );
+};
+
 const Message = ({ state }: { state: DispatchState }) => {
   if (state.status === "idle" || !state.message) {
     return null;
@@ -61,6 +76,7 @@ export const ProcessJobForm = ({ action }: ProcessJobFormProps) => {
 
   return (
     <form action={formAction} className="flex flex-col items-start gap-2">
+      <RepeatToggle />
       <SubmitButton />
       <Message state={state} />
     </form>

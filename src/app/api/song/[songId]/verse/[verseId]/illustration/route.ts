@@ -80,7 +80,7 @@ const handlers = createApiRoute<{ songId: string; verseId: string }>({
       const verseId = normalizeUuidParam(params.verseId, "Verse id");
       const imageData = await extractIllustrationData(request);
 
-      const verse = await saveVerseIllustration({
+      const { verse } = await saveVerseIllustration({
         songId,
         verseId,
         imageData,

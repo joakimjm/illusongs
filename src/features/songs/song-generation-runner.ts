@@ -1,7 +1,10 @@
 import { Buffer } from "node:buffer";
 import { randomUUID } from "node:crypto";
 import OpenAI from "openai";
-import type { ResponseOutputItem } from "openai/resources/responses/responses";
+import type {
+  Response,
+  ResponseOutputItem,
+} from "openai/resources/responses/responses";
 import { getRequiredConfigValue } from "@/config";
 import {
   findConversationForSong,
@@ -22,6 +25,8 @@ import { saveVerseIllustration } from "@/features/songs/verse-illustration-servi
 const OPENROUTER_DEFAULT_BASE_URL = "https://openrouter.ai/api/v1";
 const OPENROUTER_DEFAULT_MODEL = "openai/gpt-5-image-mini";
 const PROVIDER = "openrouter";
+const IMAGE_POLL_INTERVAL_MS = 1500;
+const IMAGE_POLL_MAX_ATTEMPTS = 10;
 
 const bufferToArrayBuffer = (buffer: Buffer): ArrayBuffer => {
   const arrayBuffer = new ArrayBuffer(buffer.byteLength);
@@ -62,11 +67,54 @@ const decodeBase64Image = (value: string): Buffer => {
   return Buffer.from(normalized, "base64");
 };
 
+const wait = (ms: number): Promise<void> =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
+const resolveImageFromResponse = async (
+  client: OpenAI,
+  response: Response,
+): Promise<Buffer> => {
+  let attempt = 0;
+  let current = response;
+
+  while (attempt <= IMAGE_POLL_MAX_ATTEMPTS) {
+    const imageCall = extractImageCall(current.output);
+
+    if (!imageCall) {
+      throw new Error(
+        `Image generation response missing image data (responseId=${current.id}).`,
+      );
+    }
+
+    if (imageCall.status === "completed" && imageCall.result) {
+      return decodeBase64Image(imageCall.result);
+    }
+
+    if (imageCall.status === "failed") {
+      throw new Error(`Image generation failed for response ${current.id}.`);
+    }
+
+    attempt += 1;
+    if (attempt > IMAGE_POLL_MAX_ATTEMPTS) {
+      break;
+    }
+
+    await wait(IMAGE_POLL_INTERVAL_MS);
+    current = await client.responses.retrieve(current.id);
+  }
+
+  throw new Error(
+    `Image generation timed out before completion (responseId=${response.id}).`,
+  );
+};
+
 const generateIllustrationBuffer = async (
   client: OpenAI,
   model: string,
   prompt: string,
-): Promise<Buffer> => {
+): Promise<{ buffer: Buffer; responseId: string }> => {
   const response = await client.responses.create({
     model,
     input: [
@@ -83,16 +131,8 @@ const generateIllustrationBuffer = async (
     ],
   });
 
-  const imageCall = extractImageCall(response.output);
-  if (!imageCall) {
-    throw new Error("Image generation response did not include image data.");
-  }
-
-  if (imageCall.status !== "completed" || !imageCall.result) {
-    throw new Error("Image generation did not complete successfully.");
-  }
-
-  return decodeBase64Image(imageCall.result);
+  const buffer = await resolveImageFromResponse(client, response);
+  return { buffer, responseId: response.id };
 };
 
 export type SongGenerationRunResult = {
@@ -100,6 +140,7 @@ export type SongGenerationRunResult = {
   songId: string;
   verseSequence: number;
   conversationId: string;
+  responseId: string;
 };
 
 export const processNextSongGenerationJob =
@@ -122,6 +163,9 @@ export const processNextSongGenerationJob =
     const existingConversation = await findConversationForSong(job.songId);
 
     const conversationId = existingConversation?.conversationId ?? randomUUID();
+    const jobStartedAt = Date.now();
+    let generationStartedAt: number | null = null;
+    let generationDurationMs: number | null = null;
     const client = createOpenRouterClient(conversationId);
     console.info(
       JSON.stringify({
@@ -149,7 +193,18 @@ export const processNextSongGenerationJob =
       });
     }
 
+    let responseId: string | null = null;
+
     try {
+      console.info(
+        JSON.stringify({
+          event: "song_generation_conversation_ready",
+          jobId: job.id,
+          songId: song.id,
+          conversationId,
+        }),
+      );
+
       const prompt =
         verse.sequenceNumber === 1
           ? createInitialSongIllustrationPrompt(song)
@@ -165,11 +220,14 @@ export const processNextSongGenerationJob =
         }),
       );
 
-      const imageBuffer = await generateIllustrationBuffer(
+      generationStartedAt = Date.now();
+      const generationResult = await generateIllustrationBuffer(
         client,
         model,
         prompt,
       );
+      responseId = generationResult.responseId;
+      generationDurationMs = Date.now() - generationStartedAt;
 
       console.info(
         JSON.stringify({
@@ -177,13 +235,15 @@ export const processNextSongGenerationJob =
           jobId: job.id,
           verseId: verse.id,
           verseSequence: verse.sequenceNumber,
+          responseId,
+          generationDurationMs,
         }),
       );
 
-      const updatedVerse = await saveVerseIllustration({
+      const { verse: updatedVerse, storagePath } = await saveVerseIllustration({
         songId: song.id,
         verseId: verse.id,
-        imageData: bufferToArrayBuffer(imageBuffer),
+        imageData: bufferToArrayBuffer(generationResult.buffer),
       });
 
       console.info(
@@ -193,6 +253,7 @@ export const processNextSongGenerationJob =
           verseId: verse.id,
           verseSequence: verse.sequenceNumber,
           illustrationUrl: updatedVerse.illustrationUrl,
+          responseId,
         }),
       );
 
@@ -203,7 +264,7 @@ export const processNextSongGenerationJob =
         provider: PROVIDER,
         model,
         imageUrl: updatedVerse.illustrationUrl,
-        imagePath: null,
+        imagePath: storagePath,
       });
 
       await markSongGenerationJobCompleted(job.id);
@@ -216,6 +277,9 @@ export const processNextSongGenerationJob =
           verseId: verse.id,
           verseSequence: updatedVerse.sequenceNumber,
           conversationId,
+          responseId,
+          totalDurationMs: Date.now() - jobStartedAt,
+          generationDurationMs,
         }),
       );
 
@@ -224,6 +288,7 @@ export const processNextSongGenerationJob =
         songId: song.id,
         verseSequence: updatedVerse.sequenceNumber,
         conversationId,
+        responseId,
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -235,6 +300,13 @@ export const processNextSongGenerationJob =
           verseId: verse.id,
           verseSequence: verse.sequenceNumber,
           error: message,
+          conversationId,
+          responseId,
+          totalDurationMs: Date.now() - jobStartedAt,
+          generationDurationMs:
+            generationStartedAt !== null
+              ? Date.now() - generationStartedAt
+              : null,
         }),
       );
       await markSongGenerationJobFailed(job.id, message);

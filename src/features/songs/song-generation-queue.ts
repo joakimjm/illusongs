@@ -38,6 +38,14 @@ export type SongGenerationJobListItem = SongGenerationJobDto & {
   songTitle: string;
   songSlug: string;
   verseIllustrationUrl: string | null;
+  conversationId: string | null;
+};
+
+export type ResetSongGenerationJobResult = {
+  jobId: string;
+  songId: string;
+  verseId: string;
+  imagePath: string | null;
 };
 
 const JOB_COLUMNS = `
@@ -240,6 +248,7 @@ type SongGenerationJobListRow = {
   verse_sequence_number: number;
   verse_lyric_text: string;
   verse_illustration_url: string | null;
+  conversation_id: string | null;
 };
 
 const mapJobListRow = (
@@ -260,6 +269,7 @@ const mapJobListRow = (
   verseSequence: row.verse_sequence_number,
   verseLyric: row.verse_lyric_text,
   verseIllustrationUrl: row.verse_illustration_url,
+  conversationId: row.conversation_id,
 });
 
 export const fetchSongGenerationJobList = async (
@@ -285,10 +295,12 @@ export const fetchSongGenerationJobList = async (
           s.slug AS song_slug,
           v.sequence_number AS verse_sequence_number,
           v.lyric_text AS verse_lyric_text,
-          v.illustration_url AS verse_illustration_url
+          v.illustration_url AS verse_illustration_url,
+          c.conversation_id AS conversation_id
         FROM song_generation_jobs j
         JOIN songs s ON s.id = j.song_id
         JOIN song_verses v ON v.id = j.verse_id
+        LEFT JOIN song_generation_conversations c ON c.song_id = j.song_id
         ORDER BY
           j.created_at ASC,
           v.sequence_number ASC
@@ -354,11 +366,38 @@ export const markSongGenerationJobFailed = async (
 
 export const resetSongGenerationJob = async (
   jobId: string,
-): Promise<boolean> => {
+): Promise<ResetSongGenerationJobResult | null> => {
   const connection = getPostgresConnection();
 
   return await connection.clientUsing(async (client) => {
-    const result = await client.query(
+    const jobResult = await client.query<SongGenerationJobSto>(
+      `
+        SELECT ${JOB_COLUMNS}
+        FROM song_generation_jobs
+        WHERE id = $1
+        LIMIT 1
+      `,
+      [jobId],
+    );
+
+    const job = jobResult.rows[0];
+    if (!job) {
+      return null;
+    }
+
+    const artifactResult = await client.query<{
+      image_path: string | null;
+    }>(
+      `
+        SELECT image_path
+        FROM song_generation_verse_artifacts
+        WHERE verse_id = $1
+        LIMIT 1
+      `,
+      [job.verse_id],
+    );
+
+    await client.query(
       `
         UPDATE song_generation_jobs
         SET
@@ -373,8 +412,31 @@ export const resetSongGenerationJob = async (
       [jobId],
     );
 
-    const rowCount = result.rowCount ?? 0;
-    return rowCount > 0;
+    await client.query(
+      `
+        UPDATE song_verses
+        SET
+          illustration_url = NULL,
+          updated_at = NOW()
+        WHERE id = $1
+      `,
+      [job.verse_id],
+    );
+
+    await client.query(
+      `
+        DELETE FROM song_generation_verse_artifacts
+        WHERE verse_id = $1
+      `,
+      [job.verse_id],
+    );
+
+    return {
+      jobId: job.id,
+      songId: job.song_id,
+      verseId: job.verse_id,
+      imagePath: artifactResult.rows[0]?.image_path ?? null,
+    } as ResetSongGenerationJobResult;
   });
 };
 

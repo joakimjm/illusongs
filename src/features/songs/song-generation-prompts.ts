@@ -4,12 +4,13 @@ const ART_STYLE_BLOCK = [
   "Illustrerer med følgende stil: Vintage børnebogsillustration fra 1960’erne/70’erne,",
   "malet i gouache/akvarel med synlige penselstrøg og mat papirtekstur.",
   "Surrealistiske og humoristiske scener med overdrevne figurer, ekspressive,",
-  "som udgangspunkt smilende ansigter (med mindre andet er passenge i historien)",
+  "som udgangspunkt smilende ansigter (med mindre andet er passende i historien)",
   "og kaotisk energi.",
   "Dæmpede jordfarver kombineret med stærke kontraster.",
   "Tableau-komposition fyldt med små detaljer og flere handlingsspor.",
   "Stemning: barnlig og grotesk på samme tid, satirisk, absurd og anarkistisk.",
   "Ingen tekst på illustrationen.",
+  "Karakterer refereres til i flere vers skal være konsistente.",
   "Dimensionerne skal være 1024 x 1536.",
 ].join("\n");
 

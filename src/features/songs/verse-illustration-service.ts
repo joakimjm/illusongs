@@ -27,14 +27,19 @@ type SaveVerseIllustrationInput = {
   imageData: ArrayBuffer;
 };
 
+export type SaveVerseIllustrationResult = {
+  verse: SongVerseDto;
+  storagePath: string;
+};
+
 export const saveVerseIllustration = async (
   input: SaveVerseIllustrationInput,
-): Promise<SongVerseDto> => {
+): Promise<SaveVerseIllustrationResult> => {
   const webpImage = await convertIllustrationToWebp({
     imageData: input.imageData,
   });
 
-  const { publicUrl } = await uploadVerseIllustrationImage({
+  const { publicUrl, path } = await uploadVerseIllustrationImage({
     songId: input.songId,
     verseId: input.verseId,
     image: webpImage,
@@ -46,5 +51,8 @@ export const saveVerseIllustration = async (
     illustrationUrl: publicUrl,
   });
 
-  return mapSongVerseStoToDto(verse);
+  return {
+    verse: mapSongVerseStoToDto(verse),
+    storagePath: path,
+  };
 };

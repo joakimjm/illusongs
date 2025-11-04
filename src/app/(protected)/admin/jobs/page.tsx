@@ -1,6 +1,7 @@
 import type { Route } from "next";
 import { revalidatePath } from "next/cache";
 import { HiArrowTopRightOnSquare } from "react-icons/hi2";
+import { Button } from "@/components/button";
 import { HeroHeader } from "@/components/hero-header";
 import { PageShell } from "@/components/page-shell";
 import { Panel } from "@/components/panel";
@@ -10,31 +11,67 @@ import {
   fetchSongGenerationJobList,
   resetSongGenerationJob,
 } from "@/features/songs/song-generation-queue";
-import { processNextSongGenerationJob } from "@/features/songs/song-generation-runner";
+import {
+  processNextSongGenerationJob,
+  type SongGenerationRunResult,
+} from "@/features/songs/song-generation-runner";
+import { deleteVerseIllustrationImage } from "@/features/songs/verse-illustration-storage";
 import { type DispatchState, ProcessJobForm } from "./process-job-form";
 
 const JOBS_PATH: Route = "/admin/jobs";
+const MAX_CHAINED_JOBS = 10;
 
 const processNextJobAction = async (
   _prevState: {
     status: "idle" | "success" | "empty" | "error";
     message: string | null;
   },
-  _formData: FormData,
+  formData: FormData,
 ) => {
   "use server";
 
   try {
-    const result = await processNextSongGenerationJob();
-    revalidatePath(JOBS_PATH);
+    const shouldRepeat = formData.get("repeat") === "on";
+    const processed: SongGenerationRunResult[] = [];
+    let queueExhausted = false;
 
-    if (!result) {
+    while (true) {
+      const result = await processNextSongGenerationJob();
+      if (!result) {
+        queueExhausted = shouldRepeat && processed.length > 0;
+        break;
+      }
+
+      processed.push(result);
+      revalidatePath(JOBS_PATH);
+
+      if (!shouldRepeat || processed.length >= MAX_CHAINED_JOBS) {
+        break;
+      }
+    }
+
+    if (processed.length === 0) {
+      revalidatePath(JOBS_PATH);
       return { status: "empty", message: "No pending jobs." } as DispatchState;
     }
 
+    const count = processed.length;
+    const last = processed[count - 1];
+    const tail =
+      shouldRepeat && queueExhausted
+        ? " Queue is empty."
+        : shouldRepeat && count >= MAX_CHAINED_JOBS
+          ? " Stopped after batch limit."
+          : "";
+
+    const message =
+      shouldRepeat && count > 1
+        ? `Processed ${count} jobs. Last verse ${last.verseSequence}.${tail}`
+        : `Generated illustration for verse ${last.verseSequence}.`;
+
     return {
       status: "success",
-      message: `Generated illustration for verse ${result.verseSequence}.`,
+      message,
     } as DispatchState;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unexpected error";
@@ -53,7 +90,25 @@ const resetJobAction = async (formData: FormData) => {
     return;
   }
 
-  await resetSongGenerationJob(jobId);
+  const result = await resetSongGenerationJob(jobId);
+  if (!result) {
+    return;
+  }
+
+  if (result.imagePath) {
+    try {
+      await deleteVerseIllustrationImage(result.imagePath);
+    } catch (error) {
+      console.error(
+        JSON.stringify({
+          event: "song_generation_image_delete_failed",
+          jobId,
+          imagePath: result.imagePath,
+          error: error instanceof Error ? error.message : String(error),
+        }),
+      );
+    }
+  }
   revalidatePath(JOBS_PATH);
 };
 
@@ -77,6 +132,9 @@ const STATUS_STYLES: Record<string, string> = {
   completed:
     "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-100",
 };
+
+const buildConversationUrl = (conversationId: string): string =>
+  `https://openrouter.ai/conversation/${conversationId}`;
 
 const AdminJobsPage = async () => {
   const jobs = await fetchSongGenerationJobList(100);
@@ -102,18 +160,18 @@ const AdminJobsPage = async () => {
         </div>
 
         <div className="mt-6 -mx-4 overflow-x-auto sm:mx-0">
-          <div className="inline-block align-middle">
+          <div className="inline-block min-w-full align-middle">
             <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white/80 shadow-sm dark:border-slate-700/60 dark:bg-slate-900/40">
-              <table className="divide-y divide-slate-200/70 text-sm dark:divide-slate-800/60">
+              <table className="min-w-[64rem] table-fixed divide-y divide-slate-200/70 text-sm dark:divide-slate-800/60">
                 <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-900 dark:text-slate-300">
                   <tr>
-                    <th className="px-4 py-3 whitespace-nowrap">Song</th>
-                    <th className="px-4 py-3 whitespace-nowrap">Verse</th>
-                    <th className="px-4 py-3 whitespace-nowrap">Status</th>
-                    <th className="px-4 py-3 whitespace-nowrap">Attempts</th>
-                    <th className="px-4 py-3 whitespace-nowrap">Updated</th>
-                    <th className="px-4 py-3 whitespace-nowrap">Last error</th>
-                    <th className="px-4 py-3 whitespace-nowrap" />
+                    <th className="px-4 py-3">Song</th>
+                    <th className="px-4 py-3">Verse</th>
+                    <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3">Attempts</th>
+                    <th className="px-4 py-3">Updated</th>
+                    <th className="px-4 py-3">Last error</th>
+                    <th className="px-4 py-3" />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200/70 dark:divide-slate-800/60">
@@ -122,6 +180,10 @@ const AdminJobsPage = async () => {
                       STATUS_STYLES[job.status] ??
                       "bg-slate-200 text-slate-700 dark:bg-slate-800/60 dark:text-slate-200";
                     const canReset = job.status !== "pending";
+                    const conversationId = job.conversationId?.trim() ?? null;
+                    const conversationUrl = conversationId
+                      ? buildConversationUrl(conversationId)
+                      : null;
 
                     return (
                       <tr
@@ -172,17 +234,39 @@ const AdminJobsPage = async () => {
                         <td className="px-4 py-3 text-sm text-rose-600 dark:text-rose-300">
                           {job.lastError ? truncate(job.lastError, 90) : ""}
                         </td>
-                        <td className="px-4 py-3 text-right">
-                          <form action={resetJobAction} className="inline-flex">
-                            <input type="hidden" name="jobId" value={job.id} />
-                            <button
-                              type="submit"
-                              disabled={!canReset}
-                              className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400 dark:border-slate-700 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800/60 dark:disabled:border-slate-700/60 dark:disabled:text-slate-500"
+                        <td className="px-4 py-3">
+                          <div className="flex flex-col items-end gap-2">
+                            <form
+                              action={resetJobAction}
+                              className="inline-flex"
                             >
-                              Requeue
-                            </button>
-                          </form>
+                              <input
+                                type="hidden"
+                                name="jobId"
+                                value={job.id}
+                              />
+                              {canReset && (
+                                <Button
+                                  type="submit"
+                                  variant="danger"
+                                  size="xs"
+                                >
+                                  Requeue
+                                </Button>
+                              )}
+                            </form>
+                            {conversationUrl ? (
+                              <a
+                                href={conversationUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex whitespace-nowrap items-center gap-1 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800/60"
+                              >
+                                Open conversation
+                                <HiArrowTopRightOnSquare className="h-3.5 w-3.5" />
+                              </a>
+                            ) : null}
+                          </div>
                         </td>
                       </tr>
                     );
