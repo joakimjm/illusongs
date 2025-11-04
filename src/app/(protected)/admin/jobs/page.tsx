@@ -8,8 +8,40 @@ import {
   fetchSongGenerationJobList,
   resetSongGenerationJob,
 } from "@/features/songs/song-generation-queue";
+import { processNextSongGenerationJob } from "@/features/songs/song-generation-runner";
+import { type DispatchState, ProcessJobForm } from "./process-job-form";
 
 const JOBS_PATH = "/admin/jobs";
+
+const processNextJobAction = async (
+  _prevState: {
+    status: "idle" | "success" | "empty" | "error";
+    message: string | null;
+  },
+  _formData: FormData,
+) => {
+  "use server";
+
+  try {
+    const result = await processNextSongGenerationJob();
+    revalidatePath(JOBS_PATH);
+
+    if (!result) {
+      return { status: "empty", message: "No pending jobs." } as DispatchState;
+    }
+
+    return {
+      status: "success",
+      message: `Generated illustration for verse ${result.verseSequence}.`,
+    } as DispatchState;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unexpected error";
+    return {
+      status: "error",
+      message: `Failed to process job: ${message}`,
+    } as DispatchState;
+  }
+};
 
 const resetJobAction = async (formData: FormData) => {
   "use server";
@@ -60,9 +92,12 @@ const AdminJobsPage = async () => {
           Recent jobs
         </Heading>
         <Body size="sm" className="text-slate-600 dark:text-slate-300">
-          Jobs are ordered by status and most recent updates. Use the action
-          button to put a job back in the queue.
+          Jobs are ordered by status and most recent updates. Use the actions
+          below to keep things moving.
         </Body>
+        <div className="mt-4">
+          <ProcessJobForm action={processNextJobAction} />
+        </div>
 
         <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200/80 bg-white/80 shadow-sm dark:border-slate-700/60 dark:bg-slate-900/40">
           <table className="min-w-full divide-y divide-slate-200/70 text-sm dark:divide-slate-800/60">

@@ -160,7 +160,9 @@ const claimJobRow = async (
       SELECT ${JOB_COLUMNS}
       FROM song_generation_jobs
       WHERE status = 'pending'
-      ORDER BY created_at ASC
+      ORDER BY
+        created_at ASC,
+        (SELECT sequence_number FROM song_verses WHERE id = verse_id) ASC
       FOR UPDATE SKIP LOCKED
       LIMIT 1
     `,
@@ -284,14 +286,8 @@ export const fetchSongGenerationJobList = async (
         JOIN songs s ON s.id = j.song_id
         JOIN song_verses v ON v.id = j.verse_id
         ORDER BY
-          CASE j.status
-            WHEN 'pending' THEN 0
-            WHEN 'in_progress' THEN 1
-            WHEN 'failed' THEN 2
-            ELSE 3
-          END,
-          j.updated_at DESC,
-          j.id DESC
+          j.created_at ASC,
+          v.sequence_number ASC
         LIMIT $1
       `,
       [limit],

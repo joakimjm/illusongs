@@ -9,6 +9,7 @@ import { registerDatabaseTestSuite } from "@/features/testing/database-test-harn
 import { withTestPool } from "@/features/testing/postgres-test-utils";
 
 const TABLES: readonly string[] = [
+  "song_generation_conversations",
   "song_generation_verse_artifacts",
   "song_generation_jobs",
   "song_tags",

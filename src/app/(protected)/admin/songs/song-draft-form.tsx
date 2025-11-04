@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { Button } from "@/components/button";
 import { Body } from "@/components/typography";
 
@@ -43,7 +44,7 @@ const Message = ({ state }: { state: SongDraftFormState }) => {
 };
 
 const SongDraftForm = ({ action }: SongDraftFormProps) => {
-  const [state, formAction] = useFormState(action, INITIAL_STATE);
+  const [state, formAction] = useActionState(action, INITIAL_STATE);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
