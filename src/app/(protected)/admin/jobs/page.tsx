@@ -145,9 +145,6 @@ const STATUS_BADGE_VARIANTS: Record<string, BadgeVariant> = {
   completed: "success",
 };
 
-const buildConversationUrl = (conversationId: string): string =>
-  `https://openrouter.ai/conversation/${conversationId}`;
-
 const AdminJobsPage = async () => {
   const jobs = await fetchSongGenerationJobList(100);
 
@@ -191,10 +188,6 @@ const AdminJobsPage = async () => {
                     const badgeVariant =
                       STATUS_BADGE_VARIANTS[job.status] ?? "neutral";
                     const canReset = job.status !== "pending";
-                    const conversationId = job.conversationId?.trim() ?? null;
-                    const conversationUrl = conversationId
-                      ? buildConversationUrl(conversationId)
-                      : null;
 
                     return (
                       <tr
@@ -267,17 +260,6 @@ const AdminJobsPage = async () => {
                                 </Button>
                               )}
                             </form>
-                            {conversationUrl ? (
-                              <a
-                                href={conversationUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="inline-flex whitespace-nowrap items-center gap-1 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800/60"
-                              >
-                                Open conversation
-                                <HiArrowTopRightOnSquare className="h-3.5 w-3.5" />
-                              </a>
-                            ) : null}
                           </div>
                         </td>
                       </tr>
