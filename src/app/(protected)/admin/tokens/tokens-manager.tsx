@@ -1,7 +1,7 @@
 "use client";
 
 import type { ChangeEvent } from "react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/button";
 import { Panel } from "@/components/panel";
 import { Body } from "@/components/typography";
@@ -181,12 +181,9 @@ export const TokensManager = ({ initialTokens }: TokensManagerProps) => {
     }
   };
 
-  const copyButtonLabel = useMemo(() => {
-    if (!latestToken) {
-      return "Copy token";
-    }
-    return `Copy ${latestToken.label} token`;
-  }, [latestToken]);
+  const copyButtonLabel = latestToken
+    ? `Copy ${latestToken.label} token`
+    : "Copy token";
 
   const handlePermissionChange =
     (permission: AccessTokenPermissionValue) =>

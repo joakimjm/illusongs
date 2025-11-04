@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { HiChevronRight } from "react-icons/hi";
 import { Heading, HeadingText } from "@/components/typography";
 import type { TagCategoryDto } from "@/features/songs/song-tag-categories";
@@ -109,6 +109,18 @@ const filterSongs = (
 
 const CARD_SCROLL_STRENGTH = 0.05;
 const CARD_SCROLL_MAX_OFFSET = 200;
+
+const buildTagLookup = (
+  categories: TagCategoryDto[],
+): Map<string, { id: string; label: string }> => {
+  const map = new Map<string, { id: string; label: string }>();
+  categories.forEach((category) => {
+    category.tags.forEach((tag) => {
+      map.set(tag.id, tag);
+    });
+  });
+  return map;
+};
 
 const SongCard = ({ song }: { readonly song: SongSummaryDto }) => {
   const cardRef = useScrollFollow<HTMLAnchorElement>({
@@ -320,15 +332,7 @@ export const SongbookClient = ({
 
   const pathname = usePathname();
 
-  const tagLookup = useMemo(() => {
-    const map = new Map<string, { id: string; label: string }>();
-    categories.forEach((category) => {
-      category.tags.forEach((tag) => {
-        map.set(tag.id, tag);
-      });
-    });
-    return map;
-  }, [categories]);
+  const tagLookup = buildTagLookup(categories);
 
   useEffect(() => {
     setHasHydrated(true);
@@ -401,7 +405,7 @@ export const SongbookClient = ({
     };
   }, []);
 
-  const toggleTag = useCallback((tag: string) => {
+  const toggleTag = (tag: string) => {
     setSelectedTags((current) => {
       const normalizedTag = normalizeTag(tag);
       const hasTag = current.includes(normalizedTag);
@@ -411,24 +415,21 @@ export const SongbookClient = ({
 
       return next;
     });
-  }, []);
+  };
 
-  const clearFilters = useCallback(() => {
+  const clearFilters = () => {
     setQuery("");
     setSelectedTags([]);
-  }, []);
+  };
 
-  const removeFilter = useCallback((tag: string) => {
+  const removeFilter = (tag: string) => {
     const normalized = normalizeTag(tag);
     setSelectedTags((current) =>
       current.filter((entry) => entry !== normalized),
     );
-  }, []);
+  };
 
-  const filteredSongs = useMemo(
-    () => filterSongs(songs, query, selectedTags),
-    [songs, query, selectedTags],
-  );
+  const filteredSongs = filterSongs(songs, query, selectedTags);
 
   const resultsLabel =
     filteredSongs.length === 1

@@ -1,5 +1,5 @@
 import type { RefCallback } from "react";
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 const DEFAULT_STRENGTH = 0.06;
 const DEFAULT_MAX_OFFSET = 12;
@@ -170,27 +170,26 @@ export const useScrollFollow = <ElementType extends HTMLElement>(
     };
   }, []);
 
-  return useCallback(
-    (node: ElementType | null) => {
-      const previousSubscriber = subscriberRef.current;
-      if (previousSubscriber) {
-        unregisterSubscriber(previousSubscriber);
-        subscriberRef.current = null;
-      }
+  const assignRef: RefCallback<ElementType> = (node) => {
+    const previousSubscriber = subscriberRef.current;
+    if (previousSubscriber) {
+      unregisterSubscriber(previousSubscriber);
+      subscriberRef.current = null;
+    }
 
-      if (!node || !isBrowser()) {
-        return;
-      }
+    if (!node || !isBrowser()) {
+      return;
+    }
 
-      const subscriber: Subscriber = {
-        element: node,
-        strength,
-        maxOffset,
-      };
+    const subscriber: Subscriber = {
+      element: node,
+      strength,
+      maxOffset,
+    };
 
-      subscriberRef.current = subscriber;
-      registerSubscriber(subscriber);
-    },
-    [maxOffset, strength],
-  );
+    subscriberRef.current = subscriber;
+    registerSubscriber(subscriber);
+  };
+
+  return assignRef;
 };

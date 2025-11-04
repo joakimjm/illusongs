@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { SongVerseDto } from "@/features/songs/song-types";
 
 const HomeIcon = () => (
@@ -92,7 +92,7 @@ export const SongVerseCarousel = ({
     };
   }, []);
 
-  const scrollToIndex = useCallback((index: number) => {
+  const scrollToIndex = (index: number) => {
     const container = containerRef.current;
     const target = verseRefs.current[index];
     if (!container || !target) {
@@ -103,38 +103,34 @@ export const SongVerseCarousel = ({
       left: target.offsetLeft,
       behavior: "smooth",
     });
-  }, []);
+  };
 
-  const handlePrevious = useCallback(() => {
+  const handlePrevious = () => {
     if (activeIndex > 0) {
       scrollToIndex(activeIndex - 1);
     }
-  }, [activeIndex, scrollToIndex]);
+  };
 
-  const handleNext = useCallback(() => {
+  const handleNext = () => {
     if (activeIndex < verses.length - 1) {
       scrollToIndex(activeIndex + 1);
     }
-  }, [activeIndex, scrollToIndex, verses.length]);
+  };
 
-  const handleHome = useCallback(() => {
+  const handleHome = () => {
     router.push("/");
-  }, [router]);
+  };
 
-  const progressDots = useMemo(
-    () =>
-      verses.map((_verse, index) => (
-        <span
-          key={_verse.id}
-          className={`h-1.5 w-6 rounded-full transition ${
-            index === activeIndex
-              ? "bg-[rgba(255,214,142,0.95)]"
-              : "bg-[rgba(255,255,255,0.35)]"
-          }`}
-        />
-      )),
-    [activeIndex, verses],
-  );
+  const progressDots = verses.map((_verse, index) => (
+    <span
+      key={_verse.id}
+      className={`h-1.5 w-6 rounded-full transition ${
+        index === activeIndex
+          ? "bg-[rgba(255,214,142,0.95)]"
+          : "bg-[rgba(255,255,255,0.35)]"
+      }`}
+    />
+  ));
 
   return (
     <div className="relative flex h-[100dvh] flex-col bg-black text-white">

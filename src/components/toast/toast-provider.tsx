@@ -3,10 +3,8 @@
 import {
   createContext,
   type ReactNode,
-  useCallback,
   useContext,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -107,37 +105,39 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const timersRef = useRef<Map<string, number>>(new Map());
 
-  const dismissToast = useCallback((id: string) => {
+  const dismissToast = (id: string) => {
     setToasts((previous) => previous.filter((toast) => toast.id !== id));
     const timerId = timersRef.current.get(id);
     if (timerId !== undefined) {
       window.clearTimeout(timerId);
       timersRef.current.delete(id);
     }
-  }, []);
+  };
 
-  const pushToast = useCallback(
-    ({ title, description, variant = "info", durationMs }: ToastInput) => {
-      const id = generateId();
-      setToasts((previous) => [
-        ...previous,
-        {
-          id,
-          title,
-          description,
-          variant,
-        },
-      ]);
+  const pushToast = ({
+    title,
+    description,
+    variant = "info",
+    durationMs,
+  }: ToastInput) => {
+    const id = generateId();
+    setToasts((previous) => [
+      ...previous,
+      {
+        id,
+        title,
+        description,
+        variant,
+      },
+    ]);
 
-      const timeout = window.setTimeout(() => {
-        dismissToast(id);
-      }, durationMs ?? DEFAULT_DURATION_MS);
-      timersRef.current.set(id, timeout);
+    const timeout = window.setTimeout(() => {
+      dismissToast(id);
+    }, durationMs ?? DEFAULT_DURATION_MS);
+    timersRef.current.set(id, timeout);
 
-      return id;
-    },
-    [dismissToast],
-  );
+    return id;
+  };
 
   useEffect(
     () => () => {
@@ -149,13 +149,10 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
     [],
   );
 
-  const contextValue = useMemo<ToastContextValue>(
-    () => ({
-      pushToast,
-      dismissToast,
-    }),
-    [dismissToast, pushToast],
-  );
+  const contextValue: ToastContextValue = {
+    pushToast,
+    dismissToast,
+  };
 
   return (
     <ToastContext.Provider value={contextValue}>
