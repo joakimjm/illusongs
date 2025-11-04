@@ -11,7 +11,7 @@ export const ART_STYLE_BLOCK = [
   "Stemning: barnlig og grotesk på samme tid, satirisk, absurd og anarkistisk.",
   "Ingen tekst på illustrationen.",
   "Karakterer refereres til i flere vers skal være konsistente.",
-  "Dimensionerne skal være 1024 x 1536.",
+  "Dimensions must be 1024 x 1536, tall, 2:3 aspect ratio.",
 ].join("\n");
 
 const joinVerses = (verses: readonly SongVerseDto[]): string =>
