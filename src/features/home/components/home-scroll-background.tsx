@@ -3,8 +3,8 @@
 import type { JSX } from "react";
 import { useScrollFollow } from "@/utils/use-scroll-follow";
 
-const BACKGROUND_STRENGTH = -0.012;
-const BACKGROUND_MAX_OFFSET = 18;
+const BACKGROUND_STRENGTH = -0.05;
+const BACKGROUND_MAX_OFFSET = 200;
 
 export const HomeScrollBackground = (): JSX.Element => {
   const backgroundRef = useScrollFollow<HTMLDivElement>({
