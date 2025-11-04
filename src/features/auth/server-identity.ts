@@ -45,20 +45,51 @@ export const extractCreatedBy = (identity: ServerIdentity): string => {
 
 const AUTHORIZATION_HEADER = "authorization";
 const BEARER_PREFIX = "bearer ";
+const ACCESS_TOKEN_QUERY_PARAM = "token";
 
-const extractAccessToken = (request: Request | NextRequest): string | null => {
+const getHeaderToken = (request: Request | NextRequest): string | null => {
   const headerValue = request.headers.get(AUTHORIZATION_HEADER);
   if (!headerValue) {
     return null;
   }
 
-  const lowerCased = headerValue.trim().toLowerCase();
-  if (!lowerCased.startsWith(BEARER_PREFIX)) {
+  const trimmed = headerValue.trim();
+  if (trimmed.length === 0) {
     return null;
   }
 
-  const token = headerValue.slice(BEARER_PREFIX.length);
-  return token.trim().length > 0 ? token.trim() : null;
+  if (!trimmed.toLowerCase().startsWith(BEARER_PREFIX)) {
+    return null;
+  }
+
+  const token = trimmed.slice(BEARER_PREFIX.length).trim();
+  return token.length > 0 ? token : null;
+};
+
+const getQueryToken = (request: Request | NextRequest): string | null => {
+  const params =
+    "nextUrl" in request
+      ? request.nextUrl.searchParams
+      : new URL(request.url).searchParams;
+
+  const token = params.get(ACCESS_TOKEN_QUERY_PARAM);
+  if (!token) {
+    return null;
+  }
+
+  const trimmed = token.trim();
+  return trimmed.length > 0 ? trimmed : null;
+};
+
+export const extractAccessToken = (
+  request: Request | NextRequest,
+): string | null => {
+  const headerToken = getHeaderToken(request);
+  if (headerToken) {
+    return headerToken;
+  }
+
+  return getQueryToken(request);
 };
 
 const resolveTokenIdentity = async (
