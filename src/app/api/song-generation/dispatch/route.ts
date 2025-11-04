@@ -11,7 +11,7 @@ import { processNextSongGenerationJob } from "@/features/songs/song-generation-r
 export const runtime = "nodejs";
 
 const handlers = createApiRoute({
-  POST: async ({ identity }) => {
+  GET: async ({ identity }) => {
     if (!isAdmin(identity) && !isTokenIdentity(identity)) {
       return createForbiddenResponse(SONGS_MANAGED_BY_ADMINS_DETAIL);
     }
@@ -34,4 +34,4 @@ const handlers = createApiRoute({
   },
 });
 
-export const POST = handlers.POST;
+export const GET = handlers.GET;

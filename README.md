@@ -32,5 +32,5 @@ The project aims to bring song culture back into everyday family life through ar
 ## Song generation workflow
 
 - Create unpublished drafts through `POST /api/admin/songs` with `title` and a multiline `verses` payload. The server splits verses, stores them in order, and enqueues a `song_generation_jobs` row.
-- Trigger `POST /api/song-generation/dispatch` (e.g. via CRON) to process the next pending verse. Each call generates one illustration through OpenRouter, uploads it to Supabase Storage, records artifacts, and returns `204` when no work remains.
+- Trigger `GET /api/song-generation/dispatch` (e.g. via CRON) to process the next pending verse. Each call generates one illustration through OpenRouter, uploads it to Supabase Storage, records artifacts, and returns `204` when no work remains.
 - Configure `OPENROUTER_API_KEY` (and optional `OPENROUTER_BASE_URL`, `OPENROUTER_MODEL`, `OPENROUTER_HTTP_REFERER`, `OPENROUTER_APP_TITLE`) so the dispatcher can reach your chosen provider.

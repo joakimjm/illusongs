@@ -66,7 +66,7 @@ song_generation_verse_artifacts
 
 ## Cron / Automation
 
-- Schedule a POST to `/api/song-generation/dispatch` (e.g. Vercel Cron) to process the queue continuously.
+- Schedule a GET to `/api/song-generation/dispatch` (e.g. Vercel Cron) to process the queue continuously.
 - Editors can also run jobs manually from `/admin/jobs` during reviews.
 
 ---
