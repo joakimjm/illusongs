@@ -1,4 +1,5 @@
 import { revalidatePath } from "next/cache";
+import Link from "next/link";
 import { Badge } from "@/components/badge";
 import { HeroHeader } from "@/components/hero-header";
 import { PageShell } from "@/components/page-shell";
@@ -170,28 +171,42 @@ const SongsAdminPage = async () => {
                         <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
                           {formatDate(song.updatedAt)}
                         </td>
-                        <td className="px-4 py-3 text-right">
-                          <form
-                            action={publishToggleAction}
-                            className="inline-flex items-center gap-2"
-                          >
-                            <input
-                              type="hidden"
-                              name="songId"
-                              value={song.id}
-                            />
-                            <input
-                              type="hidden"
-                              name="publish"
-                              value={song.isPublished ? "false" : "true"}
-                            />
-                            <button
-                              type="submit"
+                        <td className="px-4 py-3">
+                          <div className="flex items-center justify-end gap-2">
+                            <Link
+                              href={
+                                song.isPublished
+                                  ? `/songs/${song.slug}`
+                                  : `/songs/${song.slug}?preview=true`
+                              }
                               className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800/60"
+                              target="_blank"
+                              rel="noreferrer"
                             >
-                              {song.isPublished ? "Unpublish" : "Publish"}
-                            </button>
-                          </form>
+                              {song.isPublished ? "View" : "Preview"}
+                            </Link>
+                            <form
+                              action={publishToggleAction}
+                              className="inline-flex items-center gap-2"
+                            >
+                              <input
+                                type="hidden"
+                                name="songId"
+                                value={song.id}
+                              />
+                              <input
+                                type="hidden"
+                                name="publish"
+                                value={song.isPublished ? "false" : "true"}
+                              />
+                              <button
+                                type="submit"
+                                className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800/60"
+                              >
+                                {song.isPublished ? "Unpublish" : "Publish"}
+                              </button>
+                            </form>
+                          </div>
                         </td>
                       </tr>
                     );

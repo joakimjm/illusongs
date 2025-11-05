@@ -3,9 +3,11 @@ import { notFound } from "next/navigation";
 import type { JSX } from "react";
 import { cache } from "react";
 import { APP_NAME } from "@/config/app";
+import { isAdminUser } from "@/features/auth/policies";
 import { SongVerseCarousel } from "@/features/songs/components/song-verse-carousel";
 import { findSongBySlug } from "@/features/songs/song-queries";
 import type { SongDetailDto } from "@/features/songs/song-types";
+import { getUser } from "@/features/supabase/server";
 
 type SongPageParams = {
   slug: string;
@@ -15,25 +17,68 @@ type SongPageParamsInput = {
   params: SongPageParams | Promise<SongPageParams>;
 };
 
-const loadSong = cache(async (slug: string): Promise<SongDetailDto | null> => {
-  const normalized = slug.trim().toLowerCase();
-  if (normalized.length === 0) {
-    return null;
+type SongPageSearchParams = {
+  preview?: string | string[];
+};
+
+type SongPageSearchParamsInput = {
+  searchParams?: SongPageSearchParams | Promise<SongPageSearchParams>;
+};
+
+const PREVIEW_QUERY_VALUE = "true";
+
+const loadSong = cache(
+  async (
+    slug: string,
+    includeUnpublished: boolean,
+  ): Promise<SongDetailDto | null> => {
+    const normalized = slug.trim().toLowerCase();
+    if (normalized.length === 0) {
+      return null;
+    }
+
+    const song = await findSongBySlug(normalized);
+    if (!song) {
+      return null;
+    }
+
+    if (!includeUnpublished && !song.isPublished) {
+      return null;
+    }
+
+    return song;
+  },
+);
+
+const shouldEnablePreview = async (
+  searchParams?: SongPageSearchParams | Promise<SongPageSearchParams>,
+): Promise<boolean> => {
+  const resolved = await Promise.resolve(searchParams ?? {});
+  const rawPreview = resolved.preview;
+  const previewValue = Array.isArray(rawPreview) ? rawPreview[0] : rawPreview;
+
+  if (!previewValue || previewValue.toLowerCase() !== PREVIEW_QUERY_VALUE) {
+    return false;
   }
 
-  const song = await findSongBySlug(normalized);
-  if (!song || !song.isPublished) {
-    return null;
+  const user = await getUser();
+  if (!user) {
+    return false;
   }
 
-  return song;
-});
+  return isAdminUser(user);
+};
 
 export const generateMetadata = async ({
   params,
-}: SongPageParamsInput): Promise<Metadata> => {
-  const resolvedParams = await Promise.resolve(params);
-  const song = await loadSong(resolvedParams.slug);
+  searchParams,
+}: SongPageParamsInput & SongPageSearchParamsInput): Promise<Metadata> => {
+  const [resolvedParams, previewEnabled] = await Promise.all([
+    Promise.resolve(params),
+    shouldEnablePreview(searchParams),
+  ]);
+
+  const song = await loadSong(resolvedParams.slug, previewEnabled);
 
   if (!song) {
     return {
@@ -42,22 +87,36 @@ export const generateMetadata = async ({
   }
 
   return {
-    title: `${song.title} | ${APP_NAME}`,
+    title: `${song.title}${previewEnabled && !song.isPublished ? " (preview)" : ""} | ${APP_NAME}`,
     description: `Syng med på "${song.title}" og oplev illustrationerne vers for vers.`,
   };
 };
 
 const SongPage = async ({
   params,
-}: SongPageParamsInput): Promise<JSX.Element> => {
-  const resolvedParams = await Promise.resolve(params);
-  const song = await loadSong(resolvedParams.slug);
+  searchParams,
+}: SongPageParamsInput & SongPageSearchParamsInput): Promise<JSX.Element> => {
+  const [resolvedParams, previewEnabled] = await Promise.all([
+    Promise.resolve(params),
+    shouldEnablePreview(searchParams),
+  ]);
+
+  const song = await loadSong(resolvedParams.slug, previewEnabled);
   if (!song) {
     notFound();
   }
 
+  const isPreview = previewEnabled && !song.isPublished;
+
   return (
     <main className="relative min-h-screen bg-black text-white">
+      {isPreview ? (
+        <div className="pointer-events-none absolute left-0 right-0 top-0 z-50 flex justify-center">
+          <span className="pointer-events-auto mt-6 rounded-full border border-amber-400/70 bg-amber-100/90 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-amber-900 shadow-lg dark:border-amber-300/70 dark:bg-amber-300/80 dark:text-amber-950">
+            Previewing unpublished song
+          </span>
+        </div>
+      ) : null}
       <SongVerseCarousel songTitle={song.title} verses={song.verses} />
     </main>
   );
