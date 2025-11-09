@@ -122,7 +122,7 @@ export const SongVerseCarousel = ({
   };
 
   const handleHome = () => {
-    router.push("/");
+    router.back();
   };
 
   const progressDots = verses.map((_verse, index) => (
