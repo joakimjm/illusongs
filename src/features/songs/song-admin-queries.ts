@@ -1,6 +1,6 @@
 import { getPostgresConnection } from "@/features/postgres/postgres-connection-pool";
 
-type AdminSongSummary = {
+export type AdminSongSummary = {
   id: string;
   title: string;
   slug: string;
