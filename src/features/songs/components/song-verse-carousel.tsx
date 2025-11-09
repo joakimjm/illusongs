@@ -7,6 +7,7 @@ import type { SongVerseDto } from "@/features/songs/song-types";
 const HomeIcon = () => (
   <svg
     aria-hidden
+    focusable="false"
     viewBox="0 0 24 24"
     className="h-6 w-6"
     fill="none"
@@ -25,6 +26,7 @@ const HomeIcon = () => (
 const ArrowIcon = ({ direction }: { readonly direction: "left" | "right" }) => (
   <svg
     aria-hidden
+    focusable="false"
     viewBox="0 0 24 24"
     className="h-6 w-6"
     fill="none"
@@ -46,16 +48,18 @@ type SongVerseCarouselProps = {
 };
 
 export const SongVerseCarousel = ({
-  songTitle: _songTitle,
+  songTitle,
   verses,
 }: SongVerseCarouselProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const verseRefs = useRef<(HTMLElement | null)[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const router = useRouter();
+  const [isImageFocusMode, setIsImageFocusMode] = useState(false);
 
   useEffect(() => {
     const container = containerRef.current;
+    verseRefs.current = verseRefs.current.slice(0, verses.length);
     const elements = verseRefs.current.filter(
       (element): element is HTMLElement => element !== null,
     );
@@ -90,7 +94,7 @@ export const SongVerseCarousel = ({
     return () => {
       observer.disconnect();
     };
-  }, []);
+  }, [verses]);
 
   const scrollToIndex = (index: number) => {
     const container = containerRef.current;
@@ -133,24 +137,34 @@ export const SongVerseCarousel = ({
   ));
 
   return (
-    <div className="relative flex h-[100dvh] flex-col bg-black text-white">
+    <div className="relative flex h-dvh flex-col bg-black text-white">
       <header className="pointer-events-none absolute left-0 right-0 top-0 z-30 flex items-center justify-end px-6 pt-6">
         <div className="flex items-center gap-2">{progressDots}</div>
       </header>
 
-      <div
+      <section
         ref={containerRef}
         className="flex h-full snap-x snap-mandatory overflow-x-scroll overscroll-x-none"
+        aria-label={`Illustration carousel for ${songTitle}`}
       >
         {verses.map((verse, index) => {
           const hasImage = verse.illustrationUrl !== null;
           return (
-            <section
+            <button
+              type="button"
               key={verse.id}
               ref={(element) => {
                 verseRefs.current[index] = element;
               }}
-              className="relative flex h-full w-full flex-shrink-0 snap-center items-end"
+              aria-pressed={isImageFocusMode}
+              onClick={() => setIsImageFocusMode((value) => !value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  setIsImageFocusMode((value) => !value);
+                }
+              }}
+              className="relative flex h-full w-full shrink-0 snap-center items-end"
             >
               {hasImage ? (
                 <>
@@ -164,18 +178,23 @@ export const SongVerseCarousel = ({
                   />
                 </>
               ) : (
-                <div className="absolute inset-0 bg-gradient-to-br from-stone-900/80 via-stone-800/80 to-stone-900/90" />
+                <div className="absolute inset-0 bg-linear-to-br from-stone-900/80 via-stone-800/80 to-stone-900/90" />
               )}
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[rgba(15,10,5,0.2)] to-[rgba(10,6,3,0.75)]" />
-              <div className="relative z-10 flex w-full flex-col gap-6 px-6 pb-28 pt-24 sm:px-12">
-                <p className="whitespace-pre-line text-lg leading-8 text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
+
+              <div
+                className={`absolute inset-0 bg-linear-to-b from-transparent via-[rgba(15,10,5,0.2)] to-[rgba(10,6,3,0.75)] duration-500 transition-opacity ${isImageFocusMode ? "opacity-0" : ""}`}
+              />
+              <div
+                className={`relative z-10 flex w-full flex-col gap-6 px-6 pb-28 pt-24 sm:px-12 duration-500 transition-opacity ${isImageFocusMode ? "opacity-0" : ""}`}
+              >
+                <p className="select-none text-left whitespace-pre-line text-lg leading-6 text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
                   {verse.lyricText}
                 </p>
               </div>
-            </section>
+            </button>
           );
         })}
-      </div>
+      </section>
 
       <footer className="pointer-events-none absolute inset-x-0 bottom-8 z-30 flex items-center justify-between px-6">
         <button

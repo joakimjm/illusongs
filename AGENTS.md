@@ -39,6 +39,7 @@ Access token administration (requires admin privileges):
 - Minimalist, responsive UI with full light/dark parity. WCAG 2.1 AA minimum.
 - Prefer Server Components; add "use client" only for interactivity (forms, events).
 - State: prefer server data via RSC and fetch; if @tanstack/react-query is present, use it for client mutations/queries. Avoid prop drilling; use Context sparingly.
+- React compiler is enabled
 </frontend_stack_defaults>
 </code_editing_rules>
 
