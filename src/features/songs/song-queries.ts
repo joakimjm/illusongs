@@ -57,7 +57,7 @@ export const fetchPublishedSongs = async (): Promise<SongSummaryDto[]> => {
           s.created_at,
           s.updated_at,
           preview.illustration_url
-        ORDER BY s.created_at DESC, s.id DESC
+        ORDER BY s.title, s.created_at DESC
       `,
     );
 

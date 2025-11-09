@@ -83,6 +83,39 @@ test("fetchPublishedSongs returns only published songs with sorted tags", async 
   expect(song?.coverImageUrl).toBe("/jeg-har-fanget-mig-en-myg-01.png");
 });
 
+test("fetchPublishedSongs returns songs ordered by title", async () => {
+  await seedSongData();
+
+  await withTestPool(async (pool) => {
+    await pool.query(
+      `
+        INSERT INTO songs (id, slug, title, language_code, is_published)
+        VALUES
+          ('00000000-0000-0000-0000-000000000101', 'omega-song', 'Omega Song', 'da', true),
+          ('00000000-0000-0000-0000-000000000102', 'alpha-song', 'Alpha Song', 'da', true);
+      `,
+    );
+
+    await pool.query(
+      `
+        INSERT INTO song_verses (id, song_id, sequence_number, lyric_text, illustration_url)
+        VALUES
+          ('00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000101', 1, 'Omega vers', '/omega-song-01.png'),
+          ('00000000-0000-0000-0000-000000000202', '00000000-0000-0000-0000-000000000102', 1, 'Alpha vers', '/alpha-song-01.png');
+      `,
+    );
+  });
+
+  const songs = await fetchPublishedSongs();
+  const titles = songs.map((entry) => entry.title);
+
+  expect(titles).toEqual([
+    "Alpha Song",
+    "Jeg har fanget mig en myg",
+    "Omega Song",
+  ]);
+});
+
 test("findSongBySlug returns full song with verses ordered by sequence", async () => {
   await seedSongData();
 
