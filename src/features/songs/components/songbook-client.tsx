@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { HiChevronRight } from "react-icons/hi";
 import { Heading, HeadingText } from "@/components/typography";
 import type { TagCategoryDto } from "@/features/songs/song-tag-categories";
 import type { SongSummaryDto } from "@/features/songs/song-types";
+import { usePagedSongs } from "@/features/songs/use-paged-songs";
 import { useScrollFollow } from "@/utils/use-scroll-follow";
+import { SongRangePagination } from "./song-range-pagination";
 
 const FILTER_STORAGE_KEY = "songbook:filters";
 const SCROLL_STORAGE_KEY = "songbook:scroll-position";
@@ -430,6 +432,16 @@ export const SongbookClient = ({
   };
 
   const filteredSongs = filterSongs(songs, query, selectedTags);
+  const { currentPage, pages, setPageIndex } = usePagedSongs(filteredSongs);
+  const visibleSongs =
+    pages.length > 1 && currentPage ? currentPage.items : filteredSongs;
+  const activeRangeIndex = useMemo(() => {
+    if (!currentPage) {
+      return 0;
+    }
+    const index = pages.indexOf(currentPage);
+    return index >= 0 ? index : 0;
+  }, [currentPage, pages]);
 
   const resultsLabel =
     filteredSongs.length === 1
@@ -506,11 +518,17 @@ export const SongbookClient = ({
         </div>
       ) : (
         <ul className="flex flex-col gap-4">
-          {filteredSongs.map((song) => (
+          {visibleSongs.map((song) => (
             <SongCard key={song.id} song={song} />
           ))}
         </ul>
       )}
+
+      <SongRangePagination
+        pages={pages}
+        activeIndex={activeRangeIndex}
+        onSelect={setPageIndex}
+      />
 
       {isFilterOpen ? (
         <FilterPanel
