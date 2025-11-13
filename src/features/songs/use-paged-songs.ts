@@ -50,13 +50,6 @@ export const usePagedSongs = (
 
   useEffect(() => {
     if (pagesCount === 0) {
-      if (searchParams.get(PAGE_QUERY_PARAM) !== null) {
-        const nextParams = new URLSearchParams(searchParams.toString());
-        nextParams.delete(PAGE_QUERY_PARAM);
-        router.replace(buildNextUrl(pathname, nextParams) as Route, {
-          scroll: false,
-        });
-      }
       return;
     }
 

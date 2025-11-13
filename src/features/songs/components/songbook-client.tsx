@@ -2,16 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { HiChevronRight } from "react-icons/hi";
 import { Heading, HeadingText } from "@/components/typography";
 import type { TagCategoryDto } from "@/features/songs/song-tag-categories";
 import type { SongSummaryDto } from "@/features/songs/song-types";
 import { usePagedSongs } from "@/features/songs/use-paged-songs";
+import { useTagFilter } from "@/features/songs/use-tag-filter";
 import { useScrollFollow } from "@/utils/use-scroll-follow";
 import { SongRangePagination } from "./song-range-pagination";
 
-const FILTER_STORAGE_KEY = "songbook:filters";
 const SCROLL_STORAGE_KEY = "songbook:scroll-position";
 
 type SongbookClientProps = {
@@ -19,45 +19,6 @@ type SongbookClientProps = {
   readonly categories: TagCategoryDto[];
   readonly initialQuery: string;
   readonly initialTags: string[];
-};
-
-type StoredFilters = {
-  query: string;
-  tags: string[];
-};
-
-const normalizeTag = (value: string): string => value.trim().toLowerCase();
-
-const parseStoredFilters = (value: string | null): StoredFilters | null => {
-  if (!value) {
-    return null;
-  }
-
-  try {
-    const parsed = JSON.parse(value) as Partial<StoredFilters>;
-    if (!parsed || typeof parsed !== "object") {
-      return null;
-    }
-
-    const query = typeof parsed.query === "string" ? parsed.query.trim() : "";
-    const tags = Array.isArray(parsed.tags)
-      ? parsed.tags
-          .filter((entry): entry is string => typeof entry === "string")
-          .map(normalizeTag)
-      : [];
-
-    return { query, tags };
-  } catch {
-    return null;
-  }
-};
-
-const storeFilters = (filters: StoredFilters) => {
-  try {
-    localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(filters));
-  } catch {
-    // Ignorer fejl fra private browsing o.lign.
-  }
 };
 
 const restoreScrollPosition = () => {
@@ -80,33 +41,6 @@ const persistScrollPosition = () => {
   } catch {
     // no-op
   }
-};
-
-const filterSongs = (
-  songs: SongSummaryDto[],
-  query: string,
-  selectedTags: string[],
-): SongSummaryDto[] => {
-  const normalizedQuery = query.trim().toLowerCase();
-  const hasQuery = normalizedQuery.length > 0;
-  const hasTags = selectedTags.length > 0;
-
-  if (!hasQuery && !hasTags) {
-    return songs;
-  }
-
-  return songs.filter((song) => {
-    const matchesTags = hasTags
-      ? selectedTags.every((tag) => song.tags.includes(tag))
-      : true;
-
-    const matchesQuery = hasQuery
-      ? song.title.toLowerCase().includes(normalizedQuery) ||
-        song.tags.some((tag) => tag.includes(normalizedQuery))
-      : true;
-
-    return matchesTags && matchesQuery;
-  });
 };
 
 const CARD_SCROLL_STRENGTH = 0.05;
@@ -217,7 +151,7 @@ const ActiveFilterBadge = ({
 
 type FilterPanelProps = {
   readonly categories: TagCategoryDto[];
-  readonly selectedTags: string[];
+  readonly selectedTags: readonly string[];
   readonly onToggle: (tag: string) => void;
   readonly onClear: () => void;
   readonly onClose: () => void;
@@ -326,69 +260,31 @@ export const SongbookClient = ({
   initialQuery,
   initialTags,
 }: SongbookClientProps) => {
-  const [query, setQuery] = useState(initialQuery);
-  const [selectedTags, setSelectedTags] = useState(initialTags);
-  const [hasHydrated, setHasHydrated] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const previousUrlRef = useRef<string | null>(null);
-
-  const pathname = usePathname();
-
   const tagLookup = buildTagLookup(categories);
-
-  useEffect(() => {
-    setHasHydrated(true);
-
-    if (initialQuery.length > 0 || initialTags.length > 0) {
-      return;
+  const {
+    query,
+    setQuery,
+    selectedTags,
+    toggleTag,
+    removeTag,
+    clearFilters,
+    filteredSongs,
+  } = useTagFilter({
+    songs,
+    initialQuery,
+    initialTags,
+  });
+  const { currentPage, pages, setPageIndex } = usePagedSongs(filteredSongs);
+  const visibleSongs =
+    pages.length > 1 && currentPage ? currentPage.items : filteredSongs;
+  const activeRangeIndex = useMemo(() => {
+    if (!currentPage) {
+      return 0;
     }
-
-    const restored = parseStoredFilters(
-      typeof window === "undefined"
-        ? null
-        : localStorage.getItem(FILTER_STORAGE_KEY),
-    );
-
-    if (restored) {
-      setQuery(restored.query);
-      setSelectedTags(restored.tags);
-    }
-  }, [initialQuery, initialTags]);
-
-  useEffect(() => {
-    if (!hasHydrated) {
-      return;
-    }
-
-    const params = new URLSearchParams();
-    const trimmedQuery = query.trim();
-    if (trimmedQuery.length > 0) {
-      params.set("q", trimmedQuery);
-    }
-
-    if (selectedTags.length > 0) {
-      params.set("tags", selectedTags.join(","));
-    }
-
-    const nextSearch = params.toString();
-    const nextUrl =
-      nextSearch.length > 0 ? `${pathname}?${nextSearch}` : pathname;
-    const currentUrl =
-      typeof window === "undefined"
-        ? nextUrl
-        : `${window.location.pathname}${window.location.search}`;
-
-    if (
-      typeof window !== "undefined" &&
-      nextUrl !== currentUrl &&
-      nextUrl !== previousUrlRef.current
-    ) {
-      previousUrlRef.current = nextUrl;
-      window.history.replaceState(null, "", nextUrl);
-    }
-
-    storeFilters({ query: trimmedQuery, tags: selectedTags });
-  }, [hasHydrated, pathname, query, selectedTags]);
+    const index = pages.indexOf(currentPage);
+    return index >= 0 ? index : 0;
+  }, [currentPage, pages]);
 
   useEffect(() => {
     restoreScrollPosition();
@@ -406,42 +302,6 @@ export const SongbookClient = ({
       window.removeEventListener("beforeunload", handlePersist);
     };
   }, []);
-
-  const toggleTag = (tag: string) => {
-    setSelectedTags((current) => {
-      const normalizedTag = normalizeTag(tag);
-      const hasTag = current.includes(normalizedTag);
-      const next = hasTag
-        ? current.filter((entry) => entry !== normalizedTag)
-        : [...current, normalizedTag];
-
-      return next;
-    });
-  };
-
-  const clearFilters = () => {
-    setQuery("");
-    setSelectedTags([]);
-  };
-
-  const removeFilter = (tag: string) => {
-    const normalized = normalizeTag(tag);
-    setSelectedTags((current) =>
-      current.filter((entry) => entry !== normalized),
-    );
-  };
-
-  const filteredSongs = filterSongs(songs, query, selectedTags);
-  const { currentPage, pages, setPageIndex } = usePagedSongs(filteredSongs);
-  const visibleSongs =
-    pages.length > 1 && currentPage ? currentPage.items : filteredSongs;
-  const activeRangeIndex = useMemo(() => {
-    if (!currentPage) {
-      return 0;
-    }
-    const index = pages.indexOf(currentPage);
-    return index >= 0 ? index : 0;
-  }, [currentPage, pages]);
 
   const resultsLabel =
     filteredSongs.length === 1
@@ -495,7 +355,7 @@ export const SongbookClient = ({
                   <ActiveFilterBadge
                     key={tagMeta.id}
                     tag={tagMeta}
-                    onRemove={removeFilter}
+                    onRemove={removeTag}
                   />
                 ) : null;
               })}
