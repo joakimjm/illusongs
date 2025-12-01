@@ -5,7 +5,10 @@ import { cache } from "react";
 import { APP_NAME } from "@/config/app";
 import { isAdminUser } from "@/features/auth/policies";
 import { SongVerseCarousel } from "@/features/songs/components/song-verse-carousel";
-import { findSongBySlug } from "@/features/songs/song-queries";
+import {
+  fetchPublishedSongSlugs,
+  findSongBySlug,
+} from "@/features/songs/song-queries";
 import type { SongDetailDto } from "@/features/songs/song-types";
 import { getUser } from "@/features/supabase/server";
 
@@ -26,6 +29,11 @@ type SongPageSearchParamsInput = {
 };
 
 const PREVIEW_QUERY_VALUE = "true";
+
+export const generateStaticParams = async (): Promise<SongPageParams[]> => {
+  const slugs = await fetchPublishedSongSlugs();
+  return slugs.map((slug) => ({ slug }));
+};
 
 const loadSong = cache(
   async (

@@ -65,6 +65,24 @@ export const fetchPublishedSongs = async (): Promise<SongSummaryDto[]> => {
   });
 };
 
+export const fetchPublishedSongSlugs = async (): Promise<string[]> => {
+  const connection = getPostgresConnection();
+
+  return await connection.clientUsing(async (client) => {
+    const result = await client.query<{ slug: string }>(
+      `
+        SELECT slug
+        FROM songs
+        WHERE is_published = true
+      `,
+    );
+
+    return result.rows
+      .map((row) => row.slug.trim().toLowerCase())
+      .filter((slug) => slug.length > 0);
+  });
+};
+
 export const findSongBySlug = async (
   slug: string,
 ): Promise<SongDetailDto | null> => {

@@ -11,6 +11,8 @@ import SongDraftForm, { type SongDraftFormState } from "./song-draft-form";
 import { SongsTable } from "./songs-table";
 
 const SONGS_PATH = "/admin/songs";
+const PUBLIC_SONGS_PATH = "/songs";
+const HOME_PATH = "/";
 
 const createSongDraftAction = async (
   _prev: SongDraftFormState,
@@ -63,13 +65,20 @@ const publishToggleAction = async (formData: FormData): Promise<void> => {
 
   const songId = formData.get("songId");
   const publish = formData.get("publish");
+  const slug = formData.get("slug");
 
-  if (typeof songId !== "string" || typeof publish !== "string") {
+  if (
+    typeof songId !== "string" ||
+    typeof publish !== "string" ||
+    typeof slug !== "string"
+  ) {
     return;
   }
 
   await updateSongPublishStatus(songId, publish === "true");
   revalidatePath(SONGS_PATH);
+  revalidatePath(`${PUBLIC_SONGS_PATH}/${slug}`);
+  revalidatePath(HOME_PATH);
 };
 
 const SongsAdminPage = async () => {

@@ -87,6 +87,7 @@ export const SongsTable = ({
                         className="inline-flex items-center gap-2"
                       >
                         <input type="hidden" name="songId" value={song.id} />
+                        <input type="hidden" name="slug" value={song.slug} />
                         <input
                           type="hidden"
                           name="publish"
