@@ -71,13 +71,13 @@ test("isOpenAiImageGenerationEnabled respects truthy values", () => {
 });
 
 test("getOpenAiImageSize enforces allowed values", () => {
-  expect(getOpenAiImageSize()).toBe("1792x1024");
-
-  setEnv("OPENAI_IMAGE_SIZE", "1024x1536");
   expect(getOpenAiImageSize()).toBe("1024x1536");
 
-  setEnv("OPENAI_IMAGE_SIZE", "invalid");
+  setEnv("OPENAI_IMAGE_SIZE", "1792x1024");
   expect(getOpenAiImageSize()).toBe("1792x1024");
+
+  setEnv("OPENAI_IMAGE_SIZE", "invalid");
+  expect(getOpenAiImageSize()).toBe("1024x1536");
 });
 
 test("getOpenAiImageQuality returns supported quality options", () => {
