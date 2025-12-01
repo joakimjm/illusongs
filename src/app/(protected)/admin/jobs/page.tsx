@@ -206,7 +206,7 @@ const AdminJobsPage = async () => {
                           <div className="font-medium">
                             Verse {job.verseSequence}
                           </div>
-                          <div className="whitespace-pre text-xs text-slate-500 dark:text-slate-400">
+                          <div className="max-w-48 whitespace-pre overflow-hidden text-ellipsis text-xs text-slate-500 dark:text-slate-400">
                             {truncate(job.verseLyric, 120)}
                           </div>
                           {job.status === "completed" &&
