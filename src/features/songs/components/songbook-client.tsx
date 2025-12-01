@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { HiChevronRight } from "react-icons/hi";
 import { Heading, HeadingText } from "@/components/typography";

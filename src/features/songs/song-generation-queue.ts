@@ -303,7 +303,7 @@ export const fetchSongGenerationJobList = async (
         JOIN song_verses v ON v.id = j.verse_id
         LEFT JOIN song_generation_conversations c ON c.song_id = j.song_id
         ORDER BY
-          j.created_at ASC,
+          j.created_at DESC,
           v.sequence_number ASC
         LIMIT $1
       `,
