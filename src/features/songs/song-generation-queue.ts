@@ -42,7 +42,7 @@ type SongGenerationJobListItem = SongGenerationJobDto & {
   conversationId: string | null;
 };
 
-type ResetSongGenerationJobResult = {
+export type ResetSongGenerationJobResult = {
   jobId: string;
   songId: string;
   verseId: string;

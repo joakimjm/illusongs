@@ -125,7 +125,13 @@ const SongPage = async ({
           </span>
         </div>
       ) : null}
-      <SongVerseCarousel songTitle={song.title} verses={song.verses} />
+      <SongVerseCarousel
+        songTitle={song.title}
+        verses={song.verses}
+        enableRequeue={isPreview}
+        songId={song.id}
+        songSlug={song.slug}
+      />
     </main>
   );
 };

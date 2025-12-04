@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { Button } from "@/components/button";
 import type { SongVerseDto } from "@/features/songs/song-types";
 
 const HomeIcon = () => (
@@ -45,17 +46,25 @@ const ArrowIcon = ({ direction }: { readonly direction: "left" | "right" }) => (
 type SongVerseCarouselProps = {
   readonly songTitle: string;
   readonly verses: SongVerseDto[];
+  readonly enableRequeue?: boolean;
+  readonly songId?: string;
+  readonly songSlug?: string;
 };
 
 export const SongVerseCarousel = ({
   songTitle,
   verses,
+  enableRequeue = false,
+  songId,
+  songSlug,
 }: SongVerseCarouselProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const verseRefs = useRef<(HTMLElement | null)[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const router = useRouter();
   const [isImageFocusMode, setIsImageFocusMode] = useState(false);
+  const [pendingRequeueId, setPendingRequeueId] = useState<string | null>(null);
+  const [requeueError, setRequeueError] = useState<string | null>(null);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -125,6 +134,33 @@ export const SongVerseCarousel = ({
     router.back();
   };
 
+  const handleRequeue = async (verseId: string) => {
+    if (!enableRequeue || !songId) {
+      return;
+    }
+    setPendingRequeueId(verseId);
+    setRequeueError(null);
+    try {
+      const response = await fetch(
+        `/api/song/${songId}/verse/${verseId}/requeue`,
+        {
+          method: "POST",
+        },
+      );
+      if (!response.ok) {
+        const detail = await response.text();
+        throw new Error(detail || "Failed to requeue");
+      }
+      router.refresh();
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unable to requeue";
+      setRequeueError(message);
+    } finally {
+      setPendingRequeueId(null);
+    }
+  };
+
   const progressDots = verses.map((_verse, index) => (
     <span
       key={_verse.id}
@@ -190,6 +226,35 @@ export const SongVerseCarousel = ({
                 <p className="select-none text-left whitespace-pre-line text-lg leading-6 text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
                   {verse.lyricText}
                 </p>
+                {enableRequeue ? (
+                  <div className="flex items-center justify-between text-xs text-white/80">
+                    <div className="rounded-full border border-white/20 bg-black/40 px-3 py-1 uppercase tracking-wide">
+                      Preview tools
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {requeueError ? (
+                        <span className="text-rose-300">{requeueError}</span>
+                      ) : null}
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleRequeue(verse.id);
+                        }}
+                        disabled={
+                          pendingRequeueId === verse.id || !songId || !songSlug
+                        }
+                        className="rounded-full border border-white/30 bg-white/10 text-[11px] uppercase tracking-[0.2em] text-white hover:bg-white/20"
+                      >
+                        {pendingRequeueId === verse.id
+                          ? "Requeuing…"
+                          : "Requeue illustration"}
+                      </Button>
+                    </div>
+                  </div>
+                ) : null}
               </div>
             </button>
           );
