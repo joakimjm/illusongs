@@ -1,15 +1,9 @@
 import Link from "next/link";
 import type { JSX } from "react";
 import { Badge } from "@/components/badge";
+import { Button } from "@/components/button";
 import { Body } from "@/components/typography";
 import type { AdminSongSummary } from "@/features/songs/song-admin-queries";
-
-const formatDate = (iso: string) =>
-  new Date(iso).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
 
 type SongsTableProps = {
   readonly songs: readonly AdminSongSummary[];
@@ -27,18 +21,15 @@ export const SongsTable = ({
           <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-900 dark:text-slate-300">
             <tr>
               <th className="px-4 py-3">Title</th>
-              <th className="px-4 py-3">Slug</th>
+              <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3">Verses</th>
               <th className="px-4 py-3">Queued</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Created</th>
-              <th className="px-4 py-3">Updated</th>
-              <th className="px-4 py-3" />
+              <th className="px-4 py-3">Manage</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200/70 dark:divide-slate-800/60">
             {songs.map((song) => {
-              const badgeVariant = song.isPublished ? "success" : "neutral";
+              const badgeVariant = song.isPublished ? "success" : "warning";
 
               return (
                 <tr
@@ -46,10 +37,28 @@ export const SongsTable = ({
                   className="transition hover:bg-slate-50 dark:hover:bg-slate-900/40"
                 >
                   <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">
-                    {song.title}
+                    <Link
+                      href={
+                        song.isPublished
+                          ? `/songs/${song.slug}`
+                          : `/songs/${song.slug}?preview=true`
+                      }
+                      className="text-blue-600 underline decoration-blue-300 underline-offset-2 hover:text-blue-700 dark:text-blue-300 dark:hover:text-blue-200"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {song.title}
+                    </Link>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">
+                      /{song.slug}
+                    </div>
                   </td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
-                    {song.slug}
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <Badge variant={badgeVariant} className="px-2.5 py-0.5">
+                        {song.isPublished ? "Published" : "Preview"}
+                      </Badge>
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
                     {song.verseCount}
@@ -58,56 +67,32 @@ export const SongsTable = ({
                     {song.pendingJobs}
                   </td>
                   <td className="px-4 py-3">
-                    <Badge variant={badgeVariant} className="px-2.5 py-0.5">
-                      {song.isPublished ? "Published" : "Draft"}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
-                    {formatDate(song.createdAt)}
-                  </td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
-                    {formatDate(song.updatedAt)}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-2">
-                      <Link
-                        href={
-                          song.isPublished
-                            ? `/songs/${song.slug}`
-                            : `/songs/${song.slug}?preview=true`
-                        }
-                        className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800/60"
-                        target="_blank"
-                        rel="noreferrer"
+                    <form
+                      action={onTogglePublish}
+                      className="inline-flex items-center gap-2"
+                    >
+                      <input type="hidden" name="songId" value={song.id} />
+                      <input type="hidden" name="slug" value={song.slug} />
+                      <input
+                        type="hidden"
+                        name="publish"
+                        value={song.isPublished ? "false" : "true"}
+                      />
+                      <Button
+                        type="submit"
+                        variant={song.isPublished ? "danger" : "primary"}
+                        size="sm"
                       >
-                        {song.isPublished ? "View" : "Preview"}
-                      </Link>
-                      <form
-                        action={onTogglePublish}
-                        className="inline-flex items-center gap-2"
-                      >
-                        <input type="hidden" name="songId" value={song.id} />
-                        <input type="hidden" name="slug" value={song.slug} />
-                        <input
-                          type="hidden"
-                          name="publish"
-                          value={song.isPublished ? "false" : "true"}
-                        />
-                        <button
-                          type="submit"
-                          className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800/60"
-                        >
-                          {song.isPublished ? "Unpublish" : "Publish"}
-                        </button>
-                      </form>
-                    </div>
+                        {song.isPublished ? "Unpublish" : "Publish"}
+                      </Button>
+                    </form>
                   </td>
                 </tr>
               );
             })}
             {songs.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-4 py-10 text-center">
+                <td colSpan={5} className="px-4 py-10 text-center">
                   <Body
                     size="sm"
                     className="text-slate-500 dark:text-slate-400"
