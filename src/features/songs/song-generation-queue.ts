@@ -37,6 +37,7 @@ type SongGenerationJobListItem = SongGenerationJobDto & {
   verseLyric: string;
   songTitle: string;
   songSlug: string;
+  isPublished: boolean;
   verseIllustrationUrl: string | null;
   conversationId: string | null;
 };
@@ -246,6 +247,7 @@ type SongGenerationJobListRow = {
   updated_at: Date;
   song_title: string;
   song_slug: string;
+  is_published: boolean;
   verse_sequence_number: number;
   verse_lyric_text: string;
   verse_illustration_url: string | null;
@@ -267,18 +269,55 @@ const mapJobListRow = (
   updatedAt: row.updated_at.toISOString(),
   songTitle: row.song_title,
   songSlug: row.song_slug,
+  isPublished: row.is_published,
   verseSequence: row.verse_sequence_number,
   verseLyric: row.verse_lyric_text,
   verseIllustrationUrl: row.verse_illustration_url,
   conversationId: row.conversation_id,
 });
 
+type JobListFilters = {
+  limit?: number;
+  excludePublished?: boolean;
+  searchText?: string | null;
+};
+
 export const fetchSongGenerationJobList = async (
-  limit: number = 50,
+  filters: number | JobListFilters = 50,
 ): Promise<SongGenerationJobListItem[]> => {
   const connection = getPostgresConnection();
+  const normalizedFilters: JobListFilters =
+    typeof filters === "number" ? { limit: filters } : filters;
+  const limit = normalizedFilters.limit ?? 50;
+  const excludePublished = normalizedFilters.excludePublished ?? false;
+  const searchTextRaw = normalizedFilters.searchText ?? null;
+  const searchText =
+    searchTextRaw && searchTextRaw.trim().length > 0
+      ? `%${searchTextRaw.trim()}%`
+      : null;
 
   return await connection.clientUsing(async (client) => {
+    const conditions: string[] = [];
+    const params: Array<string | number> = [];
+    let paramIndex = 1;
+
+    if (excludePublished) {
+      conditions.push("s.is_published = false");
+    }
+
+    if (searchText) {
+      conditions.push(
+        `(s.title ILIKE $${paramIndex} OR v.lyric_text ILIKE $${paramIndex})`,
+      );
+      params.push(searchText);
+      paramIndex += 1;
+    }
+
+    const whereClause =
+      conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+
+    params.push(limit);
+
     const result = await client.query<SongGenerationJobListRow>(
       `
         SELECT
@@ -294,6 +333,7 @@ export const fetchSongGenerationJobList = async (
           j.updated_at,
           s.title AS song_title,
           s.slug AS song_slug,
+          s.is_published AS is_published,
           v.sequence_number AS verse_sequence_number,
           v.lyric_text AS verse_lyric_text,
           v.illustration_url AS verse_illustration_url,
@@ -302,12 +342,13 @@ export const fetchSongGenerationJobList = async (
         JOIN songs s ON s.id = j.song_id
         JOIN song_verses v ON v.id = j.verse_id
         LEFT JOIN song_generation_conversations c ON c.song_id = j.song_id
+        ${whereClause}
         ORDER BY
           j.created_at DESC,
           v.sequence_number ASC
-        LIMIT $1
+        LIMIT $${paramIndex}
       `,
-      [limit],
+      params,
     );
 
     return result.rows.map(mapJobListRow);

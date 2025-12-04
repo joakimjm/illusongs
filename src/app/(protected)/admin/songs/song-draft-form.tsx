@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { Button } from "@/components/button";
+import { FormField } from "@/components/form/field";
 import { Body } from "@/components/typography";
 
 export type SongDraftFormState = {
@@ -48,13 +49,7 @@ const SongDraftForm = ({ action }: SongDraftFormProps) => {
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-2">
-        <label
-          htmlFor="title"
-          className="text-sm font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300"
-        >
-          Song title
-        </label>
+      <FormField label="Song title" htmlFor="title">
         <input
           id="title"
           name="title"
@@ -63,15 +58,13 @@ const SongDraftForm = ({ action }: SongDraftFormProps) => {
           className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-100"
           placeholder="Enter a working title"
         />
-      </div>
+      </FormField>
 
-      <div className="flex flex-col gap-2">
-        <label
-          htmlFor="verses"
-          className="text-sm font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300"
-        >
-          Verses
-        </label>
+      <FormField
+        label="Verses"
+        htmlFor="verses"
+        description="Separate verses with a blank line. Each verse will queue an illustration job."
+      >
         <textarea
           id="verses"
           name="verses"
@@ -80,19 +73,13 @@ const SongDraftForm = ({ action }: SongDraftFormProps) => {
           className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-100"
           placeholder={`Verse one\nAnother line\n\nVerse two`}
         />
-        <Body size="xs" className="text-slate-500 dark:text-slate-400">
-          Separate verses with a blank line. Each verse will queue an
-          illustration job.
-        </Body>
-      </div>
+      </FormField>
 
-      <div className="flex flex-col gap-2">
-        <label
-          htmlFor="tags"
-          className="text-sm font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300"
-        >
-          Tags (optional)
-        </label>
+      <FormField
+        label="Tags (optional)"
+        htmlFor="tags"
+        description="Comma separated. Tags are stored in lowercase."
+      >
         <input
           id="tags"
           name="tags"
@@ -100,10 +87,7 @@ const SongDraftForm = ({ action }: SongDraftFormProps) => {
           placeholder="dreamy, lullaby, forest"
           className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-100"
         />
-        <Body size="xs" className="text-slate-500 dark:text-slate-400">
-          Comma separated. Tags are stored in lowercase.
-        </Body>
-      </div>
+      </FormField>
 
       <div className="flex items-center justify-between gap-4">
         <SubmitButton>Create song draft</SubmitButton>

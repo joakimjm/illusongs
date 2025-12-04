@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { HiArrowTopRightOnSquare } from "react-icons/hi2";
 import { Badge, type BadgeVariant } from "@/components/badge";
 import { Button } from "@/components/button";
+import { FormField } from "@/components/form/field";
 import { HeroHeader } from "@/components/hero-header";
 import { PageShell } from "@/components/page-shell";
 import { Panel } from "@/components/panel";
@@ -21,6 +22,25 @@ import { type DispatchState, ProcessJobForm } from "./process-job-form";
 
 const JOBS_PATH: Route = "/admin/jobs";
 const MAX_CHAINED_JOBS = 10;
+const DEFAULT_JOB_LIMIT = 100;
+
+type AdminJobsPageProps = {
+  readonly searchParams?: Record<string, string | string[] | undefined>;
+};
+
+const parseBooleanParam = (value: string | string[] | undefined): boolean => {
+  const resolved = Array.isArray(value) ? value[0] : value;
+  if (!resolved) {
+    return false;
+  }
+  const normalized = resolved.trim().toLowerCase();
+  return normalized === "1" || normalized === "true" || normalized === "yes";
+};
+
+const parseSearchParam = (value: string | string[] | undefined): string => {
+  const resolved = Array.isArray(value) ? value[0] : value;
+  return resolved?.trim() ?? "";
+};
 
 const processNextJobAction = async (
   _prevState: {
@@ -145,8 +165,16 @@ const STATUS_BADGE_VARIANTS: Record<string, BadgeVariant> = {
   completed: "success",
 };
 
-const AdminJobsPage = async () => {
-  const jobs = await fetchSongGenerationJobList(100);
+const AdminJobsPage = async ({ searchParams }: AdminJobsPageProps) => {
+  const resolvedParams = await Promise.resolve(searchParams ?? {});
+  const searchText = parseSearchParam(resolvedParams.q);
+  const hidePublished = parseBooleanParam(resolvedParams.hidePublished);
+
+  const jobs = await fetchSongGenerationJobList({
+    limit: DEFAULT_JOB_LIMIT,
+    excludePublished: hidePublished,
+    searchText,
+  });
 
   return (
     <PageShell>
@@ -167,6 +195,40 @@ const AdminJobsPage = async () => {
         <div className="mt-4">
           <ProcessJobForm action={processNextJobAction} />
         </div>
+        <hr className="my-6 border-slate-200 dark:border-slate-700" />
+        <form className="mt-4 flex flex-wrap items-end gap-3">
+          <FormField label="Search title or lyrics" htmlFor="job-search">
+            <input
+              id="job-search"
+              name="q"
+              type="search"
+              defaultValue={searchText}
+              placeholder="e.g. storm or lullaby"
+              className="w-64 rounded-lg border border-slate-200 px-3 py-2 text-sm shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-100"
+            />
+          </FormField>
+          <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
+            <input
+              type="checkbox"
+              name="hidePublished"
+              value="1"
+              defaultChecked={hidePublished}
+              className="h-4 w-4 rounded border-slate-300 text-slate-700 focus:ring-slate-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+            />
+            Hide published songs
+          </label>
+          <div className="flex items-center gap-2">
+            <Button type="submit" variant="secondary" size="sm">
+              Apply filters
+            </Button>
+            <a
+              href={JOBS_PATH}
+              className="inline-flex items-center justify-center rounded-lg border border-transparent px-3 py-1.5 text-sm font-medium text-slate-700 underline decoration-slate-400 underline-offset-2 transition hover:text-slate-900 dark:text-slate-200 dark:hover:text-white"
+            >
+              Reset
+            </a>
+          </div>
+        </form>
 
         <div className="mt-6 -mx-4 overflow-x-auto sm:mx-0">
           <div className="inline-block min-w-full align-middle">
@@ -200,6 +262,9 @@ const AdminJobsPage = async () => {
                           </div>
                           <div className="text-xs text-slate-500 dark:text-slate-400">
                             /{job.songSlug}
+                          </div>
+                          <div className="mt-1 text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                            {job.isPublished ? "Published" : "Draft"}
                           </div>
                         </td>
                         <td className="px-4 py-3 text-slate-700 dark:text-slate-300">

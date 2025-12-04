@@ -58,6 +58,43 @@ const seedSongWithJobs = async (verseCount: number) => {
   return song;
 };
 
+const seedCustomSongWithJobs = async (options: {
+  slug: string;
+  title: string;
+  isPublished: boolean;
+  verses: string[];
+}) => {
+  const connection = getPostgresConnection();
+
+  const song = await connection.clientUsing(async (client) => {
+    const created = await createSongWithClient(client, {
+      slug: options.slug,
+      title: options.title,
+      languageCode: "da",
+      isPublished: options.isPublished,
+      tags: [],
+      verses: options.verses.map((lyricText, index) => ({
+        sequenceNumber: index + 1,
+        lyricText,
+        illustrationUrl: null,
+      })),
+    });
+
+    await enqueueSongGenerationJobs(
+      client,
+      created.id,
+      created.verses.map((verse) => ({
+        id: verse.id,
+        sequenceNumber: verse.sequenceNumber,
+      })),
+    );
+
+    return created;
+  });
+
+  return song;
+};
+
 test("claimNextSongGenerationJob returns next pending job with song detail", async () => {
   const song = await seedSongWithJobs(1);
 
@@ -191,6 +228,48 @@ test("fetchSongGenerationJobList returns enriched entries", async () => {
   expect(first).toBeDefined();
   expect(first?.songTitle).toBe("Test Song");
   expect(first?.verseSequence).toBeGreaterThanOrEqual(1);
+  expect(first?.isPublished).toBe(false);
+});
+
+test("fetchSongGenerationJobList supports filtering published and search text", async () => {
+  const draft = await seedCustomSongWithJobs({
+    slug: "draft-song-filter",
+    title: "Draft Song Filter",
+    isPublished: false,
+    verses: ["Moonlit chorus", "Silver rivers"],
+  });
+  const published = await seedCustomSongWithJobs({
+    slug: "published-song-filter",
+    title: "Bright Horizon",
+    isPublished: true,
+    verses: ["Shining sun over the bay"],
+  });
+
+  const allJobs = await fetchSongGenerationJobList({ limit: 10 });
+  expect(allJobs.some((job) => job.songId === published.id)).toBe(true);
+
+  const hiddenPublished = await fetchSongGenerationJobList({
+    excludePublished: true,
+    limit: 10,
+  });
+  expect(hiddenPublished.some((job) => job.songId === published.id)).toBe(
+    false,
+  );
+  expect(hiddenPublished.some((job) => job.songId === draft.id)).toBe(true);
+
+  const searchDraft = await fetchSongGenerationJobList({
+    searchText: "moonlit",
+    limit: 10,
+  });
+  expect(searchDraft.some((job) => job.songId === draft.id)).toBe(true);
+  const searchPublished = await fetchSongGenerationJobList({
+    searchText: "shining",
+    excludePublished: true,
+    limit: 10,
+  });
+  expect(searchPublished.some((job) => job.songId === published.id)).toBe(
+    false,
+  );
 });
 
 test("resetSongGenerationJob clears illustration and requeues job", async () => {

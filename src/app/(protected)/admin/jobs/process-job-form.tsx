@@ -76,8 +76,10 @@ export const ProcessJobForm = ({ action }: ProcessJobFormProps) => {
 
   return (
     <form action={formAction} className="flex flex-col items-start gap-2">
-      <RepeatToggle />
-      <SubmitButton />
+      <div className="flex items-center gap-4">
+        <SubmitButton />
+        <RepeatToggle />
+      </div>
       <Message state={state} />
     </form>
   );
