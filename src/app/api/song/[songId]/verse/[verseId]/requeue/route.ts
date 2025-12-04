@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
+import { NextResponse } from "next/server";
 import { createApiRoute } from "@/features/auth/api-handler";
 import { isAdmin } from "@/features/auth/policies";
 import {
@@ -8,8 +8,8 @@ import {
   logAndRespondWithError,
 } from "@/features/http/api-utils";
 import { getPostgresConnection } from "@/features/postgres/postgres-connection-pool";
-import { resetSongGenerationJob } from "@/features/songs/song-generation-queue";
 import type { ResetSongGenerationJobResult } from "@/features/songs/song-generation-queue";
+import { resetSongGenerationJob } from "@/features/songs/song-generation-queue";
 import { deleteVerseIllustrationImage } from "@/features/songs/verse-illustration-storage";
 import { isValidUuid } from "@/utils";
 

@@ -1,5 +1,5 @@
-import type { JSX, ReactNode } from "react";
 import clsx from "clsx";
+import type { JSX, ReactNode } from "react";
 
 type FormFieldProps = {
   readonly label: string;
@@ -25,7 +25,9 @@ export const FormField = ({
     </label>
     {children}
     {description ? (
-      <p className="text-xs text-slate-500 dark:text-slate-400">{description}</p>
+      <p className="text-xs text-slate-500 dark:text-slate-400">
+        {description}
+      </p>
     ) : null}
   </div>
 );
