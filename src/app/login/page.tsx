@@ -53,7 +53,7 @@ const LoginWithCredsPage = async ({
     <PageShell>
       <div className="flex flex-col gap-8">
         <HeroHeader
-          eyebrow="Signals"
+          eyebrow="Illusongs"
           title="Sign in with credentials."
           description="Temporary access while Azure SSO configuration is completed."
         />

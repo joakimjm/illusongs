@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { getRequiredConfigValue } from "./config";
 
-const TEST_ENV_KEY = "SIGNALS_TEST_ENV_KEY";
+const TEST_ENV_KEY = "ILLUSONGS_TEST_ENV_KEY";
 
 afterEach(() => {
   delete process.env[TEST_ENV_KEY];
