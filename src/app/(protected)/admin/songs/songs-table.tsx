@@ -179,25 +179,33 @@ export const SongsTable = ({
                       {song.pendingJobs}
                     </td>
                     <td className="px-4 py-3">
-                      <form
-                        action={onTogglePublish}
-                        className="inline-flex items-center gap-2"
-                      >
-                        <input type="hidden" name="songId" value={song.id} />
-                        <input type="hidden" name="slug" value={song.slug} />
-                        <input
-                          type="hidden"
-                          name="publish"
-                          value={song.isPublished ? "false" : "true"}
-                        />
-                        <Button
-                          type="submit"
-                          variant={song.isPublished ? "danger" : "primary"}
-                          size="sm"
+                      <div className="inline-flex items-center gap-2">
+                        <Link
+                          href={`/admin/songs/${song.id}`}
+                          className="inline-flex items-center justify-center rounded-lg border border-blue-500 px-3 py-1.5 text-sm font-medium text-blue-600 transition hover:bg-blue-600 hover:text-white dark:border-blue-400 dark:text-blue-300 dark:hover:bg-blue-400 dark:hover:text-slate-950"
                         >
-                          {song.isPublished ? "Unpublish" : "Publish"}
-                        </Button>
-                      </form>
+                          Edit lyrics
+                        </Link>
+                        <form
+                          action={onTogglePublish}
+                          className="inline-flex items-center gap-2"
+                        >
+                          <input type="hidden" name="songId" value={song.id} />
+                          <input type="hidden" name="slug" value={song.slug} />
+                          <input
+                            type="hidden"
+                            name="publish"
+                            value={song.isPublished ? "false" : "true"}
+                          />
+                          <Button
+                            type="submit"
+                            variant={song.isPublished ? "danger" : "primary"}
+                            size="sm"
+                          >
+                            {song.isPublished ? "Unpublish" : "Publish"}
+                          </Button>
+                        </form>
+                      </div>
                     </td>
                   </tr>
                 );

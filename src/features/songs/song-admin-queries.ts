@@ -11,6 +11,22 @@ export type AdminSongSummary = {
   pendingJobs: number;
 };
 
+export type AdminSongVerseDetail = {
+  id: string;
+  sequenceNumber: number;
+  lyricText: string;
+  updatedAt: string;
+};
+
+export type AdminSongDetail = {
+  id: string;
+  title: string;
+  slug: string;
+  isPublished: boolean;
+  updatedAt: string;
+  verses: AdminSongVerseDetail[];
+};
+
 type AdminSongSummaryRow = {
   id: string;
   title: string;
@@ -20,6 +36,21 @@ type AdminSongSummaryRow = {
   updated_at: Date;
   verse_count: string;
   pending_jobs: string;
+};
+
+type AdminSongRow = {
+  id: string;
+  title: string;
+  slug: string;
+  is_published: boolean;
+  updated_at: Date;
+};
+
+type AdminSongVerseRow = {
+  id: string;
+  sequence_number: number;
+  lyric_text: string;
+  updated_at: Date;
 };
 
 const mapAdminSongSummaryRow = (
@@ -33,6 +64,13 @@ const mapAdminSongSummaryRow = (
   updatedAt: row.updated_at.toISOString(),
   verseCount: Number.parseInt(row.verse_count, 10),
   pendingJobs: Number.parseInt(row.pending_jobs, 10),
+});
+
+const mapAdminSongVerseRow = (row: AdminSongVerseRow): AdminSongVerseDetail => ({
+  id: row.id,
+  sequenceNumber: row.sequence_number,
+  lyricText: row.lyric_text,
+  updatedAt: row.updated_at.toISOString(),
 });
 
 export const fetchAdminSongSummaries = async (): Promise<
@@ -74,5 +112,56 @@ export const fetchAdminSongSummaries = async (): Promise<
     );
 
     return result.rows.map(mapAdminSongSummaryRow);
+  });
+};
+
+export const findAdminSongById = async (
+  songId: string,
+): Promise<AdminSongDetail | null> => {
+  const connection = getPostgresConnection();
+
+  return await connection.clientUsing(async (client) => {
+    const songResult = await client.query<AdminSongRow>(
+      `
+        SELECT
+          id,
+          title,
+          slug,
+          is_published,
+          updated_at
+        FROM songs
+        WHERE id = $1
+        LIMIT 1
+      `,
+      [songId],
+    );
+
+    const song = songResult.rows[0];
+    if (!song) {
+      return null;
+    }
+
+    const verseResult = await client.query<AdminSongVerseRow>(
+      `
+        SELECT
+          id,
+          sequence_number,
+          lyric_text,
+          updated_at
+        FROM song_verses
+        WHERE song_id = $1
+        ORDER BY sequence_number
+      `,
+      [song.id],
+    );
+
+    return {
+      id: song.id,
+      title: song.title,
+      slug: song.slug,
+      isPublished: song.is_published,
+      updatedAt: song.updated_at.toISOString(),
+      verses: verseResult.rows.map(mapAdminSongVerseRow),
+    };
   });
 };

@@ -1,6 +1,9 @@
 import { expect, test } from "vitest";
 import { getPostgresConnection } from "@/features/postgres/postgres-connection-pool";
-import { fetchAdminSongSummaries } from "@/features/songs/song-admin-queries";
+import {
+  fetchAdminSongSummaries,
+  findAdminSongById,
+} from "@/features/songs/song-admin-queries";
 import { createSong } from "@/features/songs/song-commands";
 import {
   enqueueSongGenerationJobs,
@@ -83,4 +86,37 @@ test("fetchAdminSongSummaries returns songs with job counts", async () => {
   const updatedSummaries = await fetchAdminSongSummaries();
   const updated = updatedSummaries.find((entry) => entry.id === song.id);
   expect(updated?.pendingJobs).toBe(1);
+});
+
+test("findAdminSongById returns verses in sequence order", async () => {
+  const song = await createSong({
+    slug: "edit-me",
+    title: "Edit Me",
+    languageCode: "da",
+    isPublished: false,
+    tags: [],
+    verses: [
+      {
+        sequenceNumber: 2,
+        lyricText: "Andet vers",
+        illustrationUrl: null,
+      },
+      {
+        sequenceNumber: 1,
+        lyricText: "Første vers",
+        illustrationUrl: null,
+      },
+    ],
+  });
+
+  const detail = await findAdminSongById(song.id);
+
+  expect(detail).not.toBeNull();
+  expect(detail?.id).toBe(song.id);
+  expect(detail?.title).toBe("Edit Me");
+  expect(detail?.verses).toHaveLength(2);
+  expect(detail?.verses[0]?.sequenceNumber).toBe(1);
+  expect(detail?.verses[0]?.lyricText).toBe("Første vers");
+  expect(detail?.verses[1]?.sequenceNumber).toBe(2);
+  expect(detail?.verses[1]?.lyricText).toBe("Andet vers");
 });

@@ -2,6 +2,9 @@ import { expect, test } from "vitest";
 import {
   createSongDraft,
   InvalidSongDraftError,
+  InvalidSongVerseUpdateError,
+  reconcileSongVerses,
+  reconcileVersesForSongUpdate,
   slugifySongTitle,
   splitSongDraftVerses,
 } from "@/features/songs/song-admin-commands";
@@ -81,4 +84,220 @@ test("createSongDraft throws when verses are missing", async () => {
       versesText: "   ",
     }),
   ).rejects.toThrowError(InvalidSongDraftError);
+});
+
+test("reconcileVersesForSongUpdate matches grammar/whitespace rewrite for same verse", () => {
+  const before =
+    "Jens Hansen havde en bondegård,\u2028 Ih-ah, ih-ah, åh, Og på den gård der var en Hest Ih-ah, ih-ah, åh\u2028 Det var prr-prr her, det var prr- prr der,\u2028prr her, prr der, alle steder prr.\u2028 Jens Hansen havde en bondegård\u2028Ih-ah, ih-ah, åh";
+  const after = `Jens Hansen havde en bondegård,
+Ih-ah, ih-ah, åh,
+Og på den gård der var en Hest
+Ih-ah, ih-ah, åh
+Det var pruh-pruh her, det var pruh-pruh der,
+pruh her, pruh der, alle steder pruh.
+Jens Hansen havde en bondegård
+Ih-ah, ih-ah, åh`;
+
+  const plan = reconcileVersesForSongUpdate(
+    [{ id: "verse-1", lyricText: before }],
+    [after],
+  );
+
+  expect(plan.matches).toHaveLength(1);
+  expect(plan.matches[0]?.oldIndex).toBe(0);
+  expect(plan.matches[0]?.newIndex).toBe(0);
+  expect(plan.newVerseIndexes).toEqual([]);
+  expect(plan.removedVerseIds).toEqual([]);
+});
+
+test("reconcileVersesForSongUpdate keeps duplicate exact verses in order", () => {
+  const plan = reconcileVersesForSongUpdate(
+    [
+      { id: "a", lyricText: "Same verse" },
+      { id: "b", lyricText: "Same verse" },
+    ],
+    ["Same verse", "Same verse"],
+  );
+
+  expect(plan.matches).toHaveLength(2);
+  expect(plan.matches[0]?.oldIndex).toBe(0);
+  expect(plan.matches[1]?.oldIndex).toBe(1);
+  expect(plan.removedVerseIds).toEqual([]);
+  expect(plan.newVerseIndexes).toEqual([]);
+});
+
+test("reconcileSongVerses supports add/remove while preserving matched verse identity", async () => {
+  const song = await createSongDraft({
+    title: "Reconcile mig",
+    versesText: "Første vers\n\nAndet vers\n\nTredje vers",
+  });
+
+  const firstVerseId = song.verses[0]?.id ?? "";
+  const secondVerseId = song.verses[1]?.id ?? "";
+  const thirdVerseId = song.verses[2]?.id ?? "";
+  expect(firstVerseId).toBeDefined();
+  expect(secondVerseId).toBeDefined();
+  expect(thirdVerseId).toBeDefined();
+  if (!firstVerseId || !secondVerseId || !thirdVerseId) {
+    throw new Error("Test setup failed: expected three verses.");
+  }
+
+  await withTestPool(async (pool) => {
+    await pool.query(
+      `
+        UPDATE songs
+        SET is_published = true
+        WHERE id = $1
+      `,
+      [song.id],
+    );
+
+    await pool.query(
+      `
+        UPDATE song_verses
+        SET illustration_url = $2
+        WHERE id = $1
+      `,
+      [firstVerseId, "/images/first.png"],
+    );
+  });
+
+  const result = await reconcileSongVerses({
+    songId: song.id,
+    versesText:
+      "Første vers rettet\n\nTredje vers\n\nHelt nyt fjerde vers med ny illustration",
+  });
+
+  expect(result.matchedVerseCount).toBe(2);
+  expect(result.significantMatchedVerseCount).toBe(1);
+  expect(result.insertedVerseCount).toBe(1);
+  expect(result.removedVerseCount).toBe(1);
+  expect(result.wasUnpublished).toBe(true);
+
+  const state = await withTestPool(async (pool) => {
+    const result = await pool.query<{
+      id: string;
+      sequence_number: number;
+      lyric_text: string;
+      illustration_url: string | null;
+    }>(
+      `
+        SELECT id, sequence_number, lyric_text, illustration_url
+        FROM song_verses
+        WHERE song_id = $1
+        ORDER BY sequence_number
+      `,
+      [song.id],
+    );
+
+    const jobs = await pool.query<{
+      verse_id: string;
+      status: string;
+    }>(
+      `
+        SELECT verse_id, status
+        FROM song_generation_jobs
+        WHERE song_id = $1
+      `,
+      [song.id],
+    );
+
+    const songState = await pool.query<{ is_published: boolean }>(
+      `
+        SELECT is_published
+        FROM songs
+        WHERE id = $1
+      `,
+      [song.id],
+    );
+
+    return {
+      verses: result.rows,
+      jobs: jobs.rows,
+      isPublished: songState.rows[0]?.is_published ?? null,
+    };
+  });
+
+  expect(state.verses).toHaveLength(3);
+  expect(state.verses[0]?.id).toBe(firstVerseId);
+  expect(state.verses[0]?.sequence_number).toBe(1);
+  expect(state.verses[0]?.lyric_text).toBe("Første vers rettet");
+  expect(state.verses[0]?.illustration_url).toBe("/images/first.png");
+
+  expect(state.verses[1]?.id).toBe(thirdVerseId);
+  expect(state.verses[1]?.sequence_number).toBe(2);
+  expect(state.verses[1]?.lyric_text).toBe("Tredje vers");
+
+  const newVerseId = state.verses[2]?.id ?? "";
+  expect(newVerseId.length).toBeGreaterThan(0);
+  expect(newVerseId).not.toBe(firstVerseId);
+  expect(newVerseId).not.toBe(secondVerseId);
+  expect(newVerseId).not.toBe(thirdVerseId);
+  expect(state.verses[2]?.sequence_number).toBe(3);
+
+  const remainingVerseIds = new Set(state.verses.map((verse) => verse.id));
+  expect(remainingVerseIds.has(secondVerseId)).toBe(false);
+  expect(state.jobs).toHaveLength(3);
+  state.jobs.forEach((job) => {
+    expect(remainingVerseIds.has(job.verse_id)).toBe(true);
+  });
+  expect(state.isPublished).toBe(false);
+});
+
+test("reconcileSongVerses rejects empty verse text payload", async () => {
+  const song = await createSongDraft({
+    title: "Validering",
+    versesText: "Første vers",
+  });
+
+  await expect(
+    reconcileSongVerses({
+      songId: song.id,
+      versesText: "   ",
+    }),
+  ).rejects.toThrowError(InvalidSongVerseUpdateError);
+});
+
+test("reconcileSongVerses unpublishes when changes are significant without adding verses", async () => {
+  const song = await createSongDraft({
+    title: "Signifikant ændring",
+    versesText: "Første vers med mange ord\n\nAndet vers uændret",
+  });
+
+  await withTestPool(async (pool) => {
+    await pool.query(
+      `
+        UPDATE songs
+        SET is_published = true
+        WHERE id = $1
+      `,
+      [song.id],
+    );
+  });
+
+  const result = await reconcileSongVerses({
+    songId: song.id,
+    versesText: "Første tekst med andre ord\n\nAndet vers uændret",
+  });
+
+  expect(result.matchedVerseCount).toBe(2);
+  expect(result.significantMatchedVerseCount).toBe(1);
+  expect(result.insertedVerseCount).toBe(0);
+  expect(result.removedVerseCount).toBe(0);
+  expect(result.wasUnpublished).toBe(true);
+
+  const songState = await withTestPool(async (pool) => {
+    const queryResult = await pool.query<{ is_published: boolean }>(
+      `
+        SELECT is_published
+        FROM songs
+        WHERE id = $1
+      `,
+      [song.id],
+    );
+
+    return queryResult.rows[0]?.is_published ?? null;
+  });
+
+  expect(songState).toBe(false);
 });
