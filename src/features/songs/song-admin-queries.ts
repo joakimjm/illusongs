@@ -66,7 +66,9 @@ const mapAdminSongSummaryRow = (
   pendingJobs: Number.parseInt(row.pending_jobs, 10),
 });
 
-const mapAdminSongVerseRow = (row: AdminSongVerseRow): AdminSongVerseDetail => ({
+const mapAdminSongVerseRow = (
+  row: AdminSongVerseRow,
+): AdminSongVerseDetail => ({
   id: row.id,
   sequenceNumber: row.sequence_number,
   lyricText: row.lyric_text,

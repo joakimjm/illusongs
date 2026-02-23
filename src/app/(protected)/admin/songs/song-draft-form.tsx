@@ -55,7 +55,7 @@ const SongDraftForm = ({ action }: SongDraftFormProps) => {
           name="title"
           type="text"
           required
-          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-100"
+          className="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm shadow-sm transition focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200 dark:border-stone-700 dark:bg-stone-900/40 dark:text-stone-100"
           placeholder="Enter a working title"
         />
       </FormField>
@@ -70,7 +70,7 @@ const SongDraftForm = ({ action }: SongDraftFormProps) => {
           name="verses"
           rows={8}
           required
-          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-100"
+          className="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm shadow-sm transition focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200 dark:border-stone-700 dark:bg-stone-900/40 dark:text-stone-100"
           placeholder={`Verse one\nAnother line\n\nVerse two`}
         />
       </FormField>
@@ -85,7 +85,7 @@ const SongDraftForm = ({ action }: SongDraftFormProps) => {
           name="tags"
           type="text"
           placeholder="dreamy, lullaby, forest"
-          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-100"
+          className="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm shadow-sm transition focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200 dark:border-stone-700 dark:bg-stone-900/40 dark:text-stone-100"
         />
       </FormField>
 

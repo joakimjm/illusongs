@@ -229,7 +229,7 @@ export const TokensManager = ({ initialTokens }: TokensManagerProps) => {
         <div className="flex flex-col gap-2">
           <label
             htmlFor="access-token-label"
-            className="text-sm font-medium text-slate-800 dark:text-slate-200"
+            className="text-sm font-medium text-stone-800 dark:text-stone-200"
           >
             Token label
           </label>
@@ -240,7 +240,7 @@ export const TokensManager = ({ initialTokens }: TokensManagerProps) => {
             onChange={(event) => setLabel(event.target.value)}
             placeholder="e.g. CI integration"
             autoComplete="off"
-            className="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+            className="block w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-700 shadow-sm transition focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500 dark:border-stone-700 dark:bg-stone-950 dark:text-stone-100"
           />
           <Body size="xs" variant="muted">
             Labels help identify the owner of each token. They are visible to
@@ -248,17 +248,17 @@ export const TokensManager = ({ initialTokens }: TokensManagerProps) => {
           </Body>
         </div>
         <fieldset className="flex flex-col gap-2">
-          <legend className="text-sm font-medium text-slate-800 dark:text-slate-200">
+          <legend className="text-sm font-medium text-stone-800 dark:text-stone-200">
             Permissions
           </legend>
-          <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+          <label className="flex items-center gap-2 text-sm text-stone-700 dark:text-stone-200">
             <input
               type="checkbox"
               checked={hasAdministratorPermission}
               onChange={handlePermissionChange(
                 AccessTokenPermissions.Administrator,
               )}
-              className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-900"
+              className="h-4 w-4 rounded border-stone-300 text-amber-700 focus:ring-amber-500 dark:border-stone-600 dark:bg-stone-900"
             />
             {
               ACCESS_TOKEN_PERMISSION_LABELS[
@@ -282,12 +282,12 @@ export const TokensManager = ({ initialTokens }: TokensManagerProps) => {
         )}
 
         {latestToken && (
-          <div className="flex flex-col gap-2 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900 dark:border-blue-500/60 dark:bg-blue-900/30 dark:text-blue-100">
+          <div className="flex flex-col gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-500/60 dark:bg-amber-900/20 dark:text-amber-100">
             <p className="font-medium">
               {`Token created for ${latestToken.label}. Store it securely — it will not be shown again.`}
             </p>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <code className="overflow-x-auto rounded bg-slate-900 px-3 py-2 text-xs text-slate-100 dark:bg-slate-950">
+              <code className="overflow-x-auto rounded bg-stone-900 px-3 py-2 text-xs text-stone-100 dark:bg-stone-950">
                 {latestToken.token}
               </code>
               <Button
@@ -299,10 +299,10 @@ export const TokensManager = ({ initialTokens }: TokensManagerProps) => {
                 {copyButtonLabel}
               </Button>
             </div>
-            <p className="text-xs text-blue-700 dark:text-blue-200">
+            <p className="text-xs text-amber-800 dark:text-amber-200">
               {`Last four digits: ${latestToken.lastFour}`}
             </p>
-            <p className="text-xs text-blue-700 dark:text-blue-200">
+            <p className="text-xs text-amber-800 dark:text-amber-200">
               {`Permissions: ${formatPermissions(latestToken.permissions)}`}
             </p>
           </div>
@@ -323,10 +323,10 @@ export const TokensManager = ({ initialTokens }: TokensManagerProps) => {
               <Panel as="li" key={token.id}>
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="flex flex-col gap-1">
-                    <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                    <h2 className="text-base font-semibold text-stone-900 dark:text-stone-100">
                       {token.label}
                     </h2>
-                    <p className="text-sm text-slate-600 dark:text-slate-300">
+                    <p className="text-sm text-stone-600 dark:text-stone-300">
                       {`Last four: ${token.lastFour}`}
                     </p>
                     <Body size="xs" variant="muted">
@@ -354,7 +354,7 @@ export const TokensManager = ({ initialTokens }: TokensManagerProps) => {
           })}
         </ul>
       ) : (
-        <p className="text-sm text-slate-600 dark:text-slate-300 sm:text-base">
+        <p className="text-sm text-stone-600 dark:text-stone-300 sm:text-base">
           No access tokens issued yet. Create one to enable programmatic access.
         </p>
       )}

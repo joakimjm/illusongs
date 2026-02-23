@@ -245,7 +245,9 @@ export const reconcileVersesForSongUpdate = (
   );
   const nextKeys = nextVerses.map((verse) => normalizeForMatching(verse));
 
-  const matchByPreviousIndex = previousVerses.map(() => null as VerseMatch | null);
+  const matchByPreviousIndex = previousVerses.map(
+    () => null as VerseMatch | null,
+  );
   const matchByNextIndex = nextVerses.map(() => null as VerseMatch | null);
 
   const previousExactBuckets = new Map<string, number[]>();
@@ -422,7 +424,9 @@ export const reconcileSongVerses = async (
     const matchedVerseIds = plan.matches.map(
       (match) => existingVerses[match.oldIndex]?.id ?? "",
     );
-    const matchedSequenceNumbers = plan.matches.map((match) => match.newIndex + 1);
+    const matchedSequenceNumbers = plan.matches.map(
+      (match) => match.newIndex + 1,
+    );
     const matchedLyricTexts = plan.matches.map(
       (match) => nextVerses[match.newIndex] ?? "",
     );
@@ -443,7 +447,12 @@ export const reconcileSongVerses = async (
           WHERE verse.id = input.verse_id AND verse.song_id = $1
           RETURNING verse.id
         `,
-        [input.songId, matchedVerseIds, matchedSequenceNumbers, matchedLyricTexts],
+        [
+          input.songId,
+          matchedVerseIds,
+          matchedSequenceNumbers,
+          matchedLyricTexts,
+        ],
       );
 
       if (matchedUpdateResult.rows.length !== matchedVerseIds.length) {

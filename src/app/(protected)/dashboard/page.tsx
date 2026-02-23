@@ -2,16 +2,14 @@ import { HeroHeader } from "@/components/hero-header";
 import { PageShell } from "@/components/page-shell";
 import { Panel } from "@/components/panel";
 import { Body, Heading, Strong } from "@/components/typography";
-import { APP_NAME } from "@/config/app";
 import { getUser } from "@/features/supabase/server";
 
 const DashboardPage = async () => {
   const user = await getUser();
 
   return (
-    <PageShell>
+    <PageShell variant="embedded">
       <HeroHeader
-        eyebrow={APP_NAME}
         title="Welcome to your workspace."
         description="This dashboard is intentionally minimal—extend it to reflect your product's needs."
       />

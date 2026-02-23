@@ -23,7 +23,7 @@ const INITIAL_STATE: DispatchState = {
 const SubmitButton = () => {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" size="sm" variant="secondary" disabled={pending}>
+    <Button type="submit" size="sm" variant="primary" disabled={pending}>
       {pending ? "Processing…" : "Process next job"}
     </Button>
   );
@@ -32,12 +32,12 @@ const SubmitButton = () => {
 const RepeatToggle = () => {
   const { pending } = useFormStatus();
   return (
-    <label className="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-300">
+    <label className="flex items-center gap-2 text-xs font-medium text-stone-600 dark:text-stone-300">
       <input
         type="checkbox"
         name="repeat"
         disabled={pending}
-        className="h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500 dark:border-slate-600 dark:bg-slate-800"
+        className="h-4 w-4 rounded border-stone-300 text-amber-700 focus:ring-amber-500 dark:border-stone-600 dark:bg-stone-800"
       />
       <span>Process remaining jobs automatically</span>
     </label>
@@ -49,7 +49,7 @@ const Message = ({ state }: { state: DispatchState }) => {
     return null;
   }
 
-  let tone = "text-slate-600 dark:text-slate-300";
+  let tone = "text-stone-600 dark:text-stone-300";
   if (state.status === "success") {
     tone = "text-emerald-600 dark:text-emerald-400";
   }

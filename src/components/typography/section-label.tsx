@@ -7,7 +7,7 @@ export const SectionLabel = ({
   className = "",
 }: SectionLabelProps) => {
   const baseStyles =
-    "text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400";
+    "text-sm font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400";
   const combinedClassName = className
     ? `${baseStyles} ${className}`
     : baseStyles;

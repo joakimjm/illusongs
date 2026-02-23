@@ -19,13 +19,13 @@ export const FormField = ({
   <div className={clsx("flex flex-col gap-2", className)}>
     <label
       htmlFor={htmlFor}
-      className="text-sm font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300"
+      className="text-sm font-semibold uppercase tracking-wide text-stone-600 dark:text-stone-300"
     >
       {label}
     </label>
     {children}
     {description ? (
-      <p className="text-xs text-slate-500 dark:text-slate-400">
+      <p className="text-xs text-stone-500 dark:text-stone-400">
         {description}
       </p>
     ) : null}

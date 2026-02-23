@@ -149,10 +149,10 @@ export const NavigationShell = ({
     .filter((section): section is ReactElement => section !== null);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
-      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/80 lg:hidden">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-          <SectionLabel className="text-slate-700 dark:text-slate-300">
+    <div className="min-h-screen bg-stone-100 text-stone-900 transition-colors dark:bg-stone-950 dark:text-stone-100">
+      <header className="sticky top-0 z-30 border-b border-stone-200/80 bg-stone-50/90 backdrop-blur-md dark:border-stone-800 dark:bg-stone-950/85 lg:hidden">
+        <div className="flex items-center justify-between px-4 py-3">
+          <SectionLabel className="text-stone-700 dark:text-stone-200">
             {header.title}
           </SectionLabel>
           {renderedSections.length > 0 ? (
@@ -161,7 +161,7 @@ export const NavigationShell = ({
               aria-controls={NAVIGATION_ID}
               aria-expanded={isOpen}
               onClick={() => setIsOpen(true)}
-              className="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+              className="inline-flex items-center justify-center rounded-md border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-700 shadow-sm transition hover:bg-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 dark:hover:bg-stone-800"
             >
               Menu
               <span className="sr-only">Open navigation</span>
@@ -179,11 +179,11 @@ export const NavigationShell = ({
           className="fixed inset-0 z-40 flex lg:hidden"
         >
           <div
-            className="absolute inset-0 bg-slate-900/60"
+            className="absolute inset-0 bg-stone-950/65"
             aria-hidden
             onClick={() => setIsOpen(false)}
           />
-          <div className="relative ml-auto flex h-full w-80 flex-col gap-6 overflow-y-auto bg-white px-4 py-6 shadow-xl dark:bg-slate-900">
+          <div className="relative ml-auto flex h-full w-80 flex-col gap-6 overflow-y-auto border-l border-stone-200 bg-stone-50 px-4 py-6 shadow-xl dark:border-stone-800 dark:bg-stone-950">
             <div className="flex items-center justify-between">
               <Heading
                 level={2}
@@ -196,7 +196,7 @@ export const NavigationShell = ({
                 ref={closeButtonRef}
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-2 py-1 text-sm text-slate-700 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                className="inline-flex items-center justify-center rounded-md border border-stone-300 bg-white px-2 py-1 text-sm text-stone-700 transition hover:bg-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 dark:hover:bg-stone-800"
               >
                 Close
                 <span className="sr-only">Close navigation menu</span>
@@ -208,9 +208,9 @@ export const NavigationShell = ({
         </div>
       ) : null}
 
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 lg:flex-row lg:items-start lg:gap-8 lg:px-6 lg:py-10">
+      <div className="flex w-full min-w-0 flex-col lg:grid lg:min-h-screen lg:grid-cols-[18rem_minmax(0,1fr)]">
         {renderedSections.length > 0 ? (
-          <aside className="sticky top-20 hidden w-72 shrink-0 rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-sm backdrop-blur lg:block dark:border-slate-800 dark:bg-slate-900/80">
+          <aside className="hidden h-screen flex-col border-r border-stone-200/80 bg-stone-50/80 p-5 backdrop-blur lg:sticky lg:top-0 lg:flex dark:border-stone-800 dark:bg-stone-950/80">
             <div className="mb-4">
               <SectionLabel>{header.eyebrow}</SectionLabel>
               <Heading level={2} className="mt-1 text-lg">
@@ -219,20 +219,24 @@ export const NavigationShell = ({
               {header.description ? (
                 <Body
                   size="sm"
-                  className="mt-1 text-xs text-slate-500 dark:text-slate-400"
+                  className="mt-1 text-xs text-stone-500 dark:text-stone-400"
                 >
                   {header.description}
                 </Body>
               ) : null}
             </div>
             <div className="flex flex-col gap-6">{renderedSections}</div>
-            <div className="mt-6">
+            <div className="mt-auto pt-6">
               <UserInfo user={user} />
             </div>
           </aside>
         ) : null}
 
-        <main className="flex w-full flex-col gap-6 lg:flex-1">{children}</main>
+        <main className="min-w-0 p-4 sm:p-6 lg:p-8">
+          <div className="min-h-[calc(100vh-2rem)] rounded-3xl border border-stone-200/80 bg-white/75 p-4 shadow-sm backdrop-blur-sm sm:p-6 lg:p-8 dark:border-stone-800/80 dark:bg-stone-900/75">
+            <div className="flex w-full min-w-0 flex-col gap-6">{children}</div>
+          </div>
+        </main>
       </div>
     </div>
   );

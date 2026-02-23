@@ -12,7 +12,7 @@ export const Anchor = <E extends React.ElementType = "a">({
   return (
     <Tag
       {...rest}
-      className={`inline-flex items-center gap-2 text-sm font-medium text-blue-600 underline-offset-4 hover:underline dark:text-blue-300 ${className ?? ""}`}
+      className={`inline-flex items-center gap-2 text-sm font-medium text-amber-700 underline-offset-4 hover:underline dark:text-amber-300 ${className ?? ""}`}
     >
       {children}
     </Tag>

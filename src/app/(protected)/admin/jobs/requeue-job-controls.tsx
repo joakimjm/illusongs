@@ -163,7 +163,7 @@ export const RequeueJobControls = ({
             await requeue();
           }}
           toggleAriaLabel={`Open options for verse ${verseSequence}`}
-          variant="danger"
+          variant="primary"
           size="xs"
           disabled={isSubmitting}
           items={[
@@ -206,7 +206,7 @@ export const RequeueJobControls = ({
         }
       >
         <label className="block space-y-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-slate-700 dark:text-slate-200">
+          <span className="text-xs font-medium uppercase tracking-wide text-stone-700 dark:text-stone-200">
             Extra direction (optional)
           </span>
           <textarea
@@ -215,17 +215,17 @@ export const RequeueJobControls = ({
               setDirectionDraft(event.target.value);
             }}
             rows={4}
-            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+            className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 shadow-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-200 dark:border-stone-700 dark:bg-stone-950 dark:text-stone-100"
             placeholder="e.g. No visible text, letters, logos, or signage in the image."
           />
         </label>
 
         <div className="space-y-2">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-700 dark:text-slate-200">
+          <p className="text-xs font-medium uppercase tracking-wide text-stone-700 dark:text-stone-200">
             Full prompt preview
           </p>
           {isPromptPreviewLoading ? (
-            <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-300">
+            <p className="rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-xs text-stone-600 dark:border-stone-700 dark:bg-stone-950/60 dark:text-stone-300">
               Loading prompt preview...
             </p>
           ) : promptPreviewError ? (
@@ -233,7 +233,7 @@ export const RequeueJobControls = ({
               {promptPreviewError}
             </p>
           ) : (
-            <pre className="max-h-72 overflow-auto rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs whitespace-pre-wrap text-slate-800 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-100">
+            <pre className="max-h-72 overflow-auto rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-xs whitespace-pre-wrap text-stone-800 dark:border-stone-700 dark:bg-stone-950/60 dark:text-stone-100">
               {promptPreview}
             </pre>
           )}

@@ -63,7 +63,7 @@ const SongLyricsForm = ({ initialVersesText, action }: SongLyricsFormProps) => {
           rows={18}
           defaultValue={initialVersesText}
           required
-          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-100"
+          className="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm shadow-sm transition focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200 dark:border-stone-700 dark:bg-stone-900/40 dark:text-stone-100"
         />
       </FormField>
 

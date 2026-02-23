@@ -1,12 +1,10 @@
 import { HeroHeader } from "@/components/hero-header";
 import { PageShell } from "@/components/page-shell";
 import { Body, Strong } from "@/components/typography";
-import { APP_NAME } from "@/config/app";
 
 const ErrorPage = () => (
   <PageShell>
     <HeroHeader
-      eyebrow={APP_NAME}
       title="Something went wrong."
       description="We could not complete your request. Please refresh the page or return to the workspace and try again."
     />

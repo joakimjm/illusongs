@@ -39,11 +39,11 @@ const TOGGLE_SIZE_CLASS_MAP: Record<SplitButtonSize, string> = {
 
 const VARIANT_CLASS_MAP: Record<SplitButtonVariant, string> = {
   primary:
-    "border-blue-600 bg-blue-600 text-white hover:bg-blue-700 dark:border-blue-500 dark:bg-blue-500 dark:hover:bg-blue-400 dark:hover:text-slate-950",
+    "border-amber-500 bg-amber-500 text-stone-950 hover:bg-amber-400 dark:border-amber-400 dark:bg-amber-400 dark:hover:bg-amber-300 dark:hover:text-stone-950",
   secondary:
-    "border-blue-500 bg-white text-blue-600 hover:bg-blue-600 hover:text-white dark:border-blue-400 dark:bg-slate-900 dark:text-blue-300 dark:hover:bg-blue-400 dark:hover:text-slate-950",
+    "border-stone-400 bg-white text-stone-700 hover:bg-stone-700 hover:text-white dark:border-stone-500 dark:bg-stone-900 dark:text-stone-200 dark:hover:bg-stone-200 dark:hover:text-stone-900",
   danger:
-    "border-rose-500 bg-white text-rose-600 hover:bg-rose-600 hover:text-white dark:border-rose-400 dark:bg-slate-900 dark:text-rose-300 dark:hover:bg-rose-400 dark:hover:text-slate-950",
+    "border-rose-500 bg-white text-rose-600 hover:bg-rose-600 hover:text-white dark:border-rose-400 dark:bg-stone-900 dark:text-rose-300 dark:hover:bg-rose-400 dark:hover:text-stone-950",
 };
 
 export const SplitButton = ({
@@ -94,7 +94,7 @@ export const SplitButton = ({
   }, [isOpen]);
 
   const baseButtonClasses =
-    "inline-flex items-center justify-center border font-medium transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 dark:focus:ring-offset-slate-900";
+    "inline-flex items-center justify-center border font-medium transition focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 dark:focus:ring-offset-stone-900";
   const variantClasses = VARIANT_CLASS_MAP[variant];
   const sizeClasses = SIZE_CLASS_MAP[size];
   const toggleSizeClasses = TOGGLE_SIZE_CLASS_MAP[size];
@@ -133,7 +133,7 @@ export const SplitButton = ({
       {isOpen ? (
         <div
           role="menu"
-          className="absolute right-0 top-[calc(100%+0.4rem)] z-40 min-w-56 rounded-lg border border-slate-200 bg-white p-2 shadow-lg dark:border-slate-700 dark:bg-slate-900"
+          className="absolute right-0 top-[calc(100%+0.4rem)] z-40 min-w-56 rounded-lg border border-stone-200 bg-white p-2 shadow-lg dark:border-stone-700 dark:bg-stone-900"
         >
           {items.map((item) => (
             <button
@@ -146,7 +146,7 @@ export const SplitButton = ({
                 setIsOpen(false);
                 void item.onSelect();
               }}
-              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs font-medium text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60 dark:text-slate-200 dark:hover:bg-slate-800"
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs font-medium text-stone-700 transition hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-60 dark:text-stone-200 dark:hover:bg-stone-800"
             >
               {item.icon ? item.icon : null}
               <span>{item.label}</span>

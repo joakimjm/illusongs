@@ -3,7 +3,6 @@ import { HeroHeader } from "@/components/hero-header";
 import { PageShell } from "@/components/page-shell";
 import { Panel } from "@/components/panel";
 import { Body, Heading } from "@/components/typography";
-import { APP_NAME } from "@/config/app";
 import { createSongDraft } from "@/features/songs/song-admin-commands";
 import { fetchAdminSongSummaries } from "@/features/songs/song-admin-queries";
 import { updateSongPublishStatus } from "@/features/songs/song-commands";
@@ -85,23 +84,34 @@ const SongsAdminPage = async () => {
   const songs = await fetchAdminSongSummaries();
 
   return (
-    <PageShell>
+    <PageShell variant="embedded">
       <HeroHeader
-        eyebrow={APP_NAME}
         title="Songs"
-        description="Create song drafts, track illustration progress, and publish finished pieces."
+        description="Review illustration progress, publish completed songs, and draft new songs when needed."
       />
 
-      <Panel>
-        <Heading level={2} className="text-base">
-          Create song draft
-        </Heading>
-        <Body size="sm" className="text-slate-600 dark:text-slate-300">
-          Paste all verses at once. We split them, queue illustration jobs, and
-          leave the song unpublished until you decide otherwise.
-        </Body>
-        <div className="mt-4">
-          <SongDraftForm action={createSongDraftAction} />
+      <Panel as="details">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 [&::-webkit-details-marker]:hidden">
+          <div className="flex flex-col gap-1">
+            <Heading level={2} className="text-base">
+              Create song draft
+            </Heading>
+            <Body size="sm" className="text-stone-600 dark:text-stone-300">
+              Start a new draft without leaving this workflow.
+            </Body>
+          </div>
+          <span className="inline-flex h-8 items-center rounded-lg border border-stone-400 px-3 text-sm font-medium text-stone-700 transition hover:bg-stone-700 hover:text-white dark:border-stone-500 dark:text-stone-200 dark:hover:bg-stone-200 dark:hover:text-stone-900">
+            Open editor
+          </span>
+        </summary>
+        <div className="mt-4 border-t border-stone-200 pt-4 dark:border-stone-700">
+          <Body size="sm" className="text-stone-600 dark:text-stone-300">
+            Paste all verses at once. We split them, queue illustration jobs,
+            and leave the song unpublished until you decide otherwise.
+          </Body>
+          <div className="mt-4">
+            <SongDraftForm action={createSongDraftAction} />
+          </div>
         </div>
       </Panel>
 
@@ -112,7 +122,7 @@ const SongsAdminPage = async () => {
               Existing songs
             </Heading>
           </div>
-          <Body size="sm" className="text-slate-600 dark:text-slate-300">
+          <Body size="sm" className="text-stone-600 dark:text-stone-300">
             {songs.length === 0
               ? "No songs yet. Draft a song above to get started."
               : "Use the controls on the right to publish or unpublish."}

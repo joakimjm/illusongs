@@ -8,7 +8,6 @@ import { HeroHeader } from "@/components/hero-header";
 import { PageShell } from "@/components/page-shell";
 import { Panel } from "@/components/panel";
 import { Body, Heading } from "@/components/typography";
-import { APP_NAME } from "@/config/app";
 import { fetchSongGenerationJobList } from "@/features/songs/song-generation-queue";
 import {
   processNextSongGenerationJob,
@@ -37,6 +36,103 @@ const parseBooleanParam = (value: string | string[] | undefined): boolean => {
 const parseSearchParam = (value: string | string[] | undefined): string => {
   const resolved = Array.isArray(value) ? value[0] : value;
   return resolved?.trim() ?? "";
+};
+
+type JobSort =
+  | "queue"
+  | "updated_desc"
+  | "updated_asc"
+  | "song_title_asc"
+  | "song_title_desc"
+  | "status";
+
+const isJobSort = (value: string): value is JobSort => {
+  switch (value) {
+    case "queue":
+    case "updated_desc":
+    case "updated_asc":
+    case "song_title_asc":
+    case "song_title_desc":
+    case "status":
+      return true;
+    default:
+      return false;
+  }
+};
+
+const parseSortParam = (value: string | string[] | undefined): JobSort => {
+  const resolved = Array.isArray(value) ? value[0] : value;
+  const normalized = resolved?.trim().toLowerCase();
+
+  if (normalized && isJobSort(normalized)) {
+    return normalized;
+  }
+
+  return "queue";
+};
+
+const JOB_SORT_LABELS: Record<JobSort, string> = {
+  queue: "Queue order",
+  updated_desc: "Updated (newest first)",
+  updated_asc: "Updated (oldest first)",
+  song_title_asc: "Song title (A-Z)",
+  song_title_desc: "Song title (Z-A)",
+  status: "Status",
+};
+
+const JOB_STATUS_ORDER: Record<string, number> = {
+  pending: 0,
+  in_progress: 1,
+  failed: 2,
+  completed: 3,
+};
+
+const sortJobs = (
+  jobs: readonly Awaited<
+    ReturnType<typeof fetchSongGenerationJobList>
+  >[number][],
+  sortBy: JobSort,
+) => {
+  const withTimestamps = (value: string): number => new Date(value).getTime();
+
+  const sorted = [...jobs];
+  sorted.sort((left, right) => {
+    const updatedLeft = withTimestamps(left.updatedAt ?? left.createdAt);
+    const updatedRight = withTimestamps(right.updatedAt ?? right.createdAt);
+
+    switch (sortBy) {
+      case "queue":
+        return (
+          withTimestamps(right.createdAt) - withTimestamps(left.createdAt) ||
+          left.verseSequence - right.verseSequence
+        );
+      case "updated_desc":
+        return updatedRight - updatedLeft;
+      case "updated_asc":
+        return updatedLeft - updatedRight;
+      case "song_title_asc":
+        return (
+          left.songTitle.localeCompare(right.songTitle, undefined, {
+            sensitivity: "base",
+          }) || left.verseSequence - right.verseSequence
+        );
+      case "song_title_desc":
+        return (
+          right.songTitle.localeCompare(left.songTitle, undefined, {
+            sensitivity: "base",
+          }) || left.verseSequence - right.verseSequence
+        );
+      case "status": {
+        const leftOrder = JOB_STATUS_ORDER[left.status] ?? 99;
+        const rightOrder = JOB_STATUS_ORDER[right.status] ?? 99;
+        return leftOrder - rightOrder || updatedRight - updatedLeft;
+      }
+      default:
+        return 0;
+    }
+  });
+
+  return sorted;
 };
 
 const processNextJobAction = async (
@@ -126,17 +222,18 @@ const AdminJobsPage = async ({ searchParams }: AdminJobsPageProps) => {
   const resolvedParams = await Promise.resolve(searchParams ?? {});
   const searchText = parseSearchParam(resolvedParams.q);
   const hidePublished = parseBooleanParam(resolvedParams.hidePublished);
+  const sortBy = parseSortParam(resolvedParams.sort);
 
-  const jobs = await fetchSongGenerationJobList({
+  const jobsRaw = await fetchSongGenerationJobList({
     limit: DEFAULT_JOB_LIMIT,
     excludePublished: hidePublished,
     searchText,
   });
+  const jobs = sortJobs(jobsRaw, sortBy);
 
   return (
-    <PageShell className="max-w-[92rem]">
+    <PageShell variant="embedded">
       <HeroHeader
-        eyebrow={APP_NAME}
         title="Illustration queue"
         description="Each verse generates an illustration job. Keep an eye on the queue and retry if something fails."
       />
@@ -145,53 +242,79 @@ const AdminJobsPage = async ({ searchParams }: AdminJobsPageProps) => {
         <Heading level={2} className="text-base">
           Recent jobs
         </Heading>
-        <Body size="sm" className="text-slate-600 dark:text-slate-300">
+        <Body size="sm" className="text-stone-600 dark:text-stone-300">
           Jobs are ordered by status and most recent updates. Use the actions
           below to keep things moving.
         </Body>
         <div className="mt-4">
           <ProcessJobForm action={processNextJobAction} />
         </div>
-        <hr className="my-6 border-slate-200 dark:border-slate-700" />
-        <form className="mt-4 flex flex-wrap items-end gap-3">
-          <FormField label="Search title or lyrics" htmlFor="job-search">
+        <hr className="my-6 border-stone-200 dark:border-stone-700" />
+        <form className="mt-4 flex flex-wrap items-end gap-4">
+          <FormField
+            label="Search title or lyrics"
+            htmlFor="job-search"
+            className="min-w-64 flex-1"
+          >
             <input
               id="job-search"
               name="q"
               type="search"
               defaultValue={searchText}
               placeholder="e.g. storm or lullaby"
-              className="w-64 rounded-lg border border-slate-200 px-3 py-2 text-sm shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-100"
+              className="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm shadow-sm transition focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200 dark:border-stone-700 dark:bg-stone-900/40 dark:text-stone-100"
             />
           </FormField>
-          <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
-            <input
-              type="checkbox"
-              name="hidePublished"
-              value="1"
-              defaultChecked={hidePublished}
-              className="h-4 w-4 rounded border-slate-300 text-slate-700 focus:ring-slate-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
-            />
-            Hide published songs
-          </label>
-          <div className="flex items-center gap-2">
-            <Button type="submit" variant="secondary" size="sm">
-              Apply filters
-            </Button>
-            <a
-              href={JOBS_PATH}
-              className="inline-flex items-center justify-center rounded-lg border border-transparent px-3 py-1.5 text-sm font-medium text-slate-700 underline decoration-slate-400 underline-offset-2 transition hover:text-slate-900 dark:text-slate-200 dark:hover:text-white"
+          <FormField label="Visibility" htmlFor="job-hide-published">
+            <label className="flex h-10 items-center gap-2 text-sm font-medium text-stone-700 dark:text-stone-200">
+              <input
+                id="job-hide-published"
+                type="checkbox"
+                name="hidePublished"
+                value="1"
+                defaultChecked={hidePublished}
+                className="h-4 w-4 rounded border-stone-300 text-stone-700 focus:ring-stone-500 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100"
+              />
+              Hide published songs
+            </label>
+          </FormField>
+          <FormField label="Sort by" htmlFor="job-sort" className="min-w-56">
+            <select
+              id="job-sort"
+              name="sort"
+              defaultValue={sortBy}
+              className="rounded-lg border border-stone-200 px-3 py-2 text-sm shadow-sm transition focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200 dark:border-stone-700 dark:bg-stone-900/40 dark:text-stone-100"
             >
-              Reset
-            </a>
+              {Object.entries(JOB_SORT_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </FormField>
+          <div className="flex min-w-fit flex-col gap-2">
+            <span className="text-xs font-semibold uppercase tracking-wide text-stone-600 dark:text-stone-300">
+              Actions
+            </span>
+            <div className="flex h-10 items-center gap-2">
+              <Button type="submit" variant="secondary" size="sm">
+                Apply filters
+              </Button>
+              <a
+                href={JOBS_PATH}
+                className="inline-flex items-center justify-center rounded-lg border border-transparent px-3 py-1.5 text-sm font-medium text-stone-700 underline decoration-stone-400 underline-offset-2 transition hover:text-stone-900 dark:text-stone-200 dark:hover:text-white"
+              >
+                Reset
+              </a>
+            </div>
           </div>
         </form>
 
         <div className="mt-6 -mx-4 overflow-x-auto sm:mx-0">
           <div className="inline-block min-w-full align-middle">
-            <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white/80 shadow-sm dark:border-slate-700/60 dark:bg-slate-900/40">
-              <table className="min-w-[1150px] divide-y divide-slate-200/70 text-sm dark:divide-slate-800/60">
-                <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-900 dark:text-slate-300">
+            <div className="overflow-hidden rounded-2xl border border-stone-200/80 bg-white/80 shadow-sm dark:border-stone-700/60 dark:bg-stone-900/40">
+              <table className="min-w-[1150px] divide-y divide-stone-200/70 text-sm dark:divide-stone-800/60">
+                <thead className="bg-stone-50 text-left text-xs font-semibold uppercase tracking-wide text-stone-500 dark:bg-stone-900 dark:text-stone-300">
                   <tr>
                     <th className="px-4 py-3">Song</th>
                     <th className="px-4 py-3">Verse</th>
@@ -202,7 +325,7 @@ const AdminJobsPage = async ({ searchParams }: AdminJobsPageProps) => {
                     <th className="px-4 py-3" />
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200/70 dark:divide-slate-800/60">
+                <tbody className="divide-y divide-stone-200/70 dark:divide-stone-800/60">
                   {jobs.map((job) => {
                     const badgeVariant =
                       STATUS_BADGE_VARIANTS[job.status] ?? "neutral";
@@ -211,24 +334,24 @@ const AdminJobsPage = async ({ searchParams }: AdminJobsPageProps) => {
                     return (
                       <tr
                         key={job.id}
-                        className="transition hover:bg-slate-50 dark:hover:bg-slate-900/40"
+                        className="transition hover:bg-stone-50 dark:hover:bg-stone-900/40"
                       >
-                        <td className="px-4 py-3 font-medium text-slate-900 dark:text-slate-100">
+                        <td className="px-4 py-4 font-medium text-stone-900 dark:text-stone-100">
                           <div className="whitespace-nowrap">
                             {job.songTitle}
                           </div>
-                          <div className="text-xs text-slate-500 dark:text-slate-400">
+                          <div className="text-xs text-stone-500 dark:text-stone-400">
                             /{job.songSlug}
                           </div>
-                          <div className="mt-1 text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                          <div className="mt-1 text-[11px] uppercase tracking-wide text-stone-500 dark:text-stone-400">
                             {job.isPublished ? "Published" : "Draft"}
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-slate-700 dark:text-slate-300">
+                        <td className="px-4 py-4 text-stone-700 dark:text-stone-300">
                           <div className="font-medium">
                             Verse {job.verseSequence}
                           </div>
-                          <div className="max-w-48 whitespace-pre overflow-hidden text-ellipsis text-xs text-slate-500 dark:text-slate-400">
+                          <div className="max-w-48 whitespace-pre overflow-hidden text-ellipsis text-xs text-stone-500 dark:text-stone-400">
                             {truncate(job.verseLyric, 120)}
                           </div>
                           {job.status === "completed" &&
@@ -237,14 +360,14 @@ const AdminJobsPage = async ({ searchParams }: AdminJobsPageProps) => {
                               href={job.verseIllustrationUrl}
                               target="_blank"
                               rel="noreferrer"
-                              className="mt-1 inline-flex text-xs font-medium text-sky-600 underline decoration-sky-400 underline-offset-2 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-300"
+                              className="mt-1 inline-flex text-xs font-medium text-amber-700 underline decoration-amber-300 underline-offset-2 hover:text-amber-800 dark:text-amber-300 dark:hover:text-amber-200"
                             >
                               View illustration
                               <HiArrowTopRightOnSquare className="ml-1 mt-0.5" />
                             </a>
                           ) : null}
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-4">
                           <Badge
                             variant={badgeVariant}
                             className="px-2.5 py-0.5"
@@ -252,13 +375,13 @@ const AdminJobsPage = async ({ searchParams }: AdminJobsPageProps) => {
                             {job.status.replace("_", " ")}
                           </Badge>
                         </td>
-                        <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
+                        <td className="px-4 py-4 text-stone-600 dark:text-stone-300">
                           {job.attempts}
                         </td>
-                        <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                        <td className="px-4 py-4 text-stone-600 dark:text-stone-300 whitespace-nowrap">
                           {formatTimestamp(job.updatedAt ?? job.createdAt)}
                         </td>
-                        <td className="px-4 py-3 align-top">
+                        <td className="px-4 py-4 align-top">
                           {job.lastError ? (
                             <div
                               className={
@@ -287,7 +410,7 @@ const AdminJobsPage = async ({ searchParams }: AdminJobsPageProps) => {
                             </div>
                           ) : null}
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-4">
                           {canReset ? (
                             <RequeueJobControls
                               songId={job.songId}
@@ -304,7 +427,7 @@ const AdminJobsPage = async ({ searchParams }: AdminJobsPageProps) => {
                       <td colSpan={7} className="px-4 py-12 text-center">
                         <Body
                           size="sm"
-                          className="text-slate-500 dark:text-slate-400"
+                          className="text-stone-500 dark:text-stone-400"
                         >
                           The queue is empty. Draft a song to enqueue new jobs.
                         </Body>
