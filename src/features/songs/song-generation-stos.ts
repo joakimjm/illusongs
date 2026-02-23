@@ -8,6 +8,7 @@ export type SongGenerationJobSto = {
   id: string;
   song_id: string;
   verse_id: string;
+  additional_prompt_direction: string | null;
   status: SongGenerationJobStatus;
   attempts: number;
   started_at: Date | null;

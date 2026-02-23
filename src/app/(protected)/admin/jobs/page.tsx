@@ -9,16 +9,13 @@ import { PageShell } from "@/components/page-shell";
 import { Panel } from "@/components/panel";
 import { Body, Heading } from "@/components/typography";
 import { APP_NAME } from "@/config/app";
-import {
-  fetchSongGenerationJobList,
-  resetSongGenerationJob,
-} from "@/features/songs/song-generation-queue";
+import { fetchSongGenerationJobList } from "@/features/songs/song-generation-queue";
 import {
   processNextSongGenerationJob,
   type SongGenerationRunResult,
 } from "@/features/songs/song-generation-runner";
-import { deleteVerseIllustrationImage } from "@/features/songs/verse-illustration-storage";
 import { type DispatchState, ProcessJobForm } from "./process-job-form";
+import { RequeueJobControls } from "./requeue-job-controls";
 
 const JOBS_PATH: Route = "/admin/jobs";
 const MAX_CHAINED_JOBS = 10;
@@ -103,49 +100,6 @@ const processNextJobAction = async (
   }
 };
 
-const resetJobAction = async (formData: FormData) => {
-  "use server";
-
-  const jobId = formData.get("jobId");
-  if (typeof jobId !== "string" || jobId.trim().length === 0) {
-    return;
-  }
-
-  const result = await resetSongGenerationJob(jobId);
-  if (!result) {
-    return;
-  }
-
-  const deletePromises: Array<Promise<void>> = [];
-  if (result.imagePath) {
-    deletePromises.push(deleteVerseIllustrationImage(result.imagePath));
-  }
-  if (result.thumbnailPath) {
-    deletePromises.push(deleteVerseIllustrationImage(result.thumbnailPath));
-  }
-
-  await Promise.allSettled(deletePromises).then((settled) => {
-    settled.forEach((outcome) => {
-      if (outcome.status === "rejected") {
-        const error = outcome.reason;
-        console.error(
-          JSON.stringify({
-            event: "song_generation_image_delete_failed",
-            jobId,
-            imagePath: result.imagePath,
-            thumbnailPath: result.thumbnailPath,
-            error:
-              error instanceof Error
-                ? error.message
-                : String(error ?? "unknown"),
-          }),
-        );
-      }
-    });
-  });
-  revalidatePath(JOBS_PATH);
-};
-
 const formatTimestamp = (iso: string): string =>
   new Date(iso).toLocaleString(undefined, {
     year: "numeric",
@@ -157,6 +111,9 @@ const formatTimestamp = (iso: string): string =>
 
 const truncate = (value: string, length: number = 100): string =>
   value.length <= length ? value : `${value.slice(0, length)}…`;
+
+const getErrorPreviewLimit = (status: string): number =>
+  status === "failed" ? 280 : 90;
 
 const STATUS_BADGE_VARIANTS: Record<string, BadgeVariant> = {
   pending: "warning",
@@ -177,7 +134,7 @@ const AdminJobsPage = async ({ searchParams }: AdminJobsPageProps) => {
   });
 
   return (
-    <PageShell>
+    <PageShell className="max-w-[92rem]">
       <HeroHeader
         eyebrow={APP_NAME}
         title="Illustration queue"
@@ -233,7 +190,7 @@ const AdminJobsPage = async ({ searchParams }: AdminJobsPageProps) => {
         <div className="mt-6 -mx-4 overflow-x-auto sm:mx-0">
           <div className="inline-block min-w-full align-middle">
             <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white/80 shadow-sm dark:border-slate-700/60 dark:bg-slate-900/40">
-              <table className="min-w-5xl table-fixed divide-y divide-slate-200/70 text-sm dark:divide-slate-800/60">
+              <table className="min-w-[1150px] divide-y divide-slate-200/70 text-sm dark:divide-slate-800/60">
                 <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-900 dark:text-slate-300">
                   <tr>
                     <th className="px-4 py-3">Song</th>
@@ -301,31 +258,43 @@ const AdminJobsPage = async ({ searchParams }: AdminJobsPageProps) => {
                         <td className="px-4 py-3 text-slate-600 dark:text-slate-300 whitespace-nowrap">
                           {formatTimestamp(job.updatedAt ?? job.createdAt)}
                         </td>
-                        <td className="px-4 py-3 text-sm text-rose-600 dark:text-rose-300">
-                          {job.lastError ? truncate(job.lastError, 90) : ""}
+                        <td className="px-4 py-3 align-top">
+                          {job.lastError ? (
+                            <div
+                              className={
+                                job.status === "failed"
+                                  ? "text-rose-700 dark:text-rose-300"
+                                  : "text-rose-600 dark:text-rose-300"
+                              }
+                            >
+                              <p className="max-w-[34rem] text-xs leading-5 whitespace-pre-wrap break-words">
+                                {truncate(
+                                  job.lastError,
+                                  getErrorPreviewLimit(job.status),
+                                )}
+                              </p>
+                              {job.lastError.length >
+                              getErrorPreviewLimit(job.status) ? (
+                                <details className="mt-1 text-xs">
+                                  <summary className="cursor-pointer underline decoration-rose-400 underline-offset-2">
+                                    View full error
+                                  </summary>
+                                  <pre className="mt-1 max-h-52 overflow-auto rounded-lg border border-rose-200/70 bg-rose-50/70 p-2 text-[11px] whitespace-pre-wrap break-words dark:border-rose-800/70 dark:bg-rose-950/40">
+                                    {job.lastError}
+                                  </pre>
+                                </details>
+                              ) : null}
+                            </div>
+                          ) : null}
                         </td>
                         <td className="px-4 py-3">
-                          <div className="flex flex-col items-end gap-2">
-                            <form
-                              action={resetJobAction}
-                              className="inline-flex"
-                            >
-                              <input
-                                type="hidden"
-                                name="jobId"
-                                value={job.id}
-                              />
-                              {canReset && (
-                                <Button
-                                  type="submit"
-                                  variant="danger"
-                                  size="xs"
-                                >
-                                  Requeue
-                                </Button>
-                              )}
-                            </form>
-                          </div>
+                          {canReset ? (
+                            <RequeueJobControls
+                              songId={job.songId}
+                              verseId={job.verseId}
+                              verseSequence={job.verseSequence}
+                            />
+                          ) : null}
                         </td>
                       </tr>
                     );

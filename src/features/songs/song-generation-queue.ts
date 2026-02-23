@@ -1,5 +1,9 @@
 import type { PoolClient } from "pg";
 import { getPostgresConnection } from "@/features/postgres/postgres-connection-pool";
+import {
+  createVerseIllustrationBasePrompt,
+  createVerseIllustrationPrompt,
+} from "@/features/songs/song-generation-prompts";
 import type {
   SongGenerationJobStatus,
   SongGenerationJobSto,
@@ -17,6 +21,7 @@ type SongGenerationJobDto = {
   id: string;
   songId: string;
   verseId: string;
+  additionalPromptDirection: string | null;
   status: SongGenerationJobStatus;
   attempts: number;
   startedAt: string | null;
@@ -50,10 +55,21 @@ export type ResetSongGenerationJobResult = {
   thumbnailPath: string | null;
 };
 
+export type SongGenerationPromptPreview = {
+  jobId: string;
+  songId: string;
+  verseId: string;
+  verseSequence: number;
+  additionalPromptDirection: string | null;
+  basePrompt: string;
+  fullPrompt: string;
+};
+
 const JOB_COLUMNS = `
   id,
   song_id,
   verse_id,
+  additional_prompt_direction,
   status,
   attempts,
   started_at,
@@ -63,10 +79,23 @@ const JOB_COLUMNS = `
   updated_at
 `;
 
+const normalizeAdditionalPromptDirection = (
+  additionalPromptDirection: string | null | undefined,
+): string | null => {
+  if (typeof additionalPromptDirection !== "string") {
+    return null;
+  }
+  const normalized = additionalPromptDirection.trim();
+  return normalized.length > 0 ? normalized : null;
+};
+
 const mapJobStoToDto = (job: SongGenerationJobSto): SongGenerationJobDto => ({
   id: job.id,
   songId: job.song_id,
   verseId: job.verse_id,
+  additionalPromptDirection: normalizeAdditionalPromptDirection(
+    job.additional_prompt_direction,
+  ),
   status: job.status,
   attempts: job.attempts,
   startedAt: job.started_at ? job.started_at.toISOString() : null,
@@ -238,6 +267,7 @@ type SongGenerationJobListRow = {
   id: string;
   song_id: string;
   verse_id: string;
+  additional_prompt_direction: string | null;
   status: SongGenerationJobStatus;
   attempts: number;
   started_at: Date | null;
@@ -260,6 +290,9 @@ const mapJobListRow = (
   id: row.id,
   songId: row.song_id,
   verseId: row.verse_id,
+  additionalPromptDirection: normalizeAdditionalPromptDirection(
+    row.additional_prompt_direction,
+  ),
   status: row.status,
   attempts: row.attempts,
   startedAt: row.started_at ? row.started_at.toISOString() : null,
@@ -324,6 +357,7 @@ export const fetchSongGenerationJobList = async (
           j.id,
           j.song_id,
           j.verse_id,
+          j.additional_prompt_direction,
           j.status,
           j.attempts,
           j.started_at,
@@ -408,8 +442,13 @@ export const markSongGenerationJobFailed = async (
 
 export const resetSongGenerationJob = async (
   jobId: string,
+  additionalPromptDirection?: string | null,
 ): Promise<ResetSongGenerationJobResult | null> => {
   const connection = getPostgresConnection();
+  const shouldUpdateAdditionalPromptDirection =
+    additionalPromptDirection !== undefined;
+  const normalizedAdditionalPromptDirection =
+    normalizeAdditionalPromptDirection(additionalPromptDirection);
 
   return await connection.clientUsing(async (client) => {
     const jobResult = await client.query<SongGenerationJobSto>(
@@ -449,10 +488,18 @@ export const resetSongGenerationJob = async (
           started_at = NULL,
           completed_at = NULL,
           last_error = NULL,
+          additional_prompt_direction = CASE
+            WHEN $2::boolean THEN $3
+            ELSE additional_prompt_direction
+          END,
           updated_at = NOW()
         WHERE id = $1
       `,
-      [jobId],
+      [
+        jobId,
+        shouldUpdateAdditionalPromptDirection,
+        normalizedAdditionalPromptDirection,
+      ],
     );
 
     await client.query(
@@ -481,6 +528,57 @@ export const resetSongGenerationJob = async (
       imagePath: artifactResult.rows[0]?.image_path ?? null,
       thumbnailPath: artifactResult.rows[0]?.thumbnail_path ?? null,
     } as ResetSongGenerationJobResult;
+  });
+};
+
+export const findSongGenerationPromptPreviewByJobId = async (
+  jobId: string,
+): Promise<SongGenerationPromptPreview | null> => {
+  const connection = getPostgresConnection();
+
+  return await connection.clientUsing(async (client) => {
+    const jobResult = await client.query<SongGenerationJobSto>(
+      `
+        SELECT ${JOB_COLUMNS}
+        FROM song_generation_jobs
+        WHERE id = $1
+        LIMIT 1
+      `,
+      [jobId],
+    );
+
+    const job = jobResult.rows[0];
+    if (!job) {
+      return null;
+    }
+
+    const song = await fetchSongDetailById(client, job.song_id);
+    const verse = song.verses.find((entry) => entry.id === job.verse_id);
+    if (!verse) {
+      throw new Error(
+        `Verse ${job.verse_id} not found for song ${job.song_id}.`,
+      );
+    }
+
+    const additionalPromptDirection = normalizeAdditionalPromptDirection(
+      job.additional_prompt_direction,
+    );
+    const basePrompt = createVerseIllustrationBasePrompt(song, verse);
+    const fullPrompt = createVerseIllustrationPrompt(
+      song,
+      verse,
+      additionalPromptDirection,
+    );
+
+    return {
+      jobId: job.id,
+      songId: job.song_id,
+      verseId: job.verse_id,
+      verseSequence: verse.sequenceNumber,
+      additionalPromptDirection,
+      basePrompt,
+      fullPrompt,
+    };
   });
 };
 

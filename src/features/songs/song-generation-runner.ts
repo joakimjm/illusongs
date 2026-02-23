@@ -3,10 +3,7 @@ import {
   getOpenAiImageModel,
   isOpenAiImageGenerationEnabled,
 } from "@/features/songs/song-generation-config";
-import {
-  createInitialSongIllustrationPrompt,
-  createNextVerseIllustrationPrompt,
-} from "@/features/songs/song-generation-prompts";
+import { createVerseIllustrationPrompt } from "@/features/songs/song-generation-prompts";
 import {
   claimNextSongGenerationJob,
   markSongGenerationJobFailed,
@@ -57,10 +54,11 @@ const buildStrategyContext = async (
   const artifacts = await fetchSongGenerationVerseArtifactsBySong(song.id);
   const artifactsByVerseId = createArtifactsMap(artifacts);
 
-  const prompt =
-    verse.sequenceNumber === 1
-      ? createInitialSongIllustrationPrompt(song)
-      : createNextVerseIllustrationPrompt(verse);
+  const prompt = createVerseIllustrationPrompt(
+    song,
+    verse,
+    job.additionalPromptDirection,
+  );
 
   const previousVerses = getSortedPreviousVerses(song, verse);
   const referencedArtifacts = previousVerses.filter((entry) =>

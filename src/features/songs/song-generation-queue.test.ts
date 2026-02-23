@@ -5,6 +5,7 @@ import {
   claimNextSongGenerationJob,
   enqueueSongGenerationJobs,
   fetchSongGenerationJobList,
+  findSongGenerationPromptPreviewByJobId,
   markSongGenerationJobCompleted,
   markSongGenerationJobFailed,
   recordSongGenerationVerseArtifact,
@@ -102,6 +103,7 @@ test("claimNextSongGenerationJob returns next pending job with song detail", asy
   expect(claim).not.toBeNull();
   expect(claim?.job.status).toBe("in_progress");
   expect(claim?.job.attempts).toBe(1);
+  expect(claim?.job.additionalPromptDirection).toBeNull();
   expect(claim?.song.id).toBe(song.id);
   expect(claim?.song.verses).toHaveLength(1);
   expect(claim?.verse.id).toBe(song.verses[0]?.id);
@@ -356,4 +358,45 @@ test("resetSongGenerationJob clears illustration and requeues job", async () => 
   });
 
   expect(artifactCount).toBe(0);
+});
+
+test("resetSongGenerationJob updates additional prompt direction when provided", async () => {
+  await seedSongWithJobs(1);
+  const claim = await claimNextSongGenerationJob();
+  expect(claim).not.toBeNull();
+  const jobId = claim?.job.id ?? "";
+
+  await resetSongGenerationJob(jobId, "No text in image.");
+
+  const direction = await withTestPool(async (pool) => {
+    const result = await pool.query<{
+      additional_prompt_direction: string | null;
+    }>(
+      `
+        SELECT additional_prompt_direction
+        FROM song_generation_jobs
+        WHERE id = $1
+      `,
+      [jobId],
+    );
+
+    return result.rows[0]?.additional_prompt_direction ?? null;
+  });
+
+  expect(direction).toBe("No text in image.");
+});
+
+test("findSongGenerationPromptPreviewByJobId returns base and full prompt", async () => {
+  await seedSongWithJobs(1);
+  const claim = await claimNextSongGenerationJob();
+  expect(claim).not.toBeNull();
+  const jobId = claim?.job.id ?? "";
+
+  await resetSongGenerationJob(jobId, "No text in image.");
+  const preview = await findSongGenerationPromptPreviewByJobId(jobId);
+
+  expect(preview).not.toBeNull();
+  expect(preview?.additionalPromptDirection).toBe("No text in image.");
+  expect(preview?.basePrompt).toContain("Lav en illustration af første vers:");
+  expect(preview?.fullPrompt).toContain("Ekstra retning for dette vers:");
 });

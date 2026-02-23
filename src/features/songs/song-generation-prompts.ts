@@ -52,3 +52,51 @@ export const createNextVerseIllustrationPrompt = (
     "",
     verse.lyricText.trim(),
   ].join("\n");
+
+const normalizeAdditionalPromptDirection = (
+  direction: string | null | undefined,
+): string | null => {
+  if (typeof direction !== "string") {
+    return null;
+  }
+
+  const normalized = direction.trim();
+  return normalized.length > 0 ? normalized : null;
+};
+
+export const appendAdditionalPromptDirection = (
+  prompt: string,
+  additionalPromptDirection: string | null | undefined,
+): string => {
+  const normalizedDirection = normalizeAdditionalPromptDirection(
+    additionalPromptDirection,
+  );
+  if (!normalizedDirection) {
+    return prompt;
+  }
+
+  return [
+    prompt,
+    "",
+    "Ekstra retning for dette vers:",
+    normalizedDirection,
+  ].join("\n");
+};
+
+export const createVerseIllustrationBasePrompt = (
+  song: SongDetailDto,
+  verse: SongVerseDto,
+): string =>
+  verse.sequenceNumber === 1
+    ? createInitialSongIllustrationPrompt(song)
+    : createNextVerseIllustrationPrompt(verse);
+
+export const createVerseIllustrationPrompt = (
+  song: SongDetailDto,
+  verse: SongVerseDto,
+  additionalPromptDirection: string | null | undefined,
+): string =>
+  appendAdditionalPromptDirection(
+    createVerseIllustrationBasePrompt(song, verse),
+    additionalPromptDirection,
+  );

@@ -1,7 +1,9 @@
 import { expect, test } from "vitest";
 import {
+  appendAdditionalPromptDirection,
   createInitialSongIllustrationPrompt,
   createNextVerseIllustrationPrompt,
+  createVerseIllustrationPrompt,
 } from "@/features/songs/song-generation-prompts";
 import type { SongDetailDto } from "@/features/songs/song-types";
 
@@ -49,4 +51,35 @@ test("createNextVerseIllustrationPrompt formats follow-up prompt", () => {
 
   expect(prompt.startsWith("Illustrer næste vers i samme stil")).toBe(true);
   expect(prompt).toContain(sampleSong.verses[1]?.lyricText ?? "");
+});
+
+test("appendAdditionalPromptDirection appends direction when provided", () => {
+  const prompt = appendAdditionalPromptDirection("Base prompt", "No text");
+
+  expect(prompt).toContain("Base prompt");
+  expect(prompt).toContain("Ekstra retning for dette vers:");
+  expect(prompt).toContain("No text");
+});
+
+test("appendAdditionalPromptDirection ignores blank direction", () => {
+  const prompt = appendAdditionalPromptDirection("Base prompt", "   ");
+
+  expect(prompt).toBe("Base prompt");
+});
+
+test("createVerseIllustrationPrompt appends additional direction", () => {
+  const firstVerse = sampleSong.verses[0];
+  if (!firstVerse) {
+    throw new Error("Expected sample first verse.");
+  }
+
+  const prompt = createVerseIllustrationPrompt(
+    sampleSong,
+    firstVerse,
+    "No text",
+  );
+
+  expect(prompt).toContain("Lav en illustration af første vers:");
+  expect(prompt).toContain("Ekstra retning for dette vers:");
+  expect(prompt).toContain("No text");
 });

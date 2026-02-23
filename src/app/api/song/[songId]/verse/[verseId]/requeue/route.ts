@@ -3,25 +3,31 @@ import { NextResponse } from "next/server";
 import { createApiRoute } from "@/features/auth/api-handler";
 import { isAdmin } from "@/features/auth/policies";
 import {
+  createBadRequestResponse,
   createForbiddenResponse,
   createNotFoundResponse,
   logAndRespondWithError,
 } from "@/features/http/api-utils";
 import { getPostgresConnection } from "@/features/postgres/postgres-connection-pool";
 import type { ResetSongGenerationJobResult } from "@/features/songs/song-generation-queue";
-import { resetSongGenerationJob } from "@/features/songs/song-generation-queue";
+import {
+  findSongGenerationPromptPreviewByJobId,
+  resetSongGenerationJob,
+} from "@/features/songs/song-generation-queue";
 import { deleteVerseIllustrationImage } from "@/features/songs/verse-illustration-storage";
 import { isValidUuid } from "@/utils";
 
 export const runtime = "nodejs";
 
+class InvalidRequeueRequestError extends Error {}
+
 const normalizeUuid = (value: string | undefined): string => {
   if (typeof value !== "string" || value.trim().length === 0) {
-    throw new Error("Invalid id");
+    throw new InvalidRequeueRequestError("Invalid id.");
   }
   const normalized = value.trim().toLowerCase();
   if (!isValidUuid(normalized)) {
-    throw new Error("Invalid id");
+    throw new InvalidRequeueRequestError("Invalid id.");
   }
   return normalized;
 };
@@ -75,8 +81,48 @@ const deleteExistingImages = async (
   await Promise.allSettled(deletions);
 };
 
+const parseAdditionalPromptDirectionPayload = async (
+  request: Request,
+): Promise<string | null | undefined> => {
+  const contentType = request.headers.get("content-type");
+  if (!contentType || !contentType.toLowerCase().includes("application/json")) {
+    return undefined;
+  }
+
+  let payload: { additionalPromptDirection?: string | null };
+  try {
+    payload = await request.json();
+  } catch {
+    throw new InvalidRequeueRequestError("Request body must be valid JSON.");
+  }
+
+  if (
+    typeof payload !== "object" ||
+    payload === null ||
+    Array.isArray(payload)
+  ) {
+    throw new InvalidRequeueRequestError("Request body must be a JSON object.");
+  }
+
+  const value = payload.additionalPromptDirection;
+  if (value === undefined) {
+    return undefined;
+  }
+  if (value === null) {
+    return null;
+  }
+  if (typeof value !== "string") {
+    throw new InvalidRequeueRequestError(
+      "additionalPromptDirection must be a string when provided.",
+    );
+  }
+
+  const normalized = value.trim();
+  return normalized.length > 0 ? normalized : null;
+};
+
 const handlers = createApiRoute<{ songId: string; verseId: string }>({
-  POST: async ({ params, identity }) => {
+  GET: async ({ params, identity }) => {
     if (!isAdmin(identity)) {
       return createForbiddenResponse("Admins only.");
     }
@@ -90,7 +136,51 @@ const handlers = createApiRoute<{ songId: string; verseId: string }>({
         return createNotFoundResponse("No job found for this verse.");
       }
 
-      const resetResult = await resetSongGenerationJob(job.jobId);
+      const preview = await findSongGenerationPromptPreviewByJobId(job.jobId);
+      if (!preview) {
+        return createNotFoundResponse("No job found for this verse.");
+      }
+
+      return NextResponse.json({
+        jobId: preview.jobId,
+        verseId: preview.verseId,
+        verseSequence: preview.verseSequence,
+        additionalPromptDirection: preview.additionalPromptDirection,
+        basePrompt: preview.basePrompt,
+        fullPrompt: preview.fullPrompt,
+      });
+    } catch (error) {
+      if (error instanceof InvalidRequeueRequestError) {
+        return createBadRequestResponse(error.message);
+      }
+
+      return logAndRespondWithError(
+        "song_generation_requeue_prompt_preview_failed",
+        error,
+        "Unable to load prompt preview",
+      );
+    }
+  },
+  POST: async ({ request, params, identity }) => {
+    if (!isAdmin(identity)) {
+      return createForbiddenResponse("Admins only.");
+    }
+
+    try {
+      const songId = normalizeUuid(params.songId);
+      const verseId = normalizeUuid(params.verseId);
+      const additionalPromptDirection =
+        await parseAdditionalPromptDirectionPayload(request);
+
+      const job = await findLatestJobForVerse(songId, verseId);
+      if (!job) {
+        return createNotFoundResponse("No job found for this verse.");
+      }
+
+      const resetResult = await resetSongGenerationJob(
+        job.jobId,
+        additionalPromptDirection,
+      );
       if (!resetResult) {
         return createNotFoundResponse("Unable to reset job for verse.");
       }
@@ -105,6 +195,10 @@ const handlers = createApiRoute<{ songId: string; verseId: string }>({
         verseId: resetResult.verseId,
       });
     } catch (error) {
+      if (error instanceof InvalidRequeueRequestError) {
+        return createBadRequestResponse(error.message);
+      }
+
       return logAndRespondWithError(
         "song_generation_requeue_failed",
         error,
@@ -114,4 +208,5 @@ const handlers = createApiRoute<{ songId: string; verseId: string }>({
   },
 });
 
+export const GET = handlers.GET;
 export const POST = handlers.POST;
