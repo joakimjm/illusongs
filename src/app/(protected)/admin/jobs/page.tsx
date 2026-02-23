@@ -24,10 +24,13 @@ type AdminJobsPageProps = {
   readonly searchParams?: Record<string, string | string[] | undefined>;
 };
 
-const parseBooleanParam = (value: string | string[] | undefined): boolean => {
+const parseBooleanParam = (
+  value: string | string[] | undefined,
+  defaultValue: boolean = false,
+): boolean => {
   const resolved = Array.isArray(value) ? value[0] : value;
   if (!resolved) {
-    return false;
+    return defaultValue;
   }
   const normalized = resolved.trim().toLowerCase();
   return normalized === "1" || normalized === "true" || normalized === "yes";
@@ -221,7 +224,7 @@ const STATUS_BADGE_VARIANTS: Record<string, BadgeVariant> = {
 const AdminJobsPage = async ({ searchParams }: AdminJobsPageProps) => {
   const resolvedParams = await Promise.resolve(searchParams ?? {});
   const searchText = parseSearchParam(resolvedParams.q);
-  const hidePublished = parseBooleanParam(resolvedParams.hidePublished);
+  const hidePublished = parseBooleanParam(resolvedParams.hidePublished, true);
   const sortBy = parseSortParam(resolvedParams.sort);
 
   const jobsRaw = await fetchSongGenerationJobList({

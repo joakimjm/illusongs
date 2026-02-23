@@ -84,16 +84,21 @@ type SongsTableProps = {
 };
 
 const DEFAULT_SORT: SongSort = "title_asc";
+const DEFAULT_HIDE_PUBLISHED = true;
 
 export const SongsTable = ({
   songs,
   onTogglePublish,
 }: SongsTableProps): JSX.Element => {
   const [draftSearchText, setDraftSearchText] = useState("");
-  const [draftHidePublished, setDraftHidePublished] = useState(false);
+  const [draftHidePublished, setDraftHidePublished] = useState(
+    DEFAULT_HIDE_PUBLISHED,
+  );
   const [draftSortBy, setDraftSortBy] = useState<SongSort>(DEFAULT_SORT);
   const [appliedSearchText, setAppliedSearchText] = useState("");
-  const [appliedHidePublished, setAppliedHidePublished] = useState(false);
+  const [appliedHidePublished, setAppliedHidePublished] = useState(
+    DEFAULT_HIDE_PUBLISHED,
+  );
   const [appliedSortBy, setAppliedSortBy] = useState<SongSort>(DEFAULT_SORT);
 
   const filteredSongs = useMemo(() => {
@@ -128,10 +133,10 @@ export const SongsTable = ({
 
   const resetFilters = () => {
     setDraftSearchText("");
-    setDraftHidePublished(false);
+    setDraftHidePublished(DEFAULT_HIDE_PUBLISHED);
     setDraftSortBy(DEFAULT_SORT);
     setAppliedSearchText("");
-    setAppliedHidePublished(false);
+    setAppliedHidePublished(DEFAULT_HIDE_PUBLISHED);
     setAppliedSortBy(DEFAULT_SORT);
   };
 
