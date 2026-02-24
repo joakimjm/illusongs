@@ -102,7 +102,7 @@ export const SplitButton = ({
   return (
     <div
       ref={containerRef}
-      className={`relative inline-flex items-center${className ? ` ${className}` : ""}`}
+      className={`relative z-40 inline-flex items-center${className ? ` ${className}` : ""}`}
     >
       <button
         type="button"
@@ -133,7 +133,7 @@ export const SplitButton = ({
       {isOpen ? (
         <div
           role="menu"
-          className="absolute right-0 top-[calc(100%+0.4rem)] z-40 min-w-56 rounded-lg border border-stone-200 bg-white p-2 shadow-lg dark:border-stone-700 dark:bg-stone-900"
+          className="absolute right-0 top-[calc(100%+0.4rem)] z-50 min-w-56 rounded-lg border border-stone-200 bg-white p-2 shadow-lg dark:border-stone-700 dark:bg-stone-900"
         >
           {items.map((item) => (
             <button

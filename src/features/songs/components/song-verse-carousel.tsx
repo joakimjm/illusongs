@@ -339,19 +339,10 @@ export const SongVerseCarousel = ({
           const isPendingRequeue = pendingRequeueId === verse.id;
 
           return (
-            <button
-              type="button"
+            <div
               key={verse.id}
               ref={(element) => {
                 verseRefs.current[index] = element;
-              }}
-              aria-pressed={isImageFocusMode}
-              onClick={() => setIsImageFocusMode((value) => !value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  setIsImageFocusMode((value) => !value);
-                }
               }}
               className="relative flex h-full w-full shrink-0 snap-center items-end"
             >
@@ -373,14 +364,25 @@ export const SongVerseCarousel = ({
               <div
                 className={`absolute inset-0 bg-linear-to-b from-transparent via-[rgba(15,10,5,0.2)] to-[rgba(10,6,3,0.75)] duration-500 transition-opacity ${isImageFocusMode ? "opacity-0" : ""}`}
               />
+              <button
+                type="button"
+                aria-pressed={isImageFocusMode}
+                aria-label={`Toggle image focus for verse ${verse.sequenceNumber}`}
+                onClick={() => setIsImageFocusMode((value) => !value)}
+                className="absolute inset-0 z-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/60"
+              >
+                <span className="sr-only">
+                  {`Toggle image focus for verse ${verse.sequenceNumber}`}
+                </span>
+              </button>
               <div
-                className={`relative flex w-full flex-col gap-6 px-6 pb-28 pt-24 sm:px-12 duration-500 transition-opacity ${isImageFocusMode ? "opacity-0" : ""}`}
+                className={`pointer-events-none relative flex w-full flex-col gap-6 px-6 pb-28 pt-24 sm:px-12 duration-500 transition-opacity ${isImageFocusMode ? "opacity-0" : ""}`}
               >
                 <p className="select-none text-left whitespace-pre-line text-lg leading-6 text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
                   {verse.lyricText}
                 </p>
                 {enableRequeue ? (
-                  <div className="flex items-center justify-between text-xs text-white/80">
+                  <div className="pointer-events-auto flex items-center justify-between text-xs text-white/80">
                     <div className="rounded-full border border-white/20 bg-black/40 px-3 py-1 uppercase tracking-wide">
                       Preview tools
                     </div>
@@ -413,7 +415,7 @@ export const SongVerseCarousel = ({
                   </div>
                 ) : null}
               </div>
-            </button>
+            </div>
           );
         })}
       </section>
