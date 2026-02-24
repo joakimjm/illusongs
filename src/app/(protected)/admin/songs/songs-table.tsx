@@ -207,13 +207,14 @@ export const SongsTable = ({
             <Button type="submit" variant="secondary" size="sm">
               Apply filters
             </Button>
-            <button
+            <Button
               type="button"
               onClick={resetFilters}
-              className="inline-flex items-center justify-center rounded-lg border border-transparent px-3 py-1.5 text-sm font-medium text-stone-700 underline decoration-stone-400 underline-offset-2 transition hover:text-stone-900 dark:text-stone-200 dark:hover:text-white"
+              variant="link"
+              size="sm"
             >
               Reset
-            </button>
+            </Button>
           </div>
         </div>
       </form>
@@ -275,12 +276,14 @@ export const SongsTable = ({
                       </td>
                       <td className="px-4 py-4">
                         <div className="inline-flex items-center gap-2">
-                          <Link
+                          <Button
+                            as={Link}
                             href={`/admin/songs/${song.id}`}
-                            className="inline-flex items-center justify-center rounded-lg border border-stone-400 px-3 py-1.5 text-sm font-medium text-stone-700 transition hover:bg-stone-700 hover:text-white dark:border-stone-500 dark:text-stone-200 dark:hover:bg-stone-200 dark:hover:text-stone-900"
+                            variant="secondary"
+                            size="sm"
                           >
                             Edit lyrics
-                          </Link>
+                          </Button>
                           <form
                             action={onTogglePublish}
                             className="inline-flex items-center gap-2"

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactElement, ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
+import { Button } from "@/components/button";
 import { SelectableItem } from "@/components/selectable-item";
 import { Body, Heading, SectionLabel } from "@/components/typography";
 import type { SupabaseUser } from "@/features/supabase/supabase-types";
@@ -156,16 +157,18 @@ export const NavigationShell = ({
             {header.title}
           </SectionLabel>
           {renderedSections.length > 0 ? (
-            <button
+            <Button
               type="button"
               aria-controls={NAVIGATION_ID}
               aria-expanded={isOpen}
               onClick={() => setIsOpen(true)}
-              className="inline-flex items-center justify-center rounded-md border border-stone-300 bg-white px-3 py-2 text-sm font-medium text-stone-700 shadow-sm transition hover:bg-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 dark:hover:bg-stone-800"
+              variant="secondary"
+              size="sm"
+              className="rounded-md bg-white shadow-sm dark:bg-stone-900"
             >
               Menu
               <span className="sr-only">Open navigation</span>
-            </button>
+            </Button>
           ) : null}
         </div>
       </header>

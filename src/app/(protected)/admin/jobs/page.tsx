@@ -303,12 +303,9 @@ const AdminJobsPage = async ({ searchParams }: AdminJobsPageProps) => {
               <Button type="submit" variant="secondary" size="sm">
                 Apply filters
               </Button>
-              <a
-                href={JOBS_PATH}
-                className="inline-flex items-center justify-center rounded-lg border border-transparent px-3 py-1.5 text-sm font-medium text-stone-700 underline decoration-stone-400 underline-offset-2 transition hover:text-stone-900 dark:text-stone-200 dark:hover:text-white"
-              >
+              <Button as="a" href={JOBS_PATH} variant="link" size="sm">
                 Reset
-              </a>
+              </Button>
             </div>
           </div>
         </form>

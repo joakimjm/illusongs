@@ -1,4 +1,5 @@
 import { revalidatePath } from "next/cache";
+import { Button } from "@/components/button";
 import { HeroHeader } from "@/components/hero-header";
 import { PageShell } from "@/components/page-shell";
 import { Panel } from "@/components/panel";
@@ -100,9 +101,9 @@ const SongsAdminPage = async () => {
               Start a new draft without leaving this workflow.
             </Body>
           </div>
-          <span className="inline-flex h-8 items-center rounded-lg border border-stone-400 px-3 text-sm font-medium text-stone-700 transition hover:bg-stone-700 hover:text-white dark:border-stone-500 dark:text-stone-200 dark:hover:bg-stone-200 dark:hover:text-stone-900">
+          <Button as="span" variant="secondary" size="sm">
             Open editor
-          </span>
+          </Button>
         </summary>
         <div className="mt-4 border-t border-stone-200 pt-4 dark:border-stone-700">
           <Body size="sm" className="text-stone-600 dark:text-stone-300">
