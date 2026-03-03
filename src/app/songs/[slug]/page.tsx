@@ -31,6 +31,10 @@ type SongPageSearchParamsInput = {
 const PREVIEW_QUERY_VALUE = "true";
 
 export const generateStaticParams = async (): Promise<SongPageParams[]> => {
+  if (!process.env.POSTGRES_CONNECTION_STRING) {
+    return [];
+  }
+
   const slugs = await fetchPublishedSongSlugs();
   return slugs.map((slug) => ({ slug }));
 };
