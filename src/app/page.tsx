@@ -8,6 +8,10 @@ import {
   fetchPublishedSongs,
   fetchTagMetadata,
 } from "@/features/songs/song-queries";
+import {
+  isSeasonTag,
+  removeSeasonTagsFromCategories,
+} from "@/features/songs/song-season-options";
 import { groupTagsIntoCategories } from "@/features/songs/song-tag-categories";
 
 type HomePageProps = {
@@ -41,7 +45,9 @@ const HomePage = async ({
     new Set(songs.flatMap((song) => song.tags.map((tag) => tag))),
   );
   const tagMetadata = await fetchTagMetadata(tagNames);
-  const categories = groupTagsIntoCategories(tagMetadata);
+  const categories = removeSeasonTagsFromCategories(
+    groupTagsIntoCategories(tagMetadata),
+  );
   const filterCategories =
     categories.length > 0
       ? categories
@@ -50,6 +56,7 @@ const HomePage = async ({
             id: "alle",
             label: "Alle tags",
             tags: tagNames
+              .filter((tag) => !isSeasonTag(tag))
               .sort((a, b) => a.localeCompare(b, "da"))
               .map((tag) => ({
                 id: tag,

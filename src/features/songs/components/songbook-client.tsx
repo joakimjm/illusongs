@@ -4,6 +4,11 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { HiChevronRight } from "react-icons/hi";
 import { Heading, HeadingText } from "@/components/typography";
+import {
+  getAvailableSeasonDisplayOptions,
+  type SeasonDisplayOption,
+  songMatchesSeasonKey,
+} from "@/features/songs/song-season-options";
 import type { TagCategoryDto } from "@/features/songs/song-tag-categories";
 import type { SongSummaryDto } from "@/features/songs/song-types";
 import { usePagedSongs } from "@/features/songs/use-paged-songs";
@@ -12,6 +17,7 @@ import { useScrollFollow } from "@/utils/use-scroll-follow";
 import { SongRangePagination } from "./song-range-pagination";
 
 const SCROLL_STORAGE_KEY = "songbook:scroll-position";
+const HIDDEN_SEASONS_STORAGE_KEY = "songbook:hidden-seasons";
 
 type SongbookClientProps = {
   readonly songs: SongSummaryDto[];
@@ -44,6 +50,21 @@ const persistScrollPosition = () => {
 
 const CARD_SCROLL_STRENGTH = 0.05;
 const CARD_SCROLL_MAX_OFFSET = 200;
+
+const parseHiddenSeasons = (value: string | null): string[] => {
+  if (!value) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed)
+      ? parsed.filter((entry): entry is string => typeof entry === "string")
+      : [];
+  } catch {
+    return [];
+  }
+};
 
 const buildTagLookup = (
   categories: TagCategoryDto[],
@@ -151,7 +172,11 @@ const ActiveFilterBadge = ({
 type FilterPanelProps = {
   readonly categories: TagCategoryDto[];
   readonly selectedTags: readonly string[];
+  readonly seasonOptions: readonly SeasonDisplayOption[];
+  readonly hiddenSeasonCounts: Readonly<Record<string, number>>;
+  readonly hiddenSeasonKeys: readonly string[];
   readonly onToggle: (tag: string) => void;
+  readonly onToggleSeason: (seasonKey: string) => void;
   readonly onClear: () => void;
   readonly onClose: () => void;
 };
@@ -159,7 +184,11 @@ type FilterPanelProps = {
 const FilterPanel = ({
   categories,
   selectedTags,
+  seasonOptions,
+  hiddenSeasonCounts,
+  hiddenSeasonKeys,
   onToggle,
+  onToggleSeason,
   onClear,
   onClose,
 }: FilterPanelProps) => {
@@ -181,73 +210,121 @@ const FilterPanel = ({
 
   return (
     <div className="fixed inset-0 z-40 flex flex-col bg-stone-950/60 backdrop-blur-md">
-      <div className="mx-auto mt-auto w-full max-w-[720px] rounded-t-[1.75rem] bg-amber-50 px-5 pb-8 pt-6 shadow-[0_-28px_60px_-32px_rgba(30,20,10,0.45)] dark:bg-slate-900/80">
-        <div className="mb-4 flex items-center justify-between">
-          <HeadingText className="text-sm uppercase tracking-[0.35em] text-stone-500 dark:text-stone-300">
-            Søg & filtrér
-          </HeadingText>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-sm font-semibold text-amber-700 hover:text-amber-800"
-          >
-            Luk
-          </button>
-        </div>
+      <div className="mx-auto mt-auto flex max-h-[85vh] w-full max-w-[720px] flex-col overflow-hidden rounded-t-[1.75rem] bg-amber-50 shadow-[0_-28px_60px_-32px_rgba(30,20,10,0.45)] dark:bg-slate-900/80">
+        <div className="overflow-y-auto px-5 pb-8 pt-6">
+          <div className="mb-4 flex items-center justify-between">
+            <HeadingText className="text-sm uppercase tracking-[0.35em] text-stone-500 dark:text-stone-300">
+              Filtre & visning
+            </HeadingText>
+            <button
+              type="button"
+              onClick={onClose}
+              className="text-sm font-semibold text-amber-700 hover:text-amber-800"
+            >
+              Luk
+            </button>
+          </div>
 
-        <div className="space-y-3">
-          {categories.map((category) => {
-            const isExpanded = expandedCategory === category.id;
-            return (
-              <div
-                key={category.id}
-                className="rounded-3xl border border-amber-200/60 bg-amber-50 dark:border-slate-600/60 dark:bg-slate-900/80"
-              >
-                <button
-                  type="button"
-                  onClick={() =>
-                    setExpandedCategory((current) =>
-                      current === category.id ? null : category.id,
-                    )
-                  }
-                  className="flex w-full items-center justify-between px-5 py-4 text-left"
-                >
-                  <HeadingText
-                    as="span"
-                    className="text-lg text-stone-700 dark:text-stone-100"
-                  >
-                    {category.label}
-                  </HeadingText>
-                  <span className="text-amber-700">
-                    {isExpanded ? "−" : "+"}
-                  </span>
-                </button>
-                {isExpanded ? (
-                  <div className="flex flex-wrap gap-2 px-5 pb-5">
-                    {category.tags.map((tag) => (
-                      <TagBadge
-                        key={tag.id}
-                        tag={tag}
-                        active={selectedTags.includes(tag.id)}
-                        onToggle={onToggle}
-                      />
-                    ))}
-                  </div>
-                ) : null}
+          <div className="space-y-5">
+            {seasonOptions.length > 0 ? (
+              <section className="space-y-3">
+                <HeadingText className="text-xs uppercase tracking-[0.35em] text-stone-500 dark:text-stone-300">
+                  Visning
+                </HeadingText>
+                <div className="space-y-2">
+                  {seasonOptions.map((option) => {
+                    const isHidden = hiddenSeasonKeys.includes(option.key);
+                    const hiddenCount = hiddenSeasonCounts[option.key] ?? 0;
+                    const hiddenLabel = isHidden
+                      ? ` · ${hiddenCount} skjult`
+                      : "";
+
+                    return (
+                      <button
+                        key={option.key}
+                        type="button"
+                        onClick={() => onToggleSeason(option.key)}
+                        className={`flex w-full items-center justify-between rounded-3xl border px-4 py-3 text-left transition ${
+                          isHidden
+                            ? "border-amber-500 bg-amber-100 text-amber-900 dark:bg-amber-500/20 dark:text-amber-100"
+                            : "border-amber-200/60 bg-amber-50 text-stone-700 dark:border-slate-600/60 dark:bg-slate-900/80 dark:text-stone-100"
+                        }`}
+                        aria-pressed={isHidden}
+                      >
+                        <span className="text-sm font-medium">
+                          {option.hideLabel}
+                          {hiddenLabel}
+                        </span>
+                        <span className="text-xs uppercase tracking-[0.3em]">
+                          {isHidden ? "Til" : "Fra"}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+            ) : null}
+
+            <section className="space-y-3">
+              <HeadingText className="text-xs uppercase tracking-[0.35em] text-stone-500 dark:text-stone-300">
+                Filtre
+              </HeadingText>
+              <div className="space-y-3">
+                {categories.map((category) => {
+                  const isExpanded = expandedCategory === category.id;
+                  return (
+                    <div
+                      key={category.id}
+                      className="rounded-3xl border border-amber-200/60 bg-amber-50 dark:border-slate-600/60 dark:bg-slate-900/80"
+                    >
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setExpandedCategory((current) =>
+                            current === category.id ? null : category.id,
+                          )
+                        }
+                        className="flex w-full items-center justify-between px-5 py-4 text-left"
+                      >
+                        <HeadingText
+                          as="span"
+                          className="text-lg text-stone-700 dark:text-stone-100"
+                        >
+                          {category.label}
+                        </HeadingText>
+                        <span className="text-amber-700">
+                          {isExpanded ? "−" : "+"}
+                        </span>
+                      </button>
+                      {isExpanded ? (
+                        <div className="flex flex-wrap gap-2 px-5 pb-5">
+                          {category.tags.map((tag) => (
+                            <TagBadge
+                              key={tag.id}
+                              tag={tag}
+                              active={selectedTags.includes(tag.id)}
+                              onToggle={onToggle}
+                            />
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })}
               </div>
-            );
-          })}
-        </div>
+            </section>
+          </div>
 
-        {selectedTags.length > 0 ? (
-          <button
-            type="button"
-            onClick={onClear}
-            className="mt-5 text-sm font-semibold text-amber-700 hover:text-amber-800"
-          >
-            Ryd valg
-          </button>
-        ) : null}
+          {selectedTags.length > 0 ? (
+            <button
+              type="button"
+              onClick={onClear}
+              className="mt-5 text-sm font-semibold text-amber-700 hover:text-amber-800"
+            >
+              Ryd valg
+            </button>
+          ) : null}
+        </div>
       </div>
     </div>
   );
@@ -260,7 +337,14 @@ export const SongbookClient = ({
   initialTags,
 }: SongbookClientProps) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [hiddenSeasonKeys, setHiddenSeasonKeys] = useState<readonly string[]>(
+    [],
+  );
   const tagLookup = buildTagLookup(categories);
+  const seasonOptions = useMemo(
+    () => getAvailableSeasonDisplayOptions(songs),
+    [songs],
+  );
   const {
     query,
     setQuery,
@@ -274,9 +358,61 @@ export const SongbookClient = ({
     initialQuery,
     initialTags,
   });
-  const { currentPage, pages, setPageIndex } = usePagedSongs(filteredSongs);
+  useEffect(() => {
+    try {
+      setHiddenSeasonKeys(
+        parseHiddenSeasons(localStorage.getItem(HIDDEN_SEASONS_STORAGE_KEY)),
+      );
+    } catch {
+      setHiddenSeasonKeys([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        HIDDEN_SEASONS_STORAGE_KEY,
+        JSON.stringify(hiddenSeasonKeys),
+      );
+    } catch {
+      // no-op
+    }
+  }, [hiddenSeasonKeys]);
+
+  const toggleSeason = (seasonKey: string) => {
+    setHiddenSeasonKeys((current) =>
+      current.includes(seasonKey)
+        ? current.filter((entry) => entry !== seasonKey)
+        : [...current, seasonKey],
+    );
+  };
+
+  const visibleFilteredSongs = useMemo(
+    () =>
+      filteredSongs.filter(
+        (song) =>
+          !hiddenSeasonKeys.some((seasonKey) =>
+            songMatchesSeasonKey(song, seasonKey),
+          ),
+      ),
+    [filteredSongs, hiddenSeasonKeys],
+  );
+  const hiddenSeasonCounts = useMemo(
+    () =>
+      Object.fromEntries(
+        seasonOptions.map((option) => [
+          option.key,
+          filteredSongs.filter((song) => songMatchesSeasonKey(song, option.key))
+            .length,
+        ]),
+      ),
+    [filteredSongs, seasonOptions],
+  );
+
+  const { currentPage, pages, setPageIndex } =
+    usePagedSongs(visibleFilteredSongs);
   const visibleSongs =
-    pages.length > 1 && currentPage ? currentPage.items : filteredSongs;
+    pages.length > 1 && currentPage ? currentPage.items : visibleFilteredSongs;
   const activeRangeIndex = useMemo(() => {
     if (!currentPage) {
       return 0;
@@ -303,9 +439,9 @@ export const SongbookClient = ({
   }, []);
 
   const resultsLabel =
-    filteredSongs.length === 1
+    visibleFilteredSongs.length === 1
       ? "Viser 1 illustreret sang"
-      : `Viser ${filteredSongs.length} illustrerede sange`;
+      : `Viser ${visibleFilteredSongs.length} illustrerede sange`;
 
   return (
     <div className="flex flex-col gap-4 pb-24">
@@ -370,7 +506,7 @@ export const SongbookClient = ({
         ) : null}
       </section>
 
-      {filteredSongs.length === 0 ? (
+      {visibleFilteredSongs.length === 0 ? (
         <div className="rounded-[2.5rem] border border-dashed border-amber-200/60 bg-amber-50 p-6 text-center text-stone-500 dark:border-slate-600/60 dark:bg-slate-900/80 dark:text-stone-300">
           Ingen sange passer til filtrene endnu. Vælg en anden stemning eller
           ryd søgningen for at udforske hele sangbogen.
@@ -393,7 +529,11 @@ export const SongbookClient = ({
         <FilterPanel
           categories={categories}
           selectedTags={selectedTags}
+          seasonOptions={seasonOptions}
+          hiddenSeasonCounts={hiddenSeasonCounts}
+          hiddenSeasonKeys={hiddenSeasonKeys}
           onToggle={toggleTag}
+          onToggleSeason={toggleSeason}
           onClear={clearFilters}
           onClose={() => setIsFilterOpen(false)}
         />
