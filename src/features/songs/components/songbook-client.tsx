@@ -83,18 +83,27 @@ const SongCard = ({ song }: { readonly song: SongSummaryDto }) => {
     strength: CARD_SCROLL_STRENGTH,
     maxOffset: CARD_SCROLL_MAX_OFFSET,
   });
+  const [isPending, setIsPending] = useState(false);
 
   return (
     <li>
       <Link
         href={`/songs/${song.slug}`}
         ref={cardRef}
-        className="group relative block overflow-hidden rounded-[1.75rem] border border-amber-200/50 shadow-[0_20px_50px_-32px_rgba(110,80,40,0.45)] transition hover:-translate-y-1.5 hover:shadow-[0_28px_60px_-28px_rgba(110,80,40,0.55)] focus:outline-none focus-visible:ring focus-visible:ring-amber-400 dark:border-slate-600/50 dark:bg-slate-900/90 dark:shadow-[0_18px_44px_-30px_rgba(40,28,14,0.45)] dark:hover:shadow-[0_28px_60px_-28px_rgba(40,28,14,0.55)]"
+        onClick={() => setIsPending(true)}
+        className={`group relative block overflow-hidden rounded-[1.75rem] border border-amber-200/50 shadow-[0_20px_50px_-32px_rgba(110,80,40,0.45)] transition focus:outline-none focus-visible:ring focus-visible:ring-amber-400 dark:border-slate-600/50 dark:bg-slate-900/90 dark:shadow-[0_18px_44px_-30px_rgba(40,28,14,0.45)] ${
+          isPending
+            ? "scale-[0.985] ring-2 ring-amber-300/80 shadow-[0_28px_60px_-28px_rgba(110,80,40,0.65)] dark:shadow-[0_28px_60px_-28px_rgba(40,28,14,0.65)]"
+            : "hover:-translate-y-1.5 hover:shadow-[0_28px_60px_-28px_rgba(110,80,40,0.55)] dark:hover:shadow-[0_28px_60px_-28px_rgba(40,28,14,0.55)]"
+        }`}
         aria-label={`${song.title} – åbner sangen`}
+        aria-busy={isPending}
       >
         <div
           aria-hidden
-          className="absolute inset-0 opacity-95 transition will-change-transform transform-[scale(1.02)] group-hover:transform-[scale(1.05)]"
+          className={`absolute inset-0 opacity-95 transition will-change-transform transform-[scale(1.02)] ${
+            isPending ? "brightness-75" : "group-hover:transform-[scale(1.05)]"
+          }`}
           style={{
             backgroundImage: song.coverImageUrl
               ? `url('${song.coverImageUrl}')`
@@ -117,8 +126,10 @@ const SongCard = ({ song }: { readonly song: SongSummaryDto }) => {
             {song.title}
           </Heading>
           <span className="inline-flex items-center gap-2 self-start rounded-full bg-stone-900/70 px-3 py-1.5 text-sm font-semibold tracking-[0.25em] text-amber-100 transition group-hover:bg-stone-900/80">
-            Åbn sangen
-            <HiChevronRight className="h-3 w-3" />
+            {isPending ? "Åbner..." : "Åbn sangen"}
+            <HiChevronRight
+              className={`h-3 w-3 ${isPending ? "animate-pulse" : ""}`}
+            />
           </span>
         </div>
       </Link>
