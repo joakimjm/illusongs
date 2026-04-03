@@ -15,6 +15,12 @@ import {
 } from "@/features/songs/song-generation-runner";
 import { type DispatchState, ProcessJobForm } from "./process-job-form";
 import { RequeueJobControls } from "./requeue-job-controls";
+import {
+  type JobSort,
+  parseBooleanParam,
+  parseSearchParam,
+  parseSortParam,
+} from "./search-params";
 
 const JOBS_PATH: Route = "/admin/jobs";
 const MAX_CHAINED_JOBS = 10;
@@ -22,56 +28,6 @@ const DEFAULT_JOB_LIMIT = 100;
 
 type AdminJobsPageProps = {
   readonly searchParams?: Record<string, string | string[] | undefined>;
-};
-
-const parseBooleanParam = (
-  value: string | string[] | undefined,
-  defaultValue: boolean = false,
-): boolean => {
-  const resolved = Array.isArray(value) ? value[0] : value;
-  if (!resolved) {
-    return defaultValue;
-  }
-  const normalized = resolved.trim().toLowerCase();
-  return normalized === "1" || normalized === "true" || normalized === "yes";
-};
-
-const parseSearchParam = (value: string | string[] | undefined): string => {
-  const resolved = Array.isArray(value) ? value[0] : value;
-  return resolved?.trim() ?? "";
-};
-
-type JobSort =
-  | "queue"
-  | "updated_desc"
-  | "updated_asc"
-  | "song_title_asc"
-  | "song_title_desc"
-  | "status";
-
-const isJobSort = (value: string): value is JobSort => {
-  switch (value) {
-    case "queue":
-    case "updated_desc":
-    case "updated_asc":
-    case "song_title_asc":
-    case "song_title_desc":
-    case "status":
-      return true;
-    default:
-      return false;
-  }
-};
-
-const parseSortParam = (value: string | string[] | undefined): JobSort => {
-  const resolved = Array.isArray(value) ? value[0] : value;
-  const normalized = resolved?.trim().toLowerCase();
-
-  if (normalized && isJobSort(normalized)) {
-    return normalized;
-  }
-
-  return "queue";
 };
 
 const JOB_SORT_LABELS: Record<JobSort, string> = {
@@ -270,6 +226,7 @@ const AdminJobsPage = async ({ searchParams }: AdminJobsPageProps) => {
           </FormField>
           <FormField label="Visibility" htmlFor="job-hide-published">
             <label className="flex h-10 items-center gap-2 text-sm font-medium text-stone-700 dark:text-stone-200">
+              <input type="hidden" name="hidePublished" value="0" />
               <input
                 id="job-hide-published"
                 type="checkbox"
