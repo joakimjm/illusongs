@@ -325,7 +325,10 @@ export const SongVerseCarousel = ({
 
   return (
     <div className="relative flex h-dvh flex-col bg-black text-white">
-      <header className="pointer-events-none absolute left-0 right-0 top-0 z-30 flex items-center justify-end px-6 pt-6">
+      <header
+        className="pointer-events-none absolute left-0 right-0 top-0 z-30 flex items-center justify-end px-6 pt-6"
+        style={{ paddingTop: "max(env(safe-area-inset-top), 1.5rem)" }}
+      >
         <div className="flex items-center gap-2">{progressDots}</div>
       </header>
 
