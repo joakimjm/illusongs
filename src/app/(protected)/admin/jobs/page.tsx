@@ -8,6 +8,7 @@ import { HeroHeader } from "@/components/hero-header";
 import { PageShell } from "@/components/page-shell";
 import { Panel } from "@/components/panel";
 import { Body, Heading } from "@/components/typography";
+import { updateSongPublishStatus } from "@/features/songs/song-commands";
 import { fetchSongGenerationJobList } from "@/features/songs/song-generation-queue";
 import {
   processNextSongGenerationJob,
@@ -23,6 +24,8 @@ import {
 } from "./search-params";
 
 const JOBS_PATH: Route = "/admin/jobs";
+const SONGS_PATH: Route = "/admin/songs";
+const HOME_PATH: Route = "/";
 const MAX_CHAINED_JOBS = 10;
 const DEFAULT_JOB_LIMIT = 100;
 
@@ -153,6 +156,19 @@ const processNextJobAction = async (
       message: `Failed to process job: ${message}`,
     } as DispatchState;
   }
+};
+
+const publishSongAction = async (
+  songId: string,
+  songSlug: string,
+): Promise<void> => {
+  "use server";
+
+  await updateSongPublishStatus(songId, true);
+  revalidatePath(JOBS_PATH);
+  revalidatePath(SONGS_PATH);
+  revalidatePath(`/songs/${songSlug}`);
+  revalidatePath(HOME_PATH);
 };
 
 const formatTimestamp = (iso: string): string =>
@@ -373,6 +389,15 @@ const AdminJobsPage = async ({ searchParams }: AdminJobsPageProps) => {
                               songId={job.songId}
                               verseId={job.verseId}
                               verseSequence={job.verseSequence}
+                              onPublish={
+                                job.isPublished
+                                  ? undefined
+                                  : publishSongAction.bind(
+                                      null,
+                                      job.songId,
+                                      job.songSlug,
+                                    )
+                              }
                             />
                           ) : null}
                         </td>

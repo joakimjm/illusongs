@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { revalidatePath } from "next/cache";
 import { notFound } from "next/navigation";
 import type { JSX } from "react";
 import { cache } from "react";
 import { APP_NAME } from "@/config/app";
 import { isAdminUser } from "@/features/auth/policies";
 import { SongVerseCarousel } from "@/features/songs/components/song-verse-carousel";
+import { updateSongPublishStatus } from "@/features/songs/song-commands";
 import {
   fetchPublishedSongSlugs,
   findSongBySlug,
@@ -29,6 +31,8 @@ type SongPageSearchParamsInput = {
 };
 
 const PREVIEW_QUERY_VALUE = "true";
+const SONGS_ADMIN_PATH = "/admin/songs";
+const HOME_PATH = "/";
 
 export const generateStaticParams = async (): Promise<SongPageParams[]> => {
   if (!process.env.POSTGRES_CONNECTION_STRING) {
@@ -119,6 +123,14 @@ const SongPage = async ({
   }
 
   const isPreview = previewEnabled && !song.isPublished;
+  const publishSongAction = async (): Promise<void> => {
+    "use server";
+
+    await updateSongPublishStatus(song.id, true);
+    revalidatePath(SONGS_ADMIN_PATH);
+    revalidatePath(`/songs/${song.slug}`);
+    revalidatePath(HOME_PATH);
+  };
 
   return (
     <main className="relative min-h-screen bg-black text-white">
@@ -135,6 +147,7 @@ const SongPage = async ({
         enableRequeue={isPreview}
         songId={song.id}
         songSlug={song.slug}
+        onPublish={isPreview ? publishSongAction : undefined}
       />
     </main>
   );

@@ -79,4 +79,33 @@ describe("SongVerseCarousel", () => {
     const menu = screen.getByRole("menu");
     expect(menu.className).toContain("z-50");
   });
+
+  it("renders a publish action in the requeue menu when provided", () => {
+    render(
+      <SongVerseCarousel
+        songTitle="Test song"
+        verses={TEST_VERSES}
+        enableRequeue
+        songId="song-1"
+        songSlug="test-song"
+        onPublish={async () => {}}
+      />,
+    );
+
+    const toggleButtons = screen.getAllByRole("button", {
+      name: "Open requeue options for verse 1",
+    });
+    const currentToggleButton = toggleButtons[toggleButtons.length - 1];
+    if (!currentToggleButton) {
+      throw new Error("Expected a requeue toggle button.");
+    }
+
+    fireEvent.click(currentToggleButton);
+
+    expect(
+      screen.getByRole("menuitem", {
+        name: "Publish song",
+      }),
+    ).toBeTruthy();
+  });
 });

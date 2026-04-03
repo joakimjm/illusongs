@@ -1,0 +1,325 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Button } from "@/components/button";
+import { Modal } from "@/components/modal";
+import { SplitButton } from "@/components/split-button";
+
+type PromptPreviewPayload = {
+  additionalPromptDirection?: string | null;
+  basePrompt?: string;
+};
+
+type VerseRequeueActionsAppearance = "light" | "dark";
+
+type VerseRequeueActionsProps = {
+  readonly songId: string;
+  readonly verseId: string;
+  readonly verseSequence: number;
+  readonly toggleAriaLabel: string;
+  readonly splitButtonVariant?: "primary" | "secondary" | "danger";
+  readonly splitButtonDisabled?: boolean;
+  readonly appearance?: VerseRequeueActionsAppearance;
+  readonly onPublish?: () => Promise<void>;
+};
+
+const ADDITIONAL_DIRECTION_HEADER = "Ekstra retning for dette vers:";
+
+const buildPromptPreview = (
+  basePrompt: string,
+  additionalPromptDirection: string,
+): string => {
+  const normalizedDirection = additionalPromptDirection.trim();
+  if (normalizedDirection.length === 0) {
+    return basePrompt;
+  }
+
+  return [
+    basePrompt,
+    "",
+    ADDITIONAL_DIRECTION_HEADER,
+    normalizedDirection,
+  ].join("\n");
+};
+
+const APPEARANCE_CLASS_MAP: Record<
+  VerseRequeueActionsAppearance,
+  {
+    readonly errorText: string;
+    readonly modalPanel?: string;
+    readonly fieldLabel: string;
+    readonly textarea: string;
+    readonly previewLoading: string;
+    readonly previewError: string;
+    readonly previewContent: string;
+  }
+> = {
+  light: {
+    errorText: "max-w-72 text-right text-xs text-rose-600 dark:text-rose-300",
+    fieldLabel:
+      "text-xs font-medium uppercase tracking-wide text-stone-700 dark:text-stone-200",
+    textarea:
+      "w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 shadow-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-200 dark:border-stone-700 dark:bg-stone-950 dark:text-stone-100",
+    previewLoading:
+      "rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-xs text-stone-600 dark:border-stone-700 dark:bg-stone-950/60 dark:text-stone-300",
+    previewError:
+      "rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-xs text-rose-700 dark:border-rose-700 dark:bg-rose-950/40 dark:text-rose-300",
+    previewContent:
+      "max-h-72 overflow-auto rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-xs whitespace-pre-wrap text-stone-800 dark:border-stone-700 dark:bg-stone-950/60 dark:text-stone-100",
+  },
+  dark: {
+    errorText: "text-rose-300",
+    modalPanel:
+      "border-white/20 bg-stone-950 text-white dark:border-white/20 dark:bg-stone-950 dark:text-white",
+    fieldLabel: "text-xs font-medium uppercase tracking-wide text-white/80",
+    textarea:
+      "w-full rounded-lg border border-white/20 bg-black/50 px-3 py-2 text-sm text-white shadow-sm outline-none transition focus:border-amber-300 focus:ring-2 focus:ring-amber-200/40",
+    previewLoading:
+      "rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-xs text-white/70",
+    previewError:
+      "rounded-lg border border-rose-400/40 bg-rose-950/30 px-3 py-2 text-xs text-rose-200",
+    previewContent:
+      "max-h-72 overflow-auto rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-xs whitespace-pre-wrap text-white/90",
+  },
+};
+
+export const VerseRequeueActions = ({
+  songId,
+  verseId,
+  verseSequence,
+  toggleAriaLabel,
+  splitButtonVariant = "secondary",
+  splitButtonDisabled = false,
+  appearance = "light",
+  onPublish,
+}: VerseRequeueActionsProps) => {
+  const router = useRouter();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [directionDraft, setDirectionDraft] = useState("");
+  const [basePromptPreview, setBasePromptPreview] = useState("");
+  const [isPromptPreviewLoading, setIsPromptPreviewLoading] = useState(false);
+  const [promptPreviewError, setPromptPreviewError] = useState<string | null>(
+    null,
+  );
+  const appearanceClasses = APPEARANCE_CLASS_MAP[appearance];
+
+  const closeDialog = () => {
+    setIsDialogOpen(false);
+    setDirectionDraft("");
+    setBasePromptPreview("");
+    setPromptPreviewError(null);
+    setIsPromptPreviewLoading(false);
+  };
+
+  const requeue = async (
+    additionalPromptDirection?: string | null,
+  ): Promise<boolean> => {
+    const hasDirectionUpdate = additionalPromptDirection !== undefined;
+    const body = hasDirectionUpdate
+      ? JSON.stringify({ additionalPromptDirection })
+      : null;
+
+    setError(null);
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(
+        `/api/song/${songId}/verse/${verseId}/requeue`,
+        {
+          method: "POST",
+          headers: body ? { "content-type": "application/json" } : undefined,
+          body,
+        },
+      );
+      if (!response.ok) {
+        const detail = await response.text();
+        throw new Error(detail || "Unable to requeue job.");
+      }
+
+      router.refresh();
+      return true;
+    } catch (caught) {
+      const message =
+        caught instanceof Error ? caught.message : "Unable to requeue job.";
+      setError(message);
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const openDirectionDialog = async (): Promise<void> => {
+    setIsDialogOpen(true);
+    setDirectionDraft("");
+    setBasePromptPreview("");
+    setPromptPreviewError(null);
+    setIsPromptPreviewLoading(true);
+
+    try {
+      const response = await fetch(
+        `/api/song/${songId}/verse/${verseId}/requeue`,
+      );
+      if (!response.ok) {
+        const detail = await response.text();
+        throw new Error(detail || "Unable to load prompt preview.");
+      }
+
+      const payload: PromptPreviewPayload = await response.json();
+      if (typeof payload.basePrompt !== "string") {
+        throw new Error("Prompt preview is unavailable.");
+      }
+
+      setBasePromptPreview(payload.basePrompt);
+      setDirectionDraft(
+        typeof payload.additionalPromptDirection === "string"
+          ? payload.additionalPromptDirection
+          : "",
+      );
+    } catch (caught) {
+      const message =
+        caught instanceof Error
+          ? caught.message
+          : "Unable to load prompt preview.";
+      setPromptPreviewError(message);
+    } finally {
+      setIsPromptPreviewLoading(false);
+    }
+  };
+
+  const saveAndRequeue = async () => {
+    const normalizedDirection = directionDraft.trim();
+    const success = await requeue(
+      normalizedDirection.length > 0 ? normalizedDirection : null,
+    );
+    if (success) {
+      closeDialog();
+    }
+  };
+
+  const publish = async (): Promise<void> => {
+    if (!onPublish) {
+      return;
+    }
+
+    setError(null);
+    setIsSubmitting(true);
+    try {
+      await onPublish();
+      router.refresh();
+    } catch (caught) {
+      const message =
+        caught instanceof Error ? caught.message : "Unable to publish song.";
+      setError(message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const promptPreview =
+    basePromptPreview.length > 0
+      ? buildPromptPreview(basePromptPreview, directionDraft)
+      : "";
+
+  const items = [
+    {
+      id: "requeue-with-direction",
+      label: "Requeue with added direction",
+      onSelect: openDirectionDialog,
+    },
+    ...(onPublish
+      ? [
+          {
+            id: "publish-song",
+            label: "Publish song",
+            onSelect: publish,
+          },
+        ]
+      : []),
+  ];
+
+  return (
+    <>
+      <div className="flex flex-col items-end gap-2">
+        {error ? (
+          <span className={appearanceClasses.errorText}>{error}</span>
+        ) : null}
+        <SplitButton
+          primaryLabel={isSubmitting ? "Requeuing..." : "Requeue"}
+          onPrimaryClick={async () => {
+            await requeue();
+          }}
+          toggleAriaLabel={toggleAriaLabel}
+          variant={splitButtonVariant}
+          size="xs"
+          disabled={isSubmitting || splitButtonDisabled}
+          items={items}
+        />
+      </div>
+
+      <Modal
+        isOpen={isDialogOpen}
+        onClose={closeDialog}
+        title={`Requeue verse ${verseSequence} with added direction`}
+        description="Used to steer image output. Moderation rules still apply."
+        panelClassName={appearanceClasses.modalPanel}
+        footer={
+          <>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={closeDialog}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              onClick={() => {
+                void saveAndRequeue();
+              }}
+              disabled={isSubmitting || isPromptPreviewLoading}
+            >
+              {isSubmitting ? "Requeuing..." : "Save and requeue"}
+            </Button>
+          </>
+        }
+      >
+        <label className="block space-y-2">
+          <span className={appearanceClasses.fieldLabel}>
+            Extra direction (optional)
+          </span>
+          <textarea
+            value={directionDraft}
+            onChange={(event) => {
+              setDirectionDraft(event.target.value);
+            }}
+            rows={4}
+            className={appearanceClasses.textarea}
+            placeholder="e.g. No visible text, letters, logos, or signage in the image."
+          />
+        </label>
+
+        <div className="space-y-2">
+          <p className={appearanceClasses.fieldLabel}>Full prompt preview</p>
+          {isPromptPreviewLoading ? (
+            <p className={appearanceClasses.previewLoading}>
+              Loading prompt preview...
+            </p>
+          ) : promptPreviewError ? (
+            <p className={appearanceClasses.previewError}>
+              {promptPreviewError}
+            </p>
+          ) : (
+            <pre className={appearanceClasses.previewContent}>
+              {promptPreview}
+            </pre>
+          )}
+        </div>
+      </Modal>
+    </>
+  );
+};

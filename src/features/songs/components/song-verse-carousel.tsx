@@ -2,10 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/button";
-import { Modal } from "@/components/modal";
-import { SplitButton } from "@/components/split-button";
 import type { SongVerseDto } from "@/features/songs/song-types";
+import { VerseRequeueActions } from "./verse-requeue-actions";
 
 const HomeIcon = () => (
   <svg
@@ -51,36 +49,7 @@ type SongVerseCarouselProps = {
   readonly enableRequeue?: boolean;
   readonly songId?: string;
   readonly songSlug?: string;
-};
-
-type PromptPreviewPayload = {
-  additionalPromptDirection?: string | null;
-  basePrompt?: string;
-  fullPrompt?: string;
-};
-
-type DirectionModalVerse = {
-  id: string;
-  sequenceNumber: number;
-};
-
-const ADDITIONAL_DIRECTION_HEADER = "Ekstra retning for dette vers:";
-
-const buildPromptPreview = (
-  basePrompt: string,
-  additionalPromptDirection: string,
-): string => {
-  const normalizedDirection = additionalPromptDirection.trim();
-  if (normalizedDirection.length === 0) {
-    return basePrompt;
-  }
-
-  return [
-    basePrompt,
-    "",
-    ADDITIONAL_DIRECTION_HEADER,
-    normalizedDirection,
-  ].join("\n");
+  readonly onPublish?: () => Promise<void>;
 };
 
 export const SongVerseCarousel = ({
@@ -89,22 +58,13 @@ export const SongVerseCarousel = ({
   enableRequeue = false,
   songId,
   songSlug,
+  onPublish,
 }: SongVerseCarouselProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const verseRefs = useRef<(HTMLElement | null)[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const router = useRouter();
   const [isImageFocusMode, setIsImageFocusMode] = useState(false);
-  const [pendingRequeueId, setPendingRequeueId] = useState<string | null>(null);
-  const [requeueError, setRequeueError] = useState<string | null>(null);
-  const [directionModalVerse, setDirectionModalVerse] =
-    useState<DirectionModalVerse | null>(null);
-  const [directionDraft, setDirectionDraft] = useState("");
-  const [basePromptPreview, setBasePromptPreview] = useState("");
-  const [isPromptPreviewLoading, setIsPromptPreviewLoading] = useState(false);
-  const [promptPreviewError, setPromptPreviewError] = useState<string | null>(
-    null,
-  );
 
   useEffect(() => {
     const container = containerRef.current;
@@ -174,139 +134,6 @@ export const SongVerseCarousel = ({
     router.back();
   };
 
-  const handleRequeue = async (
-    verseId: string,
-    additionalPromptDirection?: string | null,
-  ): Promise<boolean> => {
-    if (!enableRequeue || !songId) {
-      return false;
-    }
-
-    setPendingRequeueId(verseId);
-    setRequeueError(null);
-
-    const hasDirectionUpdate = additionalPromptDirection !== undefined;
-    const body = hasDirectionUpdate
-      ? JSON.stringify({
-          additionalPromptDirection,
-        })
-      : null;
-
-    try {
-      const response = await fetch(
-        `/api/song/${songId}/verse/${verseId}/requeue`,
-        {
-          method: "POST",
-          headers: body ? { "content-type": "application/json" } : undefined,
-          body,
-        },
-      );
-      if (!response.ok) {
-        const detail = await response.text();
-        throw new Error(detail || "Failed to requeue");
-      }
-      router.refresh();
-      return true;
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Unable to requeue";
-      setRequeueError(message);
-      return false;
-    } finally {
-      setPendingRequeueId(null);
-    }
-  };
-
-  const closeDirectionModal = () => {
-    setDirectionModalVerse(null);
-    setDirectionDraft("");
-    setBasePromptPreview("");
-    setPromptPreviewError(null);
-    setIsPromptPreviewLoading(false);
-  };
-
-  useEffect(() => {
-    if (!directionModalVerse) {
-      return;
-    }
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setDirectionModalVerse(null);
-        setDirectionDraft("");
-        setBasePromptPreview("");
-        setPromptPreviewError(null);
-        setIsPromptPreviewLoading(false);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [directionModalVerse]);
-
-  const openDirectionModal = async (verse: SongVerseDto): Promise<void> => {
-    if (!enableRequeue || !songId) {
-      return;
-    }
-
-    setDirectionModalVerse({
-      id: verse.id,
-      sequenceNumber: verse.sequenceNumber,
-    });
-    setDirectionDraft("");
-    setBasePromptPreview("");
-    setPromptPreviewError(null);
-    setIsPromptPreviewLoading(true);
-
-    try {
-      const response = await fetch(
-        `/api/song/${songId}/verse/${verse.id}/requeue`,
-      );
-      if (!response.ok) {
-        const detail = await response.text();
-        throw new Error(detail || "Failed to load prompt preview");
-      }
-
-      const payload: PromptPreviewPayload = await response.json();
-      if (typeof payload.basePrompt !== "string") {
-        throw new Error("Prompt preview is unavailable for this verse.");
-      }
-
-      setBasePromptPreview(payload.basePrompt);
-      setDirectionDraft(
-        typeof payload.additionalPromptDirection === "string"
-          ? payload.additionalPromptDirection
-          : "",
-      );
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Unable to load prompt preview";
-      setPromptPreviewError(message);
-    } finally {
-      setIsPromptPreviewLoading(false);
-    }
-  };
-
-  const handleDirectionRequeue = async () => {
-    if (!directionModalVerse) {
-      return;
-    }
-
-    const normalizedDirection = directionDraft.trim();
-    const success = await handleRequeue(
-      directionModalVerse.id,
-      normalizedDirection.length > 0 ? normalizedDirection : null,
-    );
-
-    if (success) {
-      closeDirectionModal();
-    }
-  };
-
   const progressDots = verses.map((_verse, index) => (
     <span
       key={_verse.id}
@@ -317,11 +144,6 @@ export const SongVerseCarousel = ({
       }`}
     />
   ));
-
-  const previewPrompt =
-    basePromptPreview.length > 0
-      ? buildPromptPreview(basePromptPreview, directionDraft)
-      : "";
 
   return (
     <div className="relative flex h-dvh flex-col bg-black text-white">
@@ -339,7 +161,6 @@ export const SongVerseCarousel = ({
       >
         {verses.map((verse, index) => {
           const hasImage = verse.illustrationUrl !== null;
-          const isPendingRequeue = pendingRequeueId === verse.id;
 
           return (
             <div
@@ -389,32 +210,18 @@ export const SongVerseCarousel = ({
                     <div className="rounded-full border border-white/20 bg-black/40 px-3 py-1 uppercase tracking-wide">
                       Preview tools
                     </div>
-                    <div className="flex items-center gap-2">
-                      {requeueError ? (
-                        <span className="text-rose-300">{requeueError}</span>
-                      ) : null}
-                      <SplitButton
-                        primaryLabel={
-                          isPendingRequeue ? "Requeuing..." : "Requeue"
-                        }
-                        onPrimaryClick={async () => {
-                          await handleRequeue(verse.id);
-                        }}
+                    {songId ? (
+                      <VerseRequeueActions
+                        songId={songId}
+                        verseId={verse.id}
+                        verseSequence={verse.sequenceNumber}
                         toggleAriaLabel={`Open requeue options for verse ${verse.sequenceNumber}`}
-                        disabled={isPendingRequeue || !songId || !songSlug}
-                        variant="secondary"
-                        size="xs"
-                        items={[
-                          {
-                            id: "requeue-with-direction",
-                            label: "Requeue with added direction",
-                            onSelect: async () => {
-                              await openDirectionModal(verse);
-                            },
-                          },
-                        ]}
+                        splitButtonDisabled={!songSlug}
+                        splitButtonVariant="secondary"
+                        appearance="dark"
+                        onPublish={onPublish}
                       />
-                    </div>
+                    ) : null}
                   </div>
                 ) : null}
               </div>
@@ -465,77 +272,6 @@ export const SongVerseCarousel = ({
           </button>
         </div>
       </footer>
-
-      <Modal
-        isOpen={directionModalVerse !== null}
-        onClose={closeDirectionModal}
-        title={
-          directionModalVerse
-            ? `Requeue verse ${directionModalVerse.sequenceNumber} with added direction`
-            : "Requeue verse with added direction"
-        }
-        description="Used to steer image output. Moderation rules still apply."
-        panelClassName="border-white/20 bg-stone-950 text-white dark:border-white/20 dark:bg-stone-950 dark:text-white"
-        footer={
-          <>
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={closeDirectionModal}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              variant="primary"
-              size="sm"
-              onClick={() => {
-                void handleDirectionRequeue();
-              }}
-              disabled={isPromptPreviewLoading || pendingRequeueId !== null}
-            >
-              {pendingRequeueId === directionModalVerse?.id
-                ? "Requeuing..."
-                : "Save and requeue"}
-            </Button>
-          </>
-        }
-      >
-        <label className="block space-y-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-white/80">
-            Extra direction (optional)
-          </span>
-          <textarea
-            value={directionDraft}
-            onChange={(event) => {
-              setDirectionDraft(event.target.value);
-            }}
-            rows={4}
-            className="w-full rounded-lg border border-white/20 bg-black/50 px-3 py-2 text-sm text-white shadow-sm outline-none transition focus:border-amber-300 focus:ring-2 focus:ring-amber-200/40"
-            placeholder="e.g. No visible text, letters, logos, or signage in the image."
-          />
-        </label>
-
-        <div className="space-y-2">
-          <p className="text-xs font-medium uppercase tracking-wide text-white/80">
-            Full prompt preview
-          </p>
-          {isPromptPreviewLoading ? (
-            <p className="rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-xs text-white/70">
-              Loading prompt preview...
-            </p>
-          ) : promptPreviewError ? (
-            <p className="rounded-lg border border-rose-400/40 bg-rose-950/30 px-3 py-2 text-xs text-rose-200">
-              {promptPreviewError}
-            </p>
-          ) : (
-            <pre className="max-h-72 overflow-auto rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-xs whitespace-pre-wrap text-white/90">
-              {previewPrompt}
-            </pre>
-          )}
-        </div>
-      </Modal>
     </div>
   );
 };
