@@ -80,9 +80,7 @@ export const usePagedSongs = (
 
       const nextParams = new URLSearchParams(searchParams.toString());
       nextParams.set(PAGE_QUERY_PARAM, String(clamped));
-      router.push(buildNextUrl(pathname, nextParams) as Route, {
-        scroll: false,
-      });
+      router.push(buildNextUrl(pathname, nextParams) as Route);
     },
     [pagesCount, pathname, router, searchParams],
   );
