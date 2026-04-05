@@ -56,15 +56,7 @@ export function createMigrator(opts: MigrationOptions = {}) {
 
     // 2) Optional cluster-wide guard (advisory lock)
     if (useAdvisoryLock) {
-      const { rows } = await client.query<{ pg_try_advisory_lock: boolean }>(
-        "SELECT pg_try_advisory_lock($1) AS pg_try_advisory_lock",
-        [advisoryLockKey],
-      );
-      if (!rows[0]?.pg_try_advisory_lock) {
-        throw new Error(
-          `Could not obtain advisory lock ${advisoryLockKey}. Another instance may be migrating.`,
-        );
-      }
+      await client.query("SELECT pg_advisory_lock($1)", [advisoryLockKey]);
       log("info", `Obtained advisory lock ${advisoryLockKey}`);
     }
 

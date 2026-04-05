@@ -246,7 +246,7 @@ export const SongsTable = ({
                           href={
                             song.isPublished
                               ? `/songs/${song.slug}`
-                              : `/songs/${song.slug}?preview=true`
+                              : `/admin/songs/${song.id}/preview`
                           }
                           className="text-amber-700 underline decoration-amber-300 underline-offset-2 hover:text-amber-800 dark:text-amber-300 dark:hover:text-amber-200"
                           target="_blank"
