@@ -181,8 +181,14 @@ export const getPwaStartupImageHref = (target: StartupTarget): string =>
   `/startup/${getPwaStartupImageFileName(target)}`;
 
 export const getAppleStartupImageMedia = (target: StartupTarget): string => {
-  const deviceWidth = target.orientation === "portrait" ? target.width / target.pixelRatio : target.height / target.pixelRatio;
-  const deviceHeight = target.orientation === "portrait" ? target.height / target.pixelRatio : target.width / target.pixelRatio;
+  const deviceWidth =
+    target.orientation === "portrait"
+      ? target.width / target.pixelRatio
+      : target.height / target.pixelRatio;
+  const deviceHeight =
+    target.orientation === "portrait"
+      ? target.height / target.pixelRatio
+      : target.width / target.pixelRatio;
 
   return [
     "screen",

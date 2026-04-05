@@ -4,9 +4,9 @@ import "./globals.css";
 import { AppProviders } from "@/components/app-providers";
 import { APP_DESCRIPTION, APP_NAME } from "@/config/app";
 import {
-  PWA_STARTUP_IMAGE_TARGETS,
   getAppleStartupImageMedia,
   getPwaStartupImageHref,
+  PWA_STARTUP_IMAGE_TARGETS,
 } from "@/config/pwa-startup-images";
 import { bodyFont } from "@/styles/fonts";
 
