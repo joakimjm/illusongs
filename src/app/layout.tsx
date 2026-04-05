@@ -3,6 +3,11 @@ import type { ReactNode } from "react";
 import "./globals.css";
 import { AppProviders } from "@/components/app-providers";
 import { APP_DESCRIPTION, APP_NAME } from "@/config/app";
+import {
+  PWA_STARTUP_IMAGE_TARGETS,
+  getAppleStartupImageMedia,
+  getPwaStartupImageHref,
+} from "@/config/pwa-startup-images";
 import { bodyFont } from "@/styles/fonts";
 
 export const metadata: Metadata = {
@@ -41,6 +46,16 @@ type RootLayoutProps = {
 
 const RootLayout = ({ children }: RootLayoutProps) => (
   <html lang="en" suppressHydrationWarning>
+    <head>
+      {PWA_STARTUP_IMAGE_TARGETS.map((target) => (
+        <link
+          key={getPwaStartupImageHref(target)}
+          rel="apple-touch-startup-image"
+          href={getPwaStartupImageHref(target)}
+          media={getAppleStartupImageMedia(target)}
+        />
+      ))}
+    </head>
     <body
       className={`${bodyFont.className} min-h-screen bg-amber-50 text-stone-900 antialiased selection:bg-amber-200 selection:text-amber-900 dark:bg-slate-950 dark:text-stone-100`}
     >
