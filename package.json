@@ -4,8 +4,6 @@
   "private": true,
   "scripts": {
     "generate:pwa-startup": "tsx scripts/generate-pwa-startup-images.ts",
-    "predev": "npm run generate:pwa-startup",
-    "prebuild": "npm run generate:pwa-startup",
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
